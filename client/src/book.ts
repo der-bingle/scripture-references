@@ -93,15 +93,22 @@ export class BibleBookHtml {
     // Get HTML for a specific passage
     get_passage(start_chapter:number, start_verse:number, end_chapter:number, end_verse:number,
             options:GetPassageOptions={}):string{
-        const verses =
-            this._get_list(start_chapter, start_verse, end_chapter, end_verse).map(v => v.content)
-        if (!verses.length){
+        const chapters = this._get_list(start_chapter, start_verse, end_chapter, end_verse)
+        if (!chapters.length){
             return ''
         }
-        return verses[0]![0]!
-            + verses.map(v => v[1]).join('')
-            + verses[verses.length-1]![2]!
-            + this._attribution(options.attribute)
+
+        // Wrap each chapter in a div so users can style entire chapters at a time
+        // NOTE Not possible for verses since they flow across paragraphs
+        let out = ''
+        for (const verses_for_ch of chapters){
+            out += `<div class="fb-chapter" data-c="${verses_for_ch[0]!.chapter}">`
+                + verses_for_ch[0]!.content[0]!
+                + verses_for_ch.map(v => v.content[1]).join('')
+                + verses_for_ch[verses_for_ch.length-1]!.content[2]!
+                + '</div>'
+        }
+        return out + this._attribution(options.attribute)
     }
 
     // Get HTML for multiple chapters
@@ -125,7 +132,8 @@ export class BibleBookHtml {
 
     // @internal
     _get_list(start_chapter=1, start_verse=1, end_chapter?:number, end_verse?:number)
-            :IndividualVerse<string[]>[]{
+            :IndividualVerse<string[]>[][]{
+        // Get list of individual verses with metadata, grouped by chapter
         // NOTE end_verse can be 0 to signify non-inclusion of the first verse/heading of chapter
         // TODO Option for splitting at clean paragraph breaks (where new verse starts next para)
 
@@ -161,30 +169,31 @@ export class BibleBookHtml {
         const same_ch_end_verse = start_chapter === end_chapter ? end_verse : undefined
 
         // Add verses of start chapter
-        const verses = get_verses_for_ch(start_chapter, start_verse, same_ch_end_verse)
+        const verses = [get_verses_for_ch(start_chapter, start_verse, same_ch_end_verse)]
 
         // Add inbetween chapters
         for (let ch = start_chapter + 1; ch < end_chapter; ch++){
-            verses.push(...get_verses_for_ch(ch, 1))
+            verses.push(get_verses_for_ch(ch, 1))
         }
 
         // Add verses of end chapter
         if (end_chapter > start_chapter){
-            verses.push(...get_verses_for_ch(end_chapter, 1, end_verse))
+            verses.push(get_verses_for_ch(end_chapter, 1, end_verse))
         }
 
-        return verses
+        return verses.filter(verses_for_ch => verses_for_ch.length)
     }
 
-    // Get HTML as an array of individual verses
+    // Get HTML as an array of individual verses (each verse will be in its own paragraph)
     get_list(start_chapter?:number, start_verse?:number, end_chapter?:number, end_verse?:number)
             :IndividualVerse<string>[]{
-        return this._get_list(start_chapter, start_verse, end_chapter, end_verse).map(verse => {
-            return {
-                ...verse,
-                content: verse.content.join(''),
-            }
-        })
+        return this._get_list(start_chapter, start_verse, end_chapter, end_verse)
+            .flat().map(verse => {
+                return {
+                    ...verse,
+                    content: verse.content.join(''),
+                }
+            })
     }
 }
 
