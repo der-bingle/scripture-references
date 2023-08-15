@@ -1,6 +1,16 @@
 
-interface PassageRefArg {
+
+export interface VersesRefPartialBook {
     chapter_start:number
+    chapter_end:number
+    verse_start:number|null  // If null then range is entire chapters
+    verse_end:number|null  // If null then range is entire chapters
+}
+
+export type VersesRef = VersesRefPartialBook|null  // null if whole book
+
+export interface PassageRefArg {
+    chapter_start?:number|null  // Whole book if doesn't exist
     chapter_end?:number|null  // Defaults to chapter_start
     verse_start?:number|null  // If null then range is entire chapters
     verse_end?:number|null  // Default to verse_start
@@ -8,8 +18,13 @@ interface PassageRefArg {
 
 
 // Format passage reference to a readable string
-// Supports: Gen 1 | 1-2 | 1:1 | 1:1-2 | 1:1-2:2
+// Supports: Gen | Gen 1 | 1-2 | 1:1 | 1:1-2 | 1:1-2:2
 export function passage_obj_to_str(ref:PassageRefArg){
+
+    // If no chapter_start then ref must be for whole book
+    if (!ref.chapter_start){
+        return ''
+    }
 
     // Assign defaults for missing properties
     if (!ref.chapter_end){
@@ -47,7 +62,7 @@ export function passage_obj_to_str(ref:PassageRefArg){
 
 
 // Parse passage reference string into an object
-export function passage_str_to_obj(ref:string){
+export function passage_str_to_obj(ref:string):VersesRef{
 
     // Clean ref
     ref = ref.replace(/ /g, '')
