@@ -1,6 +1,7 @@
 
 import {escape_html, num_to_letters} from './utils.js'
 import type {RuntimeLicense, RuntimeTranslation} from './types'
+import type {VersesRefArg} from './extras'
 import type {BibleJsonHtml, BibleJsonTxt, TxtContent} from './shared_types'
 
 
@@ -109,6 +110,19 @@ export class BibleBookHtml {
                 + '</div>'
         }
         return out + this._attribution(options.attribute)
+    }
+
+    // Get HTML for a specific passage specified by object (as returned by `verses_str_to_obj`)
+    get_passage_from_obj(ref?:VersesRefArg|null, options:GetPassageOptions={}):string{
+        if (!ref || !ref.chapter_start){
+            return this.get_whole(options)
+        }
+        const chapter_end = ref.chapter_end ?? ref.chapter_start
+        if (!ref.verse_start){
+            return this.get_chapters(ref.chapter_start, chapter_end, options)
+        }
+        return this.get_passage(ref.chapter_start, ref.verse_start, chapter_end,
+            ref.verse_end ?? ref.verse_start, options)
     }
 
     // Get HTML for multiple chapters
