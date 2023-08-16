@@ -19,7 +19,7 @@ template(v-if='crossrefs.length')
 
 import {computed, watch, ref, nextTick} from 'vue'
 
-import {passage_obj_to_str} from '@gracious.tech/fetch-client'
+import {verses_obj_to_str} from '@gracious.tech/fetch-client'
 
 import {change_passage, state} from '@/services/state'
 import {book_names} from '@/services/computes'
@@ -44,7 +44,7 @@ watch(() => state.study, () => {
     }
     crossrefs.value = state.crossref.get_refs(state.study[1], state.study[2]).map(crossref => {
         return {
-            label: `${book_names.value[crossref.book]!} ${passage_obj_to_str(crossref)!}`,
+            label: `${book_names.value[crossref.book]!} ${verses_obj_to_str(crossref)!}`,
             view(){
                 change_passage(crossref.book, crossref.chapter_start,
                     crossref.verse_start ?? undefined)
