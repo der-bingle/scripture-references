@@ -39,7 +39,8 @@ async function _update_source(id:string, meta:TranslationSourceMeta):Promise<voi
     clean_dir(format_dir)
 
     // Extract format files
-    const extractor = new StreamZip.async({file: zip_path})
+    // skipEntryNameValidation enabled due to eng_net zip issues (we verify names below anyway)
+    const extractor = new StreamZip.async({file: zip_path, skipEntryNameValidation: true})
     for (const entry of Object.values(await extractor.entries())){
 
         // Ignore if not in a compatible format
