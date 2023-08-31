@@ -250,9 +250,9 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
 
         // Handle note elements
         if (element.nodeName === 'note'){
-            add_html(state, '<span class="fb-note">*<span>')
+            add_html(state, '<span class="fb-note">')
             process_contents(state, element.childNodes, escape_text, true)
-            add_html(state, '</span></span>')
+            add_html(state, '</span>')
         }
     }
 }

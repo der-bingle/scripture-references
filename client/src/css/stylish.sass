@@ -44,28 +44,21 @@
         margin: 2em 0
         font-size: 0.8em
 
-    // Show notes on hover/touch
+    // Show notes on hover/touch and leave '*' in its place
     .fb-note
+        display: none
         cursor: help
         user-select: none
+        position: absolute
+        z-index: 1
+        font-size: 0.8em
+        padding: 6px 12px
+        border-radius: 4px
+        background-color: hsla(0, 0%, 50%, 0.1)  // Slight dark/light bg to stand out
+        backdrop-filter: blur(50px)  // So get solid color as bg whether light/dark theme
 
-        > span
-            display: none
-            position: absolute
-            z-index: 1
-            font-size: 0.8em
-            padding: 6px 12px
-            border-radius: 4px
-            background-color: hsla(0, 0%, 50%, 0.1)  // Slight dark/light bg to stand out
-            backdrop-filter: blur(50px)  // So get solid color as bg whether light/dark theme
+        ::before
+            content: '*'
 
-        &:hover > span
+        &:hover
             display: block  // Don't use inline-block as won't wrap when near right end
-
-
-// Styles to only apply if not using default styling
-.fetch-bible.fb-plain
-
-    // Only show the asterisk for notes as user must implement styling for note display themself
-    .fb-note > span
-        display: none
