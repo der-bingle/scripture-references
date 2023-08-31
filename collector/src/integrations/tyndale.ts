@@ -235,30 +235,33 @@ export function clean_note(body: string): string {
     // Remove links that refer this verse
     cleaned = cleaned.replace(/<span class="sn-ref">.*?<\/span>/g, '')
 
+    // Prefix all span classes
+    cleaned = cleaned.replace(/<span class="(.*?)">/g, '<span class="fbn-$1">')
+
     // Transform non-standard markup into HTML
     const elements = {
         'bold': '<strong>$1</strong>',
-        'bold-era': '<span class="era"><strong>$1</strong></span>',
-        'bold-sc': '<span class="sc"><strong>$1</strong></span>',
-        'sn-excerpt': '<span class="excerpt">$1</span>',
-        'sn-excerpt-divine-name': '<span class="excerpt divine-name">$1</span>',
-        'sn-excerpt-roman': '<span class="excerpt roman">$1</span>',
-        'sn-excerpt-sc': '<span class="excerpt sc">$1</span>',
-        'sn-hebrew-chars': '<span class="hebrew">$1</span>',
-        'sn-list-1': '<span class="list-1">$1</span>',
-        'sn-list-2': '<span class="list-2">$1</span>',
-        'sn-list-3': '<span class="list-3">$1</span>',
-        'sn-ref-sc': '<span class="sc">$1</span>',
-        'sn-sc': '<span class="sc">$1</span>',
-        'divine-name-ital': '<span class="divine-name"><em>$1</em></span>',
+        'bold-era': '<strong class="fbn-era">$1</strong>',
+        'bold-sc': '<strong class="fbn-sc">$1</strong>',
+        'sn-excerpt': '<span class="fbn-excerpt">$1</span>',
+        'sn-excerpt-divine-name': '<span class="fbn-excerpt fbn-yhwh">$1</span>',
+        'sn-excerpt-roman': '<span class="fbn-excerpt fbn-roman">$1</span>',
+        'sn-excerpt-sc': '<span class="fbn-excerpt fbn-sc">$1</span>',
+        'sn-hebrew-chars': '<span class="fbn-hebrew">$1</span>',
+        'sn-list-1': '<span class="fbn-list-1">$1</span>',
+        'sn-list-2': '<span class="fbn-list-2">$1</span>',
+        'sn-list-3': '<span class="fbn-list-3">$1</span>',
+        'sn-ref-sc': '<span class="fbn-sc">$1</span>',
+        'sn-sc': '<span class="fbn-sc">$1</span>',
+        'divine-name-ital': '<em class="fbn-yhwh">$1</em>',
         'ital': '<em>$1</em>',
         'ital-bold': '<em><strong>$1</strong></em>',
-        'sc-ital': '<span class="sc"><em>$1</em></span>',
+        'sc-ital': '<em class="fbn-sc">$1</em>',
         'sub': '<sub>$1</sub>',
         'sup': '<sup>$1</sup>',
     }
     Object.entries(elements).forEach(([klass, replacement]) => {
-        const pattern = new RegExp(`<span class="${klass}">(.*?)</span>`, 'g')
+        const pattern = new RegExp(`<span class="fbn-${klass}">(.*?)</span>`, 'g')
         cleaned = cleaned.replace(pattern, replacement)
     })
 

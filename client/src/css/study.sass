@@ -1,0 +1,14 @@
+
+.fetch-bible
+
+    // Surround NLT quotations with quotes (NLT study bible doesn't need to since obvious match)
+    .fbn-excerpt
+        font-style: italic
+    .fbn-excerpt::before
+        content: open-quote
+    .fbn-excerpt::after
+        content: close-quote
+
+    // Original language words (often a transliteration so appropriate to italicise)
+    .fbn-greek, .fbn-hebrew, .fbn-aramaic, .fbn-latin
+        font-style: italic
