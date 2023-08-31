@@ -1,0 +1,34 @@
+
+.fetch-bible
+
+    .fb-pmo, .fb-pm, .fb-pmc  // Embedded text
+        margin-left: 3em
+
+    .fb-q1  // Indented poetry
+        margin-left: 1.5em
+
+    .fb-q2  // Indented poetry
+        margin-left: 3em
+
+    .fb-q3  // Indented poetry
+        margin-left: 4.5em
+
+    .fb-q4  // Indented poetry
+        margin-left: 6em
+
+    &.no-initial-indent
+        // Optional variation where first level is not indented (e.g. for books entirely of poetry)
+        .fb-q1
+            margin-left: 0em
+        .fb-q2
+            margin-left: 1.5em
+        .fb-q3
+            margin-left: 3em
+        .fb-q4
+            margin-left: 4.5em
+
+    .fb-qr  // Poetic refrain
+        text-align: end
+
+    .fb-b  // Break between poetry stanzas (not regular para spacing)
+        margin-top: 1em  // Empty node so will have no height
