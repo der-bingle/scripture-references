@@ -155,7 +155,7 @@ export class BibleBookHtml {
         if (!end_chapter){
             end_chapter = this._html.contents.length
             end_verse = 0
-        } else if (!end_verse){
+        } else if (typeof end_verse !== 'number'){  // WARN May be 0 which is valid
             end_chapter += 1
             end_verse = 0
         }
