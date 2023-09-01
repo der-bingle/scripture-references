@@ -1,6 +1,6 @@
 {
   "name": "@gracious.tech/fetch-client",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Interact with a fetch(bible) collection in an API-like way",
   "type": "module",
   "exports": {
