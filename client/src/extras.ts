@@ -1,4 +1,6 @@
 
+import type {GetBooksItem} from './collection'
+
 
 export interface VersesRefPartialBook {
     chapter_start:number
@@ -14,6 +16,33 @@ export interface VersesRefArg {
     chapter_end?:number|null  // Defaults to chapter_start
     verse_start?:number|null  // If null then range is entire chapters
     verse_end?:number|null  // Default to verse_start
+}
+
+export interface PassageRef {
+    book:string
+    chapter_start:number|null
+    chapter_end:number|null
+    verse_start:number|null
+    verse_end:number|null
+}
+
+export interface PassageRefArg extends VersesRefArg {
+    book:string
+}
+
+export type BookNames = Record<string, string>|Record<string, GetBooksItem>|GetBooksItem[]
+
+
+// Util for normalising book_names input to a simple record
+function _normalise_book_names(book_names:BookNames):Record<string, string>{
+    if (Array.isArray(book_names)){
+        return Object.fromEntries(book_names.map(item => ([item.id, item.name])))
+    }
+    if (typeof Object.values(book_names)[0] === 'string'){
+        return book_names as Record<string, string>
+    }
+    return Object.fromEntries(Object.values(book_names as Record<string, GetBooksItem>)
+        .map(item => ([item.id, item.name])))
 }
 
 
@@ -117,7 +146,9 @@ export function verses_str_to_obj(ref:string):VersesRef{
 
 // Get book USX code from the book name or an abbreviation of it
 // This should be language neutral (though some English special cases are included)
-export function book_name_to_code(input:string, book_names:Record<string, string>):string|null{
+export function book_name_to_code(input:string, book_names:BookNames):string|null{
+
+    const simple_book_names = _normalise_book_names(book_names)
 
     // Clean util to be used for both input and book names
     const clean = (string:string) => {
@@ -133,7 +164,7 @@ export function book_name_to_code(input:string, book_names:Record<string, string
     input = clean(input)
 
     // Normalise book names
-    const normalised = Object.entries(book_names)
+    const normalised = Object.entries(simple_book_names)
         .map(([code, name]) => ([code, clean(name)] as [string, string]))
 
     // See if input matches or abbreviates any book name
@@ -173,4 +204,47 @@ export function book_name_to_code(input:string, book_names:Record<string, string
     }
 
     return null
+}
+
+
+// Parse passage reference string into an object
+export function passage_str_to_obj(ref:string, book_names:BookNames):PassageRef|null{
+    ref = ref.trim()
+
+    // Find start of first digit, except if start of string (e.g. 1 Sam)
+    let verses_start = ref.slice(1).search(/\d/) + 1
+    if (verses_start === 0){  // NOTE +1 above means never -1 and 0 is a no match
+        verses_start = ref.length
+    }
+
+    // If book can be parsed, ref is valid even if verse range can't be parsed
+    const book_code = book_name_to_code(ref.slice(0, verses_start), book_names)
+    if (!book_code){
+        return null
+    }
+
+    // If verses can't be parsed, assume whole book
+    const verses = verses_str_to_obj(ref.slice(verses_start))
+    if (verses){
+        return {book: book_code, ...verses}
+    }
+    return {
+        book: book_code,
+        chapter_start: null,
+        chapter_end: null,
+        verse_start: null,
+        verse_end: null,
+    }
+}
+
+
+// Format passage reference to a readable string
+export function passage_obj_to_str(ref:PassageRefArg, book_names:BookNames):string{
+    const simple_book_names = _normalise_book_names(book_names)
+    let text = simple_book_names[ref.book] ?? ''
+    const verses = verses_obj_to_str(ref)
+    if (verses){
+        text += ' ' + verses
+    }
+    return text
 }
