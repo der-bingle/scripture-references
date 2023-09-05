@@ -86,6 +86,11 @@ export function usx_to_json_html(xml:string, alignment=true, parser=DOMParser): 
             continue
         }
 
+        // Ignore any nodes before the first chapter marker
+        if (state.chapter === 0){
+            continue
+        }
+
         // The only element type remaining should be <para>, so skip all others to keep logic simple
         // NOTE <para> elements cannot be nested
         if (child.nodeName !== 'para'){
