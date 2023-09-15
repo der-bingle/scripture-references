@@ -49,6 +49,7 @@ export async function update_manifest(){
         }
 
         // Detect what books are available
+        // TODO Ensure all formats available, not just HTML
         const html_dir = join('dist', 'bibles', trans, 'html')
         const html_books = existsSync(html_dir) ?
             read_dir(html_dir).map(name => name.slice(0, 3)) : []
