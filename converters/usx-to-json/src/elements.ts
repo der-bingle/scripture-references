@@ -60,6 +60,11 @@ export const ignored_char_styles = [
 ]
 
 
+export const ignored_note_styles = [
+    'x', 'ex',  // Cross-reference footnotes (use own system instead)
+]
+
+
 export const headings_major = ['ms', 'ms1', 'ms2', 'ms3', 'ms4', 'mr']
 export const headings_regular = ['s', 's1', 's2', 's3', 's4', 'sr']
 export const headings_minor = ['sp', 'qa']

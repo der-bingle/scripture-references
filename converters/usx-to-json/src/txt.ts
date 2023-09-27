@@ -1,7 +1,7 @@
 
 import {get_num_verses} from './common.js'
-import {ignored_elements, ignored_para_styles, ignored_char_styles, headings_major,
-    headings_regular, headings_minor, non_para_para} from './elements.js'
+import {ignored_elements, ignored_para_styles, ignored_char_styles, ignored_note_styles,
+    headings_major, headings_regular, headings_minor, non_para_para} from './elements.js'
 
 import type {BibleJsonTxt, TxtContent} from './shared_types'
 
@@ -196,6 +196,9 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>){
 
         // Transform note elements to note objects
         if (element.nodeName === 'note'){
+            if (ignored_note_styles.includes(element.getAttribute('style') ?? '')){
+                continue
+            }
             // NOTE textContent will include all elements (so is immune to ignore lists)
             add_content(state, {type: 'note', contents: element.textContent!})
         }

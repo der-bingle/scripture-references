@@ -1,7 +1,7 @@
 
 import {get_num_verses} from './common.js'
-import {ignored_elements, ignored_para_styles, ignored_char_styles, headings_major,
-    headings_regular, headings_minor} from './elements.js'
+import {ignored_elements, ignored_para_styles, ignored_char_styles, ignored_note_styles,
+    headings_major, headings_regular, headings_minor} from './elements.js'
 import type {BibleJsonHtml} from './shared_types'
 
 
@@ -255,6 +255,13 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
 
         // Handle note elements
         if (element.nodeName === 'note'){
+
+            // Get the note's style
+            const note_style = element.getAttribute('style') ?? ''
+            if (ignored_note_styles.includes(note_style)){
+                continue
+            }
+
             add_html(state, '<span class="fb-note">')
             process_contents(state, element.childNodes, escape_text, true)
             add_html(state, '</span>')
