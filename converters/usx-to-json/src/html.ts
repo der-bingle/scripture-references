@@ -262,9 +262,10 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
                 continue
             }
 
-            add_html(state, '<span class="fb-note">')
+            // Wrap notes in two spans so outer can display a marker and inner can be displaced
+            add_html(state, '<span class="fb-note"><span>')
             process_contents(state, element.childNodes, escape_text, true)
-            add_html(state, '</span>')
+            add_html(state, '</span></span>')
         }
     }
 }
