@@ -35,3 +35,21 @@ Since it's a CDN you can't limit the size of your request like you might be able
 
 ### But you can use it like an API
 Fetch Bible comes with [a client](/access/client/) that allows accessing the CDN in an API-like way for a better developer experience. Or you can embed or extend the [official web app](/access/app/), or [manually access](/access/manual/) whatever you need. Feel free to cache responses for as long as you like too, and allow your users to access translations fully offline.
+
+
+## Available formats
+
+### Raw paragraph-based formats
+
+These formats provide raw access to translations with all of the metadata and extra-biblical content intact. You should only use these if you are familiar with them and know how to display them without confusing biblical text with metadata. They are paragraph-based, meaning paragraphs form the main structure of the documents, and verse markers occur within paragraphs. There is no guarantee all verses will be present, or that the text is broken up by the most common versification standard.
+
+ * __USFM__ -- The most common format used to create translations, with a syntax similar to TeX where backslash'd tags are used to markup the text
+ * __USX__ -- An XML format designed to support all the features of USFM, so it can be parsed with modern tooling
+
+
+### Normalized verse-based formats
+
+These formats are organised by verse rather than by paragraph, so you can easily select the exact verse range you want. They guarantee all verses will exist, even if just an empty string.
+
+ * HTML -- Standard HTML with custom classes for use with the fetch(bible) client stylesheet
+ * Plain text -- Text with double newlines for paragraphs and optionally Markdown syntax for headings and footnotes
