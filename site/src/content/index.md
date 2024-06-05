@@ -11,28 +11,26 @@ We include every Bible translation possible and regularly check for new translat
 
 ## What's not included
 
-### Translations pending permission
-If a translation is not public domain or openly licensed, then we must be granted permission before we can include it. We are actively seeking permission for all translations that require it, but you can also seek permission yourself (see below).
+### Restricted translations
+If a translation is not public domain or openly licensed, then we cannot legally include it. This unfortunately includes most of the popular English translations (ESV, NIV, etc). You can still use the fetch(bible) platform with such translations, but you'll need to request permission yourself (see below).
 
 ### Inaccurate translations
-We don't include translations well known to be poor quality or unfaithful to the original writings. We do include old translations (that were considered ok in their period) but provide ways of easily filtering them out.
+We don't include translations well known to be poor quality or unfaithful to the original writings. We cannot review every language we make available, so please let us know if you identify any translations that are unsuitable. We do include old translations (that were considered ok in their period) but provide ways of easily filtering them out.
 
 ### Apocryphal books
 We only include the 66 books of the Protestant canon, so we do not include apocryphal books. We have no interest in providing access to them ourselves, but users desiring those books are welcome to fork our service which is open source.
 
 
 ## Getting permission for restricted translations
-If a translation is not openly licensed and you want to use it beyond the limitations usually applied to it, you'll need to get permission from the translation's owner. This is usually done by requesting access via [The Digital Bible Library](https://thedigitalbiblelibrary.org/).
+Most popular Bible translations [are commercial and fully copyrighted](https://copy.church/initiatives/bibles/). We recommend you consider free alternatives so that the church eventually moves away from [commercialising God's Word](https://sellingjesus.org/articles/bible-publishers).
 
-If the translation is already included in our collection then you can just ignore the usual limits and comply with the private agreement you've made with the owner. If it's not yet included in our collection then you can simply [create your own collection](/access/collections/) and combine it with ours.
+You can use such translations with fetch(bible) if you would like. Once you have access to them you can create [a custom collection](http://localhost:5173/access/collections/#custom-collections), only accessible to your organisation, and merge that with our public collection using the fetch(bible) client.
+
+If you do wish to use such translations you will need to get permission from the owners. Most have forms on their websites for requesting permission, but to be able to provide access to their entire translation you will usually need to be a legally registered company or non-profit. You then need to request access to the [The Digital Bible Library](https://thedigitalbiblelibrary.org/) which is a licensing platform used by the major publishers. Once you have access to that, you will need to individually request permission for each translation you wish to use and establish agreements with them. This often involves paying royalties, even for non-commercial use.
 
 
 ## Suggesting a translation
-There are thousands of Bible translations in existence and there's sure to be some we simply don't know about yet. Feel free to [contact us](https://gracious.tech/support/) if there is a translation you'd like included, especially if it is public domain or openly licensed.
+There are thousands of Bible translations in existence and there's sure to be some we simply don't know about yet. Feel free to contact us if there is a translation you'd like included, as long as it is public domain or openly licensed.
 
-
-
-## Contributing a translation
-We greatly welcome the addition of Bible translations we don't have yet, and while we have a preference for openly licensed translations, our service also supports including ones with more limited licenses.
 
 <p><VPButton href='https://gracious.tech/support/' text="Contact us" theme='alt'></VPButton></p>

@@ -1,14 +1,4 @@
 
-::: warning fetch(bible) is in alpha!
-
-It is currently only suitable for developers to try out and provide feedback and we recommend letting us know if you start to use it so we can notify you of breaking changes.
-
-_Beta coming Q4 2022_
-:::
-
-&nbsp;
-
-
 # How to access
 
 You can use fetch(bible) however you like and we make it easy with a variety of methods of integration for whatever your situation may require.

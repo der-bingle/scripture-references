@@ -1,9 +1,9 @@
 
 <img src='/icon.svg' width='128' style='margin: auto'>
 
+&nbsp;
 
-
-:::warning fetch(bible) is still in preview
+:::tip fetch(bible) is still in beta
 Signup to [Gracious Tech news](https://gracious.tech) to be notified when it officially launches.
 :::
 
@@ -11,7 +11,7 @@ Signup to [Gracious Tech news](https://gracious.tech) to be notified when it off
 
 # fetch(bible) is...
 
- * __A collection__ of all available Bible translations
+ * __A collection__ of all publicly available Bible translations
  * __A service__ for free access to the collection
  * __A tool__ for integrating the Bible into apps and websites
 
@@ -35,14 +35,14 @@ While fetch(bible) has no restrictions itself, most Bible translations have term
 
 
 ## What currently uses fetch(bible)?
-Prelaunch apps:
 
  * [Official fetch(bible) app](https://app.fetch.bible)
+ * [Paper Bible](https://paper.bible)
  * [Track Bible](https://track.bible)
-
-More apps will be available after fetch(bible) officially launches.
+ * [TheWay by Church Renewal International](https://theway.app/)
 
 <img src='@/_assets/decor_apps.svg' style='max-width: 300px; margin: 36px auto'>
+
 
 ## Who made fetch(bible)?
 

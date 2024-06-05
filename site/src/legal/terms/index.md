@@ -1,6 +1,11 @@
 # Terms of service
 
-The fetch(bible) service is provided by Gracious Tech Pty Ltd and you can use it however you like.
+The fetch(bible) service is provided by Gracious Tech Pty Ltd and you can use it however you like. All code is open source with no restrictions, not even attribution (MIT No Attribution).
+
+<a href='https://copy.church' target='_blank'>
+    <img src='https://copy.church/badges/lcc_alt_pde.svg' style='max-width: 360px'>
+</a>
+
 
 ### Bible translations have their own licenses
 
