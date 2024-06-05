@@ -24,7 +24,7 @@ We only include the 66 books of the Protestant canon, so we do not include apocr
 ## Getting permission for restricted translations
 Most popular Bible translations [are commercial and fully copyrighted](https://copy.church/initiatives/bibles/). We recommend you consider free alternatives so that the church eventually moves away from [commercialising God's Word](https://sellingjesus.org/articles/bible-publishers).
 
-You can use such translations with fetch(bible) if you would like. Once you have access to them you can create [a custom collection](http://localhost:5173/access/collections/#custom-collections), only accessible to your organisation, and merge that with our public collection using the fetch(bible) client.
+You can use such translations with fetch(bible) if you would like. Once you have access to them you can create [a custom collection](/access/collections/#custom-collections), only accessible to your organisation, and merge that with our public collection using the fetch(bible) client.
 
 If you do wish to use such translations you will need to get permission from the owners. Most have forms on their websites for requesting permission, but to be able to provide access to their entire translation you will usually need to be a legally registered company or non-profit. You then need to request access to the [The Digital Bible Library](https://thedigitalbiblelibrary.org/) which is a licensing platform used by the major publishers. Once you have access to that, you will need to individually request permission for each translation you wish to use and establish agreements with them. This often involves paying royalties, even for non-commercial use.
 
