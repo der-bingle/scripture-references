@@ -32,8 +32,8 @@ export default defineConfig({
         nav: [
             {text: "Creator", link: 'https://gracious.tech/'},
             {text: "Source code", link: 'https://github.com/gracious-tech/fetch'},
-            {text: "Contact", link: 'https://gracious.tech/support/'},
-            {text: "Donate", link: 'https://give.gracious.tech'},
+            {text: "Contact", link: 'https://gracious.tech/contact'},
+            {text: "Donate", link: 'https://gracious.tech/donate'},
         ],
         sidebar: [
             {
