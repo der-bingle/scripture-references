@@ -284,7 +284,7 @@ export function txt_array_to_markdown(contents:TxtContent[], headings=true, note
 }
 
 
-// Access to the plain text of a Bible book
+// Access to the plain text of a Bible book (will be Markdown if headings/notes enabled)
 export class BibleBookTxt {
 
     // @internal
