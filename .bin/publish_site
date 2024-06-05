@@ -5,6 +5,7 @@ cd "$(dirname "$(dirname "$0")")/site"
 
 # Do fresh build of client since site relies on it
 ../.bin/build_client
+../.bin/build_client_docs
 
 ../.bin/build_site
 npx esbuild --platform=node ../.bin/publish.ts | node --input-type=module
