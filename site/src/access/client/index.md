@@ -95,11 +95,11 @@ The following classes can be added to your `.fetch-bible` container element:
 Class               | Effect
 | -                 | -
 `.fb-plain`         | Disables the more opinionated aspects of the styles so you can more easily customise them to suit your situation. E.g. Disables fading of verse numbers, chapter heading styling, notes show-on-hover, etc
-`.fb-no-verses`     | Hides verse numbers
-`.fb-no-chapters`   | Hides chapter headings
-`.fb-no-headings`   | Hides section headings
-`.fb-no-notes`      | Hides translation notes
-`.fb-no-red-letter` | Disables coloring words of Jesus in red (for translations that support it)
+`.no-verses`     | Hides verse numbers
+`.no-chapters`   | Hides chapter headings
+`.no-headings`   | Hides section headings
+`.no-notes`      | Hides translation notes
+`.no-red-letter` | Disables coloring words of Jesus in red (for translations that support it)
 
 The `.fetch-bible` class also has some variables you can customise:
 
