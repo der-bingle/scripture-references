@@ -24,6 +24,9 @@ export default defineConfig({
             target: 'es2022',  // Support top-level await, site only for developers anyway
         },
     },
+    markdown: {
+        typographer: true,
+    },
     themeConfig: {
         logo: '/icon.svg',
         nav: [
