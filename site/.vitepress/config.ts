@@ -57,6 +57,7 @@ export default defineConfig({
                 items: [
                     {text: "How to access", link: '/access/'},
                     {text: "Web app (UI)", link: '/access/app/'},
+                    {text: "Web enhancer (UI)", link: '/access/enhancer/'},
                     {text: "Client (API)", link: '/access/client/'},
                     {text: "Manual access", link: '/access/manual/'},
                     {text: "Collections", link: '/access/collections/'},

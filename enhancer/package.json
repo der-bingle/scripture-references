@@ -1,0 +1,33 @@
+{
+  "name": "@gracious.tech/fetch-enhancer",
+  "version": "0.0.0",
+  "description": "Enhance webpages with fetch(bible) links and other tools.",
+  "type": "module",
+  "exports": {
+    ".": {
+        "import": "./dist/esm/index.js"
+    }
+  },
+  "types": "./dist/esm/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gracious-tech/fetch.git"
+  },
+  "keywords": [
+    "bible",
+    "api",
+    "cdn"
+  ],
+  "author": "Gracious Tech",
+  "license": "MIT-0",
+  "bugs": {
+    "url": "https://github.com/gracious-tech/fetch/issues"
+  },
+  "homepage": "https://fetch.bible/",
+  "devDependencies": {
+    "sass": "^1.63.4"
+  }
+}
