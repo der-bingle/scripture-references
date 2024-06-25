@@ -1,5 +1,5 @@
 
-import {BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
+import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
 import type {DistManifest} from './shared_types'
@@ -87,6 +87,10 @@ export class BibleCollection {
     // @internal
     _usage:UsageConfig
     // @internal
+    _remember_fetches:boolean
+    // @internal
+    _fetch_book_cache:Record<string, Promise<BibleBook>> = {}
+    // @internal
     _manifest:RuntimeManifest
     // @internal
     _endpoints:Record<string, string> = {}  // Map translation ids to endpoints
@@ -94,11 +98,13 @@ export class BibleCollection {
     _modern_year = new Date().getFullYear() - 70
 
     // @internal
-    constructor(usage:UsageConfig, manifests:OneOrMore<[string, DistManifest]>){
+    constructor(usage:UsageConfig, remember_fetches:boolean,
+            manifests:OneOrMore<[string, DistManifest]>){
         // Merge the manifests given into a combined collection while remembering endpoints
         // WARN Original manifests are not dereferenced and assumed to not be used outside here
 
         this._usage = usage
+        this._remember_fetches = remember_fetches
 
         // Start with an empty manifest with common metadata extracted from first manifest
         this._manifest = {
@@ -464,18 +470,36 @@ export class BibleCollection {
     async fetch_book(translation:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
     async fetch_book(translation:string, book:string, format:'txt'):Promise<BibleBookTxt>
     async fetch_book(translation:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'):
-            Promise<BibleBookHtml|BibleBookUsx|BibleBookUsfm|BibleBookTxt>{
-        this._ensure_book_exists(translation, book)
-        const contents = await request(this.get_book_url(translation, book, format))
-        const format_class = {
-            html: BibleBookHtml,
-            usx: BibleBookUsx,
-            usfm: BibleBookUsfm,
-            txt: BibleBookTxt,
-        }[format]
-        return new format_class(this._manifest.translations[translation]!, contents)
-    }
+            Promise<BibleBook>{
 
-    // TODO async fetch_audio(){}
-    // TODO async fetch_video(){}
+        // Check args valid
+        this._ensure_book_exists(translation, book)
+
+        // Don't fetch if already have a result or request pending
+        const key = `${translation} ${book} ${format}`
+        if (key in this._fetch_book_cache){
+            return this._fetch_book_cache[key]!
+        }
+
+        // Fetch book in desired format
+        const promise = request(this.get_book_url(translation, book, format)).then(contents => {
+            const format_class = {
+                html: BibleBookHtml,
+                usx: BibleBookUsx,
+                usfm: BibleBookUsfm,
+                txt: BibleBookTxt,
+            }[format]
+            return new format_class(this._manifest.translations[translation]!, contents)
+        })
+
+        // Cache request promise if desired
+        if (this._remember_fetches){
+            this._fetch_book_cache[key] = promise
+            // Clear if unsuccessful so can retry if desired
+            promise.catch(() => {
+                delete this._fetch_book_cache[key]
+            })
+        }
+        return promise
+    }
 }

@@ -37,6 +37,19 @@ export interface BibleClientConfig {
      */
     usage?:UsageOptions
 
+    /* Whether to store internally the results of `fetch_*` methods (default true).
+
+    This client will auto-preserve the results of `fetch_*` methods to avoid duplicate network
+    requests. This is convenient for most users but may result in a large use of memory if a
+    significant amount of resources are requested. In such cases it is best to rely on service
+    worker caching, or self-preserving frequently used results of requests.
+
+    It is best practice to use service worker caching either way, as this will not only speed up
+    runtime execution but also revisits to your app.
+
+    Note that `fetch_collection()` results will always be preserved due to its frequency of use.
+    */
+    remember_fetches?:boolean
 }
 
 
@@ -54,29 +67,76 @@ export class BibleClient {
         limitless: false,
         derivatives: false,
     }
+    // @internal
+    _remember_fetches:boolean
+    // @internal
+    _collection_promise:Promise<BibleCollection>|undefined
+    // @internal
+    _crossref_cache:Record<string, Promise<BookCrossref>> = {}
+    // Synchronous access to collection if it has already been fetched with `fetch_collection()`
+    collection:BibleCollection|undefined
 
     // Create a new BibleClient, defaulting to the official fetch(bible) collection
     constructor(config:BibleClientConfig={}){
         this._endpoints = config.endpoints ?? ['https://collection.fetch.bible/']
         this._data_endpoint = config.data_endpoint ?? this._endpoints[0]!
         this._usage = {...this._usage, ...config.usage}
+        this._remember_fetches = config.remember_fetches !== false
     }
 
     // Fetch the collection's manifest and return a BibleCollection object for interacting with it
     async fetch_collection():Promise<BibleCollection>{
-        const manifests = await Promise.all(this._endpoints.map(async endpoint => {
+
+        // If have already requested, return previous promise (this.collection may not be ready yet)
+        if (this._collection_promise){
+            return this._collection_promise
+        }
+
+        // Request all manifests and combine into a single BibleCollection instance
+        this._collection_promise = Promise.all(this._endpoints.map(async endpoint => {
             return [
                 endpoint,
                 JSON.parse(await request(endpoint + 'bibles/manifest.json')) as DistManifest,
             ]
-        }))
-        return new BibleCollection(this._usage, manifests as OneOrMore<[string, DistManifest]>)
+        })).then(manifests => {
+            // Store instance in `this.collection` for synchronous access
+            this.collection = new BibleCollection(this._usage, this._remember_fetches,
+                manifests as OneOrMore<[string, DistManifest]>)
+            return this.collection
+        })
+
+        // Clear promise var if unsuccessful so can retry if desired
+        this._collection_promise.catch(() => {
+            this._collection_promise = undefined
+        })
+
+        // Return the promise
+        return this._collection_promise
     }
 
     // Fetch cross-reference data for a book
-    async fetch_crossref(book:string, size:'small'|'medium'|'large'='medium'){
+    async fetch_crossref(book:string, size:'small'|'medium'|'large'='medium'):Promise<BookCrossref>{
+
+        // If existing request, return that
+        const key = `${book} ${size}`
+        if (key in this._crossref_cache){
+            return this._crossref_cache[key]!
+        }
+
+        // Initiate request
         const url = this._data_endpoint + `crossref/${size}/${book}.json`
-        const data = JSON.parse(await request(url)) as CrossrefData
-        return new BookCrossref(data)
+        const promise = request(url).then(data => {
+            return new BookCrossref(JSON.parse(data) as CrossrefData)
+        })
+
+        // Cache request promise if desired
+        if (this._remember_fetches){
+            this._crossref_cache[key] = promise
+            // Clear if unsuccessful so can retry if desired
+            promise.catch(() => {
+                delete this._crossref_cache[key]
+            })
+        }
+        return promise
     }
 }

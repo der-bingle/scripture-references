@@ -392,3 +392,6 @@ export class BibleBookTxt {
         return this.get_passage(chapter, verse, chapter, verse, options)
     }
 }
+
+
+export type BibleBook = BibleBookHtml|BibleBookTxt|BibleBookUsfm|BibleBookUsx
