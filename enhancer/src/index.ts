@@ -150,7 +150,7 @@ export class BibleEnhancer {
                 }
                 // Position box under element and to right of cursor
                 const rect = element.getBoundingClientRect()
-                const hover_width = 300  // WARN Update stylesheet if change
+                const hover_width = 350  // WARN Update stylesheet if change
                 const max_left = document.documentElement.clientWidth - hover_width - 4
                 hover_box.style.top = `${window.scrollY + rect.top + rect.height + 4}px`
                 hover_box.style.left = `${Math.min(max_left, event.clientX + 4)}px`
