@@ -3,5 +3,5 @@
 set -e
 cd "$(dirname "$(dirname "$0")")/site"
 
-npx vitepress build --watch &
+npx vitepress build
 npx vitepress preview
