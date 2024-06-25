@@ -8,7 +8,7 @@ export default defineConfig({
     outDir: 'dist',
     srcDir: 'src',
     title: "fetch(bible)",
-    description: "Unrestricted digital access to thousands of Bible translations.",
+    description: "Unrestricted digital access to over a thousand Bible translations.",
     head: [
         ['link', {rel: 'icon', href: '/icon.png'}],
         ['meta', {property: 'og:image', content: '/social.png'}],
