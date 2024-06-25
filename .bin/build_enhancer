@@ -1,0 +1,21 @@
+#!/bin/bash
+# Build enhancer
+set -e
+cd "$(dirname "$(dirname "$0")")/enhancer"
+
+
+# Clear existing
+rm -rf dist
+
+
+# Build css
+npx sass --style=compressed src/styles.sass dist/styles.css
+
+
+# Common args
+esbuild="npx esbuild --sourcemap --target=ES2019"
+
+
+# Build ESM with typings
+npx tsc --emitDeclarationOnly --outDir dist/esm
+$esbuild src/*.ts --format=esm --platform=browser --outdir=dist/esm

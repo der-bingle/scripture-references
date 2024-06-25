@@ -6,6 +6,9 @@
   "exports": {
     ".": {
         "import": "./dist/esm/index.js"
+    },
+    "./styles.css": {
+        "import": "./dist/styles.css"
     }
   },
   "types": "./dist/esm/index.d.ts",
@@ -27,6 +30,9 @@
     "url": "https://github.com/gracious-tech/fetch/issues"
   },
   "homepage": "https://fetch.bible/",
+  "dependencies": {
+    "@gracious.tech/fetch-client": "^0.5.4"
+  },
   "devDependencies": {
     "sass": "^1.63.4"
   }
