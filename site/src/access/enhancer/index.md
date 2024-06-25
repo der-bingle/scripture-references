@@ -1,15 +1,18 @@
 
 <script lang='ts' setup>
 
-import {ref} from 'vue'
+import {ref, onMounted} from 'vue'
 
 
 function get_btn_text(){
     return self.fetch_enhancer?._translation === 'vie_vcb' ? "Change to English" : "Change to Vietnamese"
 }
 
-
-const btn_text = ref(get_btn_text())
+// Avoid executing for SSR
+const btn_text = ref('')
+onMounted(() => {
+    btn_text.value = get_btn_text()
+})
 
 const toggle_language = () => {
     const new_trans = self.fetch_enhancer._translation === 'vie_vcb' ? 'eng_bsb' : 'vie_vcb'
