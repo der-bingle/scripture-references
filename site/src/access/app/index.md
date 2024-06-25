@@ -13,6 +13,8 @@ iframe
 
 The fetch(bible) web app is a generic bible reading app that can be embedded within your own project, and it can also be customised, and interacted with via Javascript `postMessage` calls.
 
+_Also see the [web enhancer](/access/enhancer/)_
+
 ## Example
 
 <iframe src='https://app.fetch.bible'></iframe>
