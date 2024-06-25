@@ -2,17 +2,15 @@
 
 // Theme
 :root
-    --vp-c-brand: #c12bdb
-    --vp-c-brand-light: #e746ef
-    --vp-c-brand-lighter: #f766ff
-    --vp-c-brand-dark: #ac0ec8
-    --vp-c-brand-darker: #8c00a8
+    --vp-c-brand-1: #c12bdb
+    --vp-c-brand-2: #ac0ec8
+    --vp-c-brand-3: #8c00a8
+    --vp-c-brand-soft: var(--vp-c-purple-soft)
 
-
-// Hide navbar whenever sidebar also hidden (just intended for homepage)
-// Workaround due to https://github.com/vuejs/vitepress/issues/522
-.VPNav.no-sidebar
-    display: none
+.dark
+    --vp-c-brand-1: #c12bdb
+    --vp-c-brand-2: #e746ef
+    --vp-c-brand-3: #f766ff
 
 
 // Show icon on homepage
@@ -20,8 +18,8 @@
     background-image: url(/icon.svg)
     background-repeat: no-repeat
     background-position-x: center
-    background-size: 12vw
-    padding-top: 18vw
+    background-size: min(50vw, 300px)
+    padding-top: min(65vw, 350px)
 
 
 // Stop hero text wrapping too much on wide screens (so counter doesn't jump)
@@ -49,4 +47,4 @@ svg.loading
 
 svg.loading circle
     fill: transparent
-    stroke: var(--vp-c-brand)
+    stroke: var(--vp-c-brand-1)
