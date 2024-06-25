@@ -1,0 +1,7 @@
+#!/bin/bash
+# Serve site prod mode
+set -e
+cd "$(dirname "$(dirname "$0")")/site"
+
+npx vitepress build --watch &
+npx vitepress preview
