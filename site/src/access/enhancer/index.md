@@ -5,14 +5,14 @@ import {ref} from 'vue'
 
 
 function get_btn_text(){
-    return self.fetch_enhancer?.translation === 'vie_vcb' ? "Change to English" : "Change to Vietnamese"
+    return self.fetch_enhancer?._translation === 'vie_vcb' ? "Change to English" : "Change to Vietnamese"
 }
 
 
 const btn_text = ref(get_btn_text())
 
 const toggle_language = () => {
-    const new_trans = self.fetch_enhancer.translation === 'vie_vcb' ? 'eng_bsb' : 'vie_vcb'
+    const new_trans = self.fetch_enhancer._translation === 'vie_vcb' ? 'eng_bsb' : 'vie_vcb'
     self.fetch_enhancer.change_translation(new_trans)
     self.fetch_enhancer.discover_bible_references(document.querySelector('.vp-doc'), undefined, false)
     btn_text.value = get_btn_text()
