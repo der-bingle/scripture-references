@@ -3,9 +3,10 @@
 set -e
 cd "$(dirname "$(dirname "$0")")/site"
 
-# Do fresh build of client since site relies on it
+# Do fresh build of components that site relies on
 ../.bin/build_client
 ../.bin/build_client_docs
+../.bin/build_enhancer
 
 ../.bin/build_site
 npx esbuild --platform=node ../.bin/publish.ts | node --input-type=module
