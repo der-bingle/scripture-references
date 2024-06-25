@@ -40,8 +40,10 @@ onMounted(async () => {
         await new Promise(resolve => setTimeout(resolve, 1))
         counter = Math.min(total, counter+2)
         // Replace the existing hero `text` with number included
-        self.document.body.querySelector('.VPHomeHero .text').innerHTML =
-            `Digital access to ${counter}+<br>Bible translations`
+        const hero_text = self.document.body.querySelector('.VPHomeHero .text')
+        if (hero_text){
+            hero_text.innerHTML = `Digital access to ${counter}+<br>Bible translations`
+        }
     }
 })
 
