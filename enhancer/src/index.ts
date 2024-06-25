@@ -10,17 +10,17 @@ const book_name = '[\\p{Letter}\\p{Dash} ]{2,18}\\.? ?'
 const integer_with_opt_colon = '\\d{1,3}[abc]?(?: ?: ?\\d{1,3}[abc]?)?'
 const verse_range = integer_with_opt_colon + '(?: ?\\p{Dash} ?' + integer_with_opt_colon + ')?'
 const trailing = '(?!\\d)'
-export const ref_regex = new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
+const ref_regex = new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
 
 
 export class BibleEnhancer {
 
     client:BibleClient
-    app_origin:string
-    app_div:HTMLDivElement
-    app_iframe:HTMLIFrameElement
-    history:boolean
-    translation:string|undefined
+    _app_origin:string
+    _app_div:HTMLDivElement
+    _app_iframe:HTMLIFrameElement
+    _history:boolean
+    _translation:string|undefined
     _hover_divs:[HTMLDivElement, PassageRef][] = []
 
     constructor(options:{client?:BibleClient, app_origin?:string, history?:boolean,
@@ -28,24 +28,24 @@ export class BibleEnhancer {
 
         // Set defaults
         this.client = options.client ?? new BibleClient()
-        this.app_origin = options.app_origin ?? 'https://app.fetch.bible'
-        this.history = options.history !== false
-        this.translation = options.translation
+        this._app_origin = options.app_origin ?? 'https://app.fetch.bible'
+        this._history = options.history !== false
+        this._translation = options.translation
 
         // Pre-generate app DOM so it is ready to go once user clicks a reference
-        this.app_div = document.createElement('div')
-        this.app_div.classList.add('fb-enhancer-app')
-        this.app_iframe = document.createElement('iframe')
-        this.app_iframe.src = `${this.app_origin}#back=true&trans=${this.translation ?? ''}`
-        this.app_div.appendChild(this.app_iframe)
-        document.body.appendChild(this.app_div)
-        this.app_div.addEventListener('click', () => {
+        this._app_div = document.createElement('div')
+        this._app_div.classList.add('fb-enhancer-app')
+        this._app_iframe = document.createElement('iframe')
+        this._app_iframe.src = `${this._app_origin}#back=true&trans=${this._translation ?? ''}`
+        this._app_div.appendChild(this._app_iframe)
+        document.body.appendChild(this._app_div)
+        this._app_div.addEventListener('click', () => {
             this.hide_app()
         })
 
         // Hide app when the back button (within app) is clicked
         self.addEventListener('message', event => {
-            if (event.origin !== this.app_origin){
+            if (event.origin !== this._app_origin){
                 return  // Website could get message from any source so ensure it's from fetch app
             }
             if ((event.data as {type:string})['type'] === 'back'){
@@ -55,22 +55,22 @@ export class BibleEnhancer {
 
         // Whenever page changed, hide app (regardless if history option enabled or not)
         self.addEventListener('popstate', event => {
-            this.app_div.classList.remove('fb-show')
+            this._app_div.classList.remove('fb-show')
         })
     }
 
     // Show app and display given passage
     show_app(passage:PassageRef){
-        this.app_div.classList.add('fb-show')
-        this.app_iframe.contentWindow?.postMessage({
+        this._app_div.classList.add('fb-show')
+        this._app_iframe.contentWindow?.postMessage({
             type: 'update',
             book: passage.book,
             verse: `${passage.chapter_start ?? 1}:${passage.verse_start ?? 1}`,
-            ...this.translation ? {trans: this.translation} : {},
-        }, this.app_origin)
+            ...this._translation ? {trans: this._translation} : {},
+        }, this._app_origin)
 
         // Optionally push item to history so browser back hides app rather than changing page
-        if (this.history){
+        if (this._history){
             // NOTE fetch_enhancer_app isn't used, just given in case developer wants to identify it
             window.history.pushState({fetch_enhancer_app: true}, '')
         }
@@ -78,11 +78,11 @@ export class BibleEnhancer {
 
     // Hide app
     hide_app(){
-        this.app_div.classList.remove('fb-show')
+        this._app_div.classList.remove('fb-show')
 
         // If history enabled and current state is own, go back to non-app-showing state
         const owned = (window.history.state as null|Record<string, unknown>)?.['fetch_enhancer_app']
-        if (this.history && !!owned){
+        if (this._history && !!owned){
             window.history.back()
         }
     }
@@ -92,11 +92,11 @@ export class BibleEnhancer {
         const collection = await this.client.fetch_collection()
 
         // If translation hasn't been set yet, choose sensible default
-        if (!this.translation){
-            this.translation = collection.get_preferred_translation()
+        if (!this._translation){
+            this._translation = collection.get_preferred_translation()
         }
 
-        const book = await collection.fetch_book(this.translation, ref.book)
+        const book = await collection.fetch_book(this._translation, ref.book)
         // Append custom attribution which is just the translation's abbreviation
         div.innerHTML = book.get_passage_from_obj(ref, {attribute: false})
             + `<p class='fb-attribution'>${book._translation.name.abbrev}</p>`
@@ -196,10 +196,10 @@ export class BibleEnhancer {
 
         // Get book names so can parse references
         const collection = await this.client.fetch_collection()
-        if (!this.translation){
-            this.translation = collection.get_preferred_translation()
+        if (!this._translation){
+            this._translation = collection.get_preferred_translation()
         }
-        const trans_books = collection.get_books(this.translation)
+        const trans_books = collection.get_books(this._translation)
         const english_books = collection._manifest.book_names_english
 
         // Create DOM walker that will ignore subtrees identified by filter arg
@@ -279,7 +279,7 @@ export class BibleEnhancer {
 
             // Turn ref text into a link
             const ref_a = document.createElement('a')
-            ref_a.setAttribute('href', `${this.app_origin}#trans=${this.translation ?? ''}`
+            ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translation ?? ''}`
                 + `&book=${ref.book}&verse=${ref.chapter_start ?? 1}:${ref.verse_start ?? 1}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
@@ -313,7 +313,7 @@ export class BibleEnhancer {
 
     // Change translation used for hover boxes
     change_translation(trans:string){
-        this.translation = trans
+        this._translation = trans
         for (const [div, ref] of this._hover_divs){
             void this._set_hover_contents(div, ref)
         }
