@@ -5,7 +5,7 @@ import {ref, onMounted} from 'vue'
 
 
 function get_btn_text(){
-    return self.fetch_enhancer?._translation === 'vie_vcb' ? "Change to English" : "Change to Vietnamese"
+    return self.fetch_enhancer?._translations[0] === 'vie_vcb' ? "Change to English" : "Change to Vietnamese"
 }
 
 // Avoid executing for SSR
@@ -15,8 +15,8 @@ onMounted(() => {
 })
 
 const toggle_language = () => {
-    const new_trans = self.fetch_enhancer._translation === 'vie_vcb' ? 'eng_bsb' : 'vie_vcb'
-    self.fetch_enhancer.change_translation(new_trans)
+    const new_trans = self.fetch_enhancer._translations[0] === 'vie_vcb' ? ['eng_bsb', 'grc_sr'] : ['vie_vcb']
+    self.fetch_enhancer.change_translation(...new_trans)
     self.fetch_enhancer.discover_bible_references(document.querySelector('.vp-doc'), undefined, false)
     btn_text.value = get_btn_text()
 }
@@ -74,7 +74,7 @@ const enhancer = new BibleEnhancer({
     client: new BibleClient(),  // Provide a custom fetch(bible) client
     app_origin: 'https://app.fetch.bible',  // Use a custom fetch app
     history: false,  // Don't intercept browser "back" to hide app modal
-    translation: 'eng_bsb',  // Set the translation to be used
+    translations: ['eng_bsb', 'grc_sr'],  // Set the translations to be used
 })
 
 // Control which elements are evaluated for bible reference discovery
@@ -97,8 +97,8 @@ enhancer.hide_app()
 enhancer.enhance_element(element,
     {book: 'gen', chapter_start: 2, verse_start: 5, verse_end: 6})
 
-// Change the translation used
-enhancer.change_translation('eng_bsb')
+// Change the translations used
+enhancer.change_translation('eng_bsb', 'grc_sr')
 
 ```
 

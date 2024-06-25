@@ -20,23 +20,23 @@ export class BibleEnhancer {
     _app_div:HTMLDivElement
     _app_iframe:HTMLIFrameElement
     _history:boolean
-    _translation:string|undefined
+    _translations:string[]
     _hover_divs:[HTMLDivElement, PassageRef][] = []
 
     constructor(options:{client?:BibleClient, app_origin?:string, history?:boolean,
-            translation?:string}={}){
+            translations?:string[]}={}){
 
         // Set defaults
         this.client = options.client ?? new BibleClient()
         this._app_origin = options.app_origin ?? 'https://app.fetch.bible'
         this._history = options.history !== false
-        this._translation = options.translation
+        this._translations = options.translations ?? []
 
         // Pre-generate app DOM so it is ready to go once user clicks a reference
         this._app_div = document.createElement('div')
         this._app_div.classList.add('fb-enhancer-app')
         this._app_iframe = document.createElement('iframe')
-        this._app_iframe.src = `${this._app_origin}#back=true&trans=${this._translation ?? ''}`
+        this._app_iframe.src = `${this._app_origin}#back=true&trans=${this._translations.join(',')}`
         this._app_div.appendChild(this._app_iframe)
         document.body.appendChild(this._app_div)
         this._app_div.addEventListener('click', () => {
@@ -66,7 +66,7 @@ export class BibleEnhancer {
             type: 'update',
             book: passage.book,
             verse: `${passage.chapter_start ?? 1}:${passage.verse_start ?? 1}`,
-            ...this._translation ? {trans: this._translation} : {},
+            trans: this._translations.join(','),
         }, this._app_origin)
 
         // Optionally push item to history so browser back hides app rather than changing page
@@ -92,14 +92,18 @@ export class BibleEnhancer {
         const collection = await this.client.fetch_collection()
 
         // If translation hasn't been set yet, choose sensible default
-        if (!this._translation){
-            this._translation = collection.get_preferred_translation()
+        if (!this._translations.length){
+            this._translations = [collection.get_preferred_translation()]
         }
 
-        const book = await collection.fetch_book(this._translation, ref.book)
-        // Append custom attribution which is just the translation's abbreviation
-        div.innerHTML = book.get_passage_from_obj(ref, {attribute: false})
-            + `<p class='fb-attribution'>${book._translation.name.abbrev}</p>`
+        let html = ''
+        for (const trans of this._translations){
+            const book = await collection.fetch_book(trans, ref.book)
+            // Append custom attribution which is just the translation's abbreviation
+            html += book.get_passage_from_obj(ref, {attribute: false})
+                + `<p class='fb-attribution'>${book._translation.name.abbrev}</p>`
+        }
+        div.innerHTML = html
     }
 
     // Enhance an element by showing passage on hover and triggering app display on click
@@ -195,11 +199,12 @@ export class BibleEnhancer {
         }
 
         // Get book names so can parse references
+        // Only use english names and first translation's names (as assumed to be primary language)
         const collection = await this.client.fetch_collection()
-        if (!this._translation){
-            this._translation = collection.get_preferred_translation()
+        if (!this._translations.length){
+            this._translations = [collection.get_preferred_translation()]
         }
-        const trans_books = collection.get_books(this._translation)
+        const trans_books = collection.get_books(this._translations[0]!)
         const english_books = collection._manifest.book_names_english
 
         // Create DOM walker that will ignore subtrees identified by filter arg
@@ -279,7 +284,7 @@ export class BibleEnhancer {
 
             // Turn ref text into a link
             const ref_a = document.createElement('a')
-            ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translation ?? ''}`
+            ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
                 + `&book=${ref.book}&verse=${ref.chapter_start ?? 1}:${ref.verse_start ?? 1}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
@@ -311,9 +316,9 @@ export class BibleEnhancer {
         }
     }
 
-    // Change translation used for hover boxes
-    change_translation(trans:string){
-        this._translation = trans
+    // Change translations used for hover boxes and app
+    change_translation(...trans:string[]){
+        this._translations = trans
         for (const [div, ref] of this._hover_divs){
             void this._set_hover_contents(div, ref)
         }

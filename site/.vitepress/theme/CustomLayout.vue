@@ -22,7 +22,7 @@ const app_origin = import.meta.env.PROD ? 'https://app.fetch.bible' : 'http://lo
 
 onMounted(() => {
 
-    const enhancer = new BibleEnhancer({app_origin})
+    const enhancer = new BibleEnhancer({app_origin, translations: ['eng_bsb', 'grc_sr']})
     self.fetch_enhancer = enhancer  // Expose so can use in /access/enhancer/
 
     useRouter().onAfterRouteChanged = to => {
