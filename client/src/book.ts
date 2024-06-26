@@ -1,7 +1,7 @@
 
 import {escape_html, num_to_letters} from './utils.js'
 import type {RuntimeLicense, RuntimeTranslation} from './types'
-import type {VersesRefArg} from './extras'
+import type {VersesRefArg} from './references'
 import type {BibleJsonHtml, BibleJsonTxt, TxtContent} from './shared_types'
 
 
