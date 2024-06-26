@@ -48,7 +48,7 @@ function _normalise_book_names(book_names:BookNames):Record<string, string>{
 
 // Format verses reference to a readable string
 // Supports: Gen | Gen 1 | 1-2 | 1:1 | 1:1-2 | 1:1-2:2
-export function verses_obj_to_str(ref:VersesRefArg){
+export function verses_obj_to_str(ref:VersesRefArg, verse_sep=':', range_sep='-'){
 
     // If no chapter_start then ref must be for whole book
     if (!ref.chapter_start){
@@ -73,18 +73,18 @@ export function verses_obj_to_str(ref:VersesRefArg){
     // If only a chapter ref, logic is much simpler
     if (!ref.verse_start){
         return ref.chapter_start === ref.chapter_end ? `${ref.chapter_start}`
-            : `${ref.chapter_start}-${ref.chapter_end}`
+            : `${ref.chapter_start}${range_sep}${ref.chapter_end}`
     }
 
     // See if a single verse
     if (ref.chapter_start === ref.chapter_end && ref.verse_start === ref.verse_end){
-        return `${ref.chapter_start}:${ref.verse_start}`
+        return `${ref.chapter_start}${verse_sep}${ref.verse_start}`
     }
 
     // Dealing with a range...
-    let out = `${ref.chapter_start}:${ref.verse_start}-`
+    let out = `${ref.chapter_start}${verse_sep}${ref.verse_start}${range_sep}`
     if (ref.chapter_end !== ref.chapter_start){
-        out += `${ref.chapter_end}:`
+        out += `${ref.chapter_end}${verse_sep}`
     }
     return out + `${ref.verse_end!}`
 }
