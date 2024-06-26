@@ -2,6 +2,8 @@
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
+import {BookNames, PassageRefArg, book_name_to_code, find_passage_str, find_passage_str_all,
+    passage_obj_to_str, passage_str_to_obj} from './references.js'
 import type {DistManifest} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
@@ -501,5 +503,52 @@ export class BibleCollection {
             })
         }
         return promise
+    }
+
+    // Detect which book a name refers to (defaults to English, pass translation for other language)
+    detect_book(name:string, translation?:string){
+        return book_name_to_code(name,
+            translation ? this.get_books(translation) : this._manifest.book_names_english)
+    }
+
+    // @internal
+    _book_names_list(translation?:string){
+        const book_names:BookNames[] = [this._manifest.book_names_english]
+        if (translation){
+            book_names.unshift(this.get_books(translation))
+        }
+        return book_names
+    }
+
+    // Detect which passage a human text passage reference refers to
+    // Pass translation arg to correctly detect book names/abbreviations for that language/version
+    detect_passage(reference:string, translation?:string){
+        return passage_str_to_obj(reference, ...this._book_names_list(translation))
+    }
+
+    // Detect the text and position of first passage reference in a block of text
+    // Pass translation arg to correctly detect book names/abbreviations for that language/version
+    detect_passage_reference(text:string, translation?:string){
+        return find_passage_str(text, ...this._book_names_list(translation))
+    }
+
+    // Detect the text and position of all passage references in a block of text
+    // Pass translation arg to correctly detect book names/abbreviations for that language/version
+    detect_passage_references(text:string, translation?:string){
+        return find_passage_str_all(text, ...this._book_names_list(translation))
+    }
+
+    // Generate a human-readable passage reference from a data object
+    // `book_names` can either be a translation id or a mapping of book codes to names
+    // This allows you to pass abbreviated names if you prefer (defaults to English names)
+    generate_passage_reference(reference:PassageRefArg, book_names?:string|BookNames, verse_sep=':',
+            range_sep='-'){
+        let book_names_data:BookNames = this._manifest.book_names_english
+        if (typeof book_names === 'string'){
+            book_names_data = this.get_books(book_names)
+        } else if (typeof book_names === 'object'){
+            book_names_data = book_names
+        }
+        return passage_obj_to_str(reference, book_names_data, verse_sep, range_sep)
     }
 }
