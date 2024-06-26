@@ -216,7 +216,7 @@ export function book_name_to_code(input:string, book_names:BookNames):string|nul
 
 
 // Parse passage reference string into an object
-export function passage_str_to_obj(ref:string, book_names:BookNames):PassageRef|null{
+export function passage_str_to_obj(ref:string, ...book_names:BookNames[]):PassageRef|null{
     ref = ref.trim()
 
     // Find start of first digit, except if start of string (e.g. 1 Sam)
@@ -226,7 +226,14 @@ export function passage_str_to_obj(ref:string, book_names:BookNames):PassageRef|
     }
 
     // If book can be parsed, ref is valid even if verse range can't be parsed
-    const book_code = book_name_to_code(ref.slice(0, verses_start), book_names)
+    let book_code:string|null = null
+    // Try each set separately, so that order sets priority
+    for (const book_names_set of book_names){
+        book_code = book_name_to_code(ref.slice(0, verses_start), book_names_set)
+        if (book_code){
+            break
+        }
+    }
     if (!book_code){
         return null
     }
@@ -272,7 +279,7 @@ export function passage_str_regex(){
 
 // Discover a passage reference in a block of text
 // Only the first match is returned (call again with remaining text to get subsequent ones)
-export function find_passage_str(input:string, book_names:BookNames):PassageRefMatch|null{
+export function find_passage_str(input:string, ...book_names:BookNames[]):PassageRefMatch|null{
 
     // Create regex (will manually manipulate lastIndex property of it)
     const regex = passage_str_regex()
@@ -285,7 +292,7 @@ export function find_passage_str(input:string, book_names:BookNames):PassageRefM
         }
 
         // Confirm match is actually a valid ref
-        const ref = passage_str_to_obj(match[0], book_names)
+        const ref = passage_str_to_obj(match[0], ...book_names)
         if (ref && ref.chapter_start !== null){  // No whole book refs
             return {ref, text: match[0], index: match.index}
         }
@@ -302,10 +309,10 @@ export function find_passage_str(input:string, book_names:BookNames):PassageRefM
 
 
 // Discover all passage references in a block of text
-export function find_passage_str_all(input:string, book_names:BookNames):PassageRefMatch[]{
+export function find_passage_str_all(input:string, ...book_names:BookNames[]):PassageRefMatch[]{
     const matches:PassageRefMatch[] = []
     while (true){
-        const match = find_passage_str(input, book_names)
+        const match = find_passage_str(input, ...book_names)
         if (match){
             matches.push(match)
             input = input.slice(match.index + match.text.length)
