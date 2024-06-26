@@ -1,16 +1,7 @@
 
-import {BibleClient, passage_str_to_obj} from '@gracious.tech/fetch-client'
+import {BibleClient} from '@gracious.tech/fetch-client'
 
-import type {PassageRef} from '@gracious.tech/fetch-client/dist/esm/extras'
-
-
-// Form regex for identifying verse references in text
-const book_num_prefix = '(?:(?:[123]|I{1,3}) ?)?'
-const book_name = '[\\p{Letter}\\p{Dash} ]{2,18}\\.? ?'
-const integer_with_opt_sep = '\\d{1,3}[abc]?(?: ?[:：\\.] ?\\d{1,3}[abc]?)?'
-const verse_range = integer_with_opt_sep + '(?: ?\\p{Dash} ?' + integer_with_opt_sep + ')?'
-const trailing = '(?!\\d)'
-const ref_regex = new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
+import type {PassageRef, PassageRefMatch} from '@gracious.tech/fetch-client/dist/esm/references'
 
 
 export class BibleEnhancer {
@@ -217,14 +208,11 @@ export class BibleEnhancer {
             this._hover_divs = []
         }
 
-        // Get book names so can parse references
-        // Only use english names and first translation's names (as assumed to be primary language)
+        // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
         if (!this._translations.length){
             this._translations = [collection.get_preferred_translation()]
         }
-        const trans_books = collection.get_books(this._translations[0]!)
-        const english_books = collection._manifest.book_names_english
 
         // Create DOM walker that will ignore subtrees identified by filter arg
         // NOTE Not excluding non-text nodes initially so can filter out whole subtrees if needed
@@ -247,87 +235,57 @@ export class BibleEnhancer {
             return NodeFilter.FILTER_REJECT
         })
 
-        // Util for getting offset and ref for next valid reference
-        function next_ref(text_node:Text):[RegExpExecArray, PassageRef]|null{
-
-            // Create fresh regex each time so lastIndex is new
-            const fresh_regex = new RegExp(ref_regex)
-
-            while (true){
-                const match = fresh_regex.exec(text_node.textContent!)
-                if (!match){
-                    return null  // Either no matches or no valid matches...
-                }
-
-                // Confirm match is actually a valid ref
-                let ref = passage_str_to_obj(match[0], trans_books)
-                if (ref && ref.chapter_start !== null){  // No whole book refs
-                    return [match, ref]
-                }
-
-                // Try english names as well since so common
-                ref = passage_str_to_obj(match[0], english_books)
-                if (ref && ref.chapter_start !== null){  // No whole book refs
-                    return [match, ref]
-                }
-
-                // If invalid, try next word as match might still have included a partial ref
-                // e.g. "in 1 Corinthians 9" -> "in 1" -> "1 Corinthians 9"
-                const chars_to_next_word = match[0].indexOf(' ', 1)
-                if (chars_to_next_word >= 1){
-                    // Backtrack to exclude just first word of previous match
-                    fresh_regex.lastIndex -= (match[0].length - chars_to_next_word - 1)
-                }
-            }
-        }
 
         // Get all relevant text nodes in advance (as modifying DOM will interrupt walk)
-        const nodes:[Text, RegExpExecArray, PassageRef][] = []  // [node, first_match, first_ref]
+        const nodes:[Text, PassageRefMatch][] = []
         while (walker.nextNode()){
             if (walker.currentNode.nodeType === Node.TEXT_NODE){
-                const match = next_ref(walker.currentNode as Text)
+                const match = collection.detect_passage_reference(walker.currentNode.textContent!,
+                    this._translations[0])
                 if (match){
-                    nodes.push([walker.currentNode as Text, ...match])
+                    nodes.push([walker.currentNode as Text, match])
                 }
             }
         }
 
         // Util for turning a passage ref into an <a> element (returns trailing text node)
-        const linkify_ref = (node:Text, match:RegExpExecArray, ref:PassageRef) => {
+        const linkify_ref = (node:Text, match:PassageRefMatch) => {
 
             // Separate ref text from preceeding text
             const ref_node = node.splitText(match.index)
 
             // Separate ref text from trailing text
-            const remainder = ref_node.splitText(match[0].length)
+            const remainder = ref_node.splitText(match.text.length)
 
             // Turn ref text into a link
             const ref_a = document.createElement('a')
-            ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
-                + `&book=${ref.book}&verse=${ref.chapter_start ?? 1}:${ref.verse_start ?? 1}`)
+            ref_a.setAttribute('href',
+                `${this._app_origin}#trans=${this._translations.join(',')}&book=${match.ref.book}`
+                    + `&verse=${match.ref.chapter_start ?? 1}:${match.ref.verse_start ?? 1}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
-            ref_a.textContent = match[0]
+            ref_a.textContent = match.text
             ref_node.replaceWith(ref_a)
 
             // Enhance the new <a> element
-            this.enhance_element(ref_a, ref)
+            this.enhance_element(ref_a, match.ref)
 
             // Return newly-created trailing text node
             return remainder
         }
 
         // Modify collected text nodes
-        for (const [orig_node, first_valid_match, first_valid_ref] of nodes){
+        for (const [orig_node, first_valid_match] of nodes){
 
             // Linkify the first match
-            let remainder = linkify_ref(orig_node, first_valid_match, first_valid_ref)
+            let remainder = linkify_ref(orig_node, first_valid_match)
 
             // Linkify any remaining matches too
             while (true){
-                const next_ref_result = next_ref(remainder)
+                const next_ref_result = collection.detect_passage_reference(remainder.textContent!,
+                    this._translations[0])
                 if (next_ref_result){
-                    remainder = linkify_ref(remainder, ...next_ref_result)
+                    remainder = linkify_ref(remainder, next_ref_result)
                 } else {
                     break
                 }
