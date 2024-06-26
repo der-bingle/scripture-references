@@ -22,7 +22,14 @@ const app_origin = import.meta.env.PROD ? 'https://app.fetch.bible' : 'http://lo
 
 onMounted(() => {
 
-    const enhancer = new BibleEnhancer({app_origin, translations: ['eng_bsb', 'grc_sr']})
+    const enhancer = new BibleEnhancer({
+        app_origin,
+        translations: ['eng_bsb', 'grc_sr'],
+        before_history_push: () => {
+            // Store scroll position so VP will restore upon back action (same as router does)
+            history.replaceState({scrollPosition: window.scrollY}, '')
+        },
+    })
     self.fetch_enhancer = enhancer  // Expose so can use in /access/enhancer/
 
     useRouter().onAfterRouteChanged = to => {

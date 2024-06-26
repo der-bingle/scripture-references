@@ -25,16 +25,18 @@ export class BibleEnhancer {
     _app_iframe:HTMLIFrameElement
     _history:boolean
     _translations:string[]
+    _before_history_push:()=>void
     _hover_divs:[HTMLDivElement, PassageRef][] = []
 
     constructor(options:{client?:BibleClient, app_origin?:string, history?:boolean,
-            translations?:string[]}={}){
+            translations?:string[], before_history_push?:()=>void}={}){
 
         // Set defaults
         this.client = options.client ?? new BibleClient()
         this._app_origin = options.app_origin ?? 'https://app.fetch.bible'
         this._history = options.history !== false
         this._translations = options.translations ?? []
+        this._before_history_push = options.before_history_push ?? (() => {})
 
         // Pre-generate app DOM so it is ready to go once user clicks a reference
         this._app_div = document.createElement('div')
@@ -76,6 +78,7 @@ export class BibleEnhancer {
         // Optionally push item to history so browser back hides app rather than changing page
         if (this._history){
             // NOTE fetch_enhancer_app isn't used, just given in case developer wants to identify it
+            this._before_history_push()
             window.history.pushState({fetch_enhancer_app: true}, '')
         }
     }
