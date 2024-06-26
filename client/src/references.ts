@@ -30,6 +30,12 @@ export interface PassageRefArg extends VersesRefArg {
     book:string
 }
 
+export interface PassageRefMatch {
+    ref:PassageRef
+    text:string
+    index:number
+}
+
 export type BookNames = Record<string, string>|Record<string, GetBooksItem>|GetBooksItem[]
 
 
@@ -266,15 +272,14 @@ export function passage_str_regex(){
 
 // Discover a passage reference in a block of text
 // Only the first match is returned (call again with remaining text to get subsequent ones)
-export function find_passage_str(text:string, book_names:BookNames):
-        {ref:PassageRef, match:string, index:number}|null{
+export function find_passage_str(input:string, book_names:BookNames):PassageRefMatch|null{
 
     // Create regex (will manually manipulate lastIndex property of it)
     const regex = passage_str_regex()
 
     // Loop until find a valid ref (not all regex matches will be valid)
     while (true){
-        const match = regex.exec(text)
+        const match = regex.exec(input)
         if (!match){
             return null  // Either no matches or no valid matches...
         }
@@ -282,7 +287,7 @@ export function find_passage_str(text:string, book_names:BookNames):
         // Confirm match is actually a valid ref
         const ref = passage_str_to_obj(match[0], book_names)
         if (ref && ref.chapter_start !== null){  // No whole book refs
-            return {ref, match: match[0], index: match.index}
+            return {ref, text: match[0], index: match.index}
         }
 
         // If invalid, try next word as match might still have included a partial ref
@@ -293,4 +298,20 @@ export function find_passage_str(text:string, book_names:BookNames):
             regex.lastIndex -= (match[0].length - chars_to_next_word - 1)
         }
     }
+}
+
+
+// Discover all passage references in a block of text
+export function find_passage_str_all(input:string, book_names:BookNames):PassageRefMatch[]{
+    const matches:PassageRefMatch[] = []
+    while (true){
+        const match = find_passage_str(input, book_names)
+        if (match){
+            matches.push(match)
+            input = input.slice(match.index + match.text.length)
+        } else {
+            break
+        }
+    }
+    return matches
 }
