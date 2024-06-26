@@ -13,6 +13,10 @@ const trailing = '(?!\\d)'
 const ref_regex = new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
 
 
+// Detect whether device can hover (without emulation)
+const can_hover = matchMedia('(hover: hover)').matches
+
+
 export class BibleEnhancer {
 
     client:BibleClient
@@ -109,7 +113,18 @@ export class BibleEnhancer {
     // Enhance an element by showing passage on hover and triggering app display on click
     enhance_element(element:HTMLElement, ref:PassageRef){
 
-        // Create text div
+        // Open app when element clicked
+        element.addEventListener('click', event => {
+            event.preventDefault()  // Important if a link
+            this.show_app(ref)
+        })
+
+        // The rest relates to hover box functionality, so skip if a touch device
+        if (!can_hover){
+            return
+        }
+
+        // Create hover box div
         const hover_box = document.createElement('div')
         this._hover_divs.push([hover_box, ref])
         hover_box.setAttribute('class',
@@ -178,11 +193,7 @@ export class BibleEnhancer {
             rm_hover_box()
         })
 
-        // Open app when click element or click hover box
-        element.addEventListener('click', event => {
-            event.preventDefault()  // Important if a link
-            this.show_app(ref)
-        })
+        // Open app when click hover box
         hover_box.addEventListener('click', () => {
             this.show_app(ref)
         })
