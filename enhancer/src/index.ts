@@ -13,10 +13,6 @@ const trailing = '(?!\\d)'
 const ref_regex = new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
 
 
-// Detect whether device can hover (without emulation)
-const can_hover = matchMedia('(hover: hover)').matches
-
-
 export class BibleEnhancer {
 
     client:BibleClient
@@ -27,6 +23,8 @@ export class BibleEnhancer {
     _translations:string[]
     _before_history_push:()=>void
     _hover_divs:[HTMLDivElement, PassageRef][] = []
+    // Detect whether device can hover (without emulation)
+    _can_hover = self.matchMedia('(hover: hover)').matches
 
     constructor(options:{client?:BibleClient, app_origin?:string, history?:boolean,
             translations?:string[], before_history_push?:()=>void}={}){
@@ -123,7 +121,7 @@ export class BibleEnhancer {
         })
 
         // The rest relates to hover box functionality, so skip if a touch device
-        if (!can_hover){
+        if (!this._can_hover){
             return
         }
 
