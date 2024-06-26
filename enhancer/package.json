@@ -1,6 +1,6 @@
 {
   "name": "@gracious.tech/fetch-enhancer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Enhance webpages with fetch(bible) links and other tools.",
   "type": "module",
   "exports": {

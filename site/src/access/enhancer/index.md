@@ -87,7 +87,8 @@ const enhancer = new BibleEnhancer({
 // Control which elements are evaluated for bible reference discovery
 enhancer.discover_bible_references(
     document.querySelector('.article'),  // Root element for discovery
-    element => element.classList.contains('refs'),  // Custom filter
+    // A custom filter (default excludes headings)
+    element => element.classList.contains('refs'),
 )
 
 // Call discover method whenever content is dynamically replaced

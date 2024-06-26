@@ -203,8 +203,8 @@ export class BibleEnhancer {
     }
 
     // Auto-discover references in text of page and transform into links
-    async discover_bible_references(root:HTMLElement=document.body,
-            filter:(element:Element)=>boolean=e=>true){
+    async discover_bible_references(root:HTMLElement=document.body, filter:
+            (element:Element)=>boolean=e=>!['H1','H2','H3','H4','H5','H6'].includes(e.tagName)){
 
         // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
