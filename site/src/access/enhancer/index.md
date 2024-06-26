@@ -17,7 +17,7 @@ onMounted(() => {
 const toggle_language = () => {
     const new_trans = self.fetch_enhancer._translations[0] === 'vie_vcb' ? ['eng_bsb', 'grc_sr'] : ['vie_vcb']
     self.fetch_enhancer.change_translation(...new_trans)
-    self.fetch_enhancer.discover_bible_references(document.querySelector('.vp-doc'), undefined, false)
+    self.fetch_enhancer.discover_bible_references(document.querySelector('.vp-doc'))
     btn_text.value = get_btn_text()
 }
 
@@ -88,7 +88,6 @@ const enhancer = new BibleEnhancer({
 enhancer.discover_bible_references(
     document.querySelector('.article'),  // Root element for discovery
     element => element.classList.contains('refs'),  // Custom filter
-    false,  // Don't forget existing links (still update them)
 )
 
 // Call discover method whenever content is dynamically replaced
@@ -108,6 +107,34 @@ enhancer.enhance_element(element,
 enhancer.change_translation('eng_bsb', 'grc_sr')
 
 ```
+
+### Real example with SPA
+
+The following is an example of how the enhancer can be used in a SPA framework like [VitePress](https://vitepress.dev/).
+
+```js
+// Within a root component that only renders once
+onMounted(() => {
+
+    // Init enhancer with support for VitePress' router
+    const enhancer = new BibleEnhancer({
+        translations: ['eng_bsb', 'grc_sr'],
+        before_history_push: () => {
+            // Store scroll position for VitePress to prevent page jump
+            history.replaceState({scrollPosition: window.scrollY}, '')
+        },
+    })
+
+    // Initial discovery
+    enhancer.discover_bible_references()
+
+    // Discover for every page visited
+    useRouter().onAfterRouteChanged = to => {
+        enhancer.discover_bible_references()
+    }
+})
+```
+
 
 ### Styles
 
