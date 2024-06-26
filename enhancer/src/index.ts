@@ -103,10 +103,17 @@ export class BibleEnhancer {
 
         let html = ''
         for (const trans of this._translations){
-            const book = await collection.fetch_book(trans, ref.book)
+            // Confirm translation has book before attempting to get it
+            if (ref.book in collection.get_books(trans, {object: true})){
+                const book = await collection.fetch_book(trans, ref.book)
+                html += book.get_passage_from_obj(ref, {attribute: false})
+            } else {
+                html += '<p>&mdash;</p>'
+            }
             // Append custom attribution which is just the translation's abbreviation
-            html += book.get_passage_from_obj(ref, {attribute: false})
-                + `<p class='fb-attribution'>${book._translation.name.abbrev}</p>`
+            html += `<p class='fb-attribution'>
+                ${collection._manifest.translations[trans]?.name.abbrev ?? '&mdash;'}
+            </p>`
         }
         div.innerHTML = html
     }
