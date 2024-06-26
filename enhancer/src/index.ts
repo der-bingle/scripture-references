@@ -112,6 +112,10 @@ export class BibleEnhancer {
     // Enhance an element by showing passage on hover and triggering app display on click
     enhance_element(element:HTMLElement, ref:PassageRef){
 
+        // Set custom property so can detect if an SPA has serialized the element and lost listeners
+        // @ts-ignore Custom property
+        element['_fetch_enhanced'] = true
+
         // Open app when element clicked
         element.addEventListener('click', event => {
             event.preventDefault()  // Important if a link
@@ -200,18 +204,24 @@ export class BibleEnhancer {
 
     // Auto-discover references in text of page and transform into links
     async discover_bible_references(root:HTMLElement=document.body,
-            filter:(element:Element) => boolean=e=>true, forget_existing=true){
-
-        // Don't want to keep updating contents of divs that are no longer needed
-        // But will want to preserve them if still visible and targeting a different area of page
-        if (forget_existing){
-            this._hover_divs = []
-        }
+            filter:(element:Element)=>boolean=e=>true){
 
         // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
         if (!this._translations.length){
             this._translations = [collection.get_preferred_translation()]
+        }
+
+        // Ensure existing links are active (SPAs might reattach without event listeners)
+        for (const link of root.querySelectorAll('.fb-enhancer-link')){
+            // @ts-ignore Custom property
+            if (link['_fetch_enhanced']){
+                continue  // Hasn't been serialized by an SPA so should still have listeners
+            }
+            const ref = collection.detect_passage(link.textContent!, this._translations[0])
+            if (ref){
+                this.enhance_element(link as HTMLElement, ref)
+            }
         }
 
         // Create DOM walker that will ignore subtrees identified by filter arg
