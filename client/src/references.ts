@@ -165,7 +165,7 @@ export function book_name_to_code(input:string, book_names:BookNames):string|nul
             .replace(/^i /, '1').replace('1st ', '1').replace('first ', '1')
             .replace(/^ii /, '2').replace('2nd ', '2').replace('second ', '2')
             .replace(/^iii /, '3').replace('3rd ', '3').replace('third ', '3')
-            .replace(/[^\da-zA-Z]/g, '')
+            .replace(/[^\d\p{Letter}]/gui, '')
     }
 
     // Clean the input
