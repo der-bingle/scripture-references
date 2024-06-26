@@ -241,10 +241,11 @@ export function passage_str_to_obj(ref:string, book_names:BookNames):PassageRef|
 
 
 // Format passage reference to a readable string
-export function passage_obj_to_str(ref:PassageRefArg, book_names:BookNames):string{
+export function passage_obj_to_str(ref:PassageRefArg, book_names:BookNames, verse_sep=':',
+        range_sep='-'):string{
     const simple_book_names = _normalise_book_names(book_names)
     let text = simple_book_names[ref.book] ?? ''
-    const verses = verses_obj_to_str(ref)
+    const verses = verses_obj_to_str(ref, verse_sep, range_sep)
     if (verses){
         text += ' ' + verses
     }
