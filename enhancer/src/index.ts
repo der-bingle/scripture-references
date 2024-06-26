@@ -104,7 +104,7 @@ export class BibleEnhancer {
         let html = ''
         for (const trans of this._translations){
             // Confirm translation has book before attempting to get it
-            if (ref.book in collection.get_books(trans, {object: true})){
+            if (collection.has_translation(trans) && collection.has_book(trans, ref.book)){
                 const book = await collection.fetch_book(trans, ref.book)
                 html += book.get_passage_from_obj(ref, {attribute: false})
             } else {
