@@ -73,10 +73,15 @@ new BibleEnhancer().discover_bible_references()
 ```js
 // Available settings for BibleEnhancer
 const enhancer = new BibleEnhancer({
+    translations: ['eng_bsb', 'grc_sr'],  // Set the translations to be used
     client: new BibleClient(),  // Provide a custom fetch(bible) client
     app_origin: 'https://app.fetch.bible',  // Use a custom fetch app
     history: false,  // Don't intercept browser "back" to hide app modal
-    translations: ['eng_bsb', 'grc_sr'],  // Set the translations to be used
+    // Do something before enhancer pushes to browser history
+    // E.g. Some SPAs need to store scroll position
+    before_history_push: () => {
+        history.replaceState({scrollPosition: window.scrollY}, '')
+    },
 })
 
 // Control which elements are evaluated for bible reference discovery
