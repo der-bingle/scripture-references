@@ -37,18 +37,20 @@ References like Jn 3:16 and John 3:16 can be automatically discovered within tex
 
 Supported formats:
 
- * Matt 10:8
- * Matt 10:7-8
+ * Matt. 10:8
+ * Matthew 10:7-8
  * Matt 10:7a-8b (letters are valid but don't affect passage contents)
  * Matt 9:37-10:8
  * Matt 10
  * Matt 9-10
 
-It also works with references in other languages, as long as a translation of that language is specified when constructing `BibleEnhancer`.
+It also works with references in other languages, as long as a translation of that language is specified when constructing `BibleEnhancer`. Change the language below and it will discover the following references, accounting for a variety of different reference styles.
+
+ * Công vụ 13.38    (period)
+ * Công vụ 13:38&mdash;39 (long-dash)
+ * Công vụ 13：38   (full-width colon)
 
 <VPButton :text='btn_text' @click='toggle_language' theme='alt' />
-
- * Công vụ 13: 38
 
 ## Usage
 

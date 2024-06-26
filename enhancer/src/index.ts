@@ -7,8 +7,8 @@ import type {PassageRef} from '@gracious.tech/fetch-client/dist/esm/extras'
 // Form regex for identifying verse references in text
 const book_num_prefix = '(?:(?:[123]|I{1,3}) ?)?'
 const book_name = '[\\p{Letter}\\p{Dash} ]{2,18}\\.? ?'
-const integer_with_opt_colon = '\\d{1,3}[abc]?(?: ?: ?\\d{1,3}[abc]?)?'
-const verse_range = integer_with_opt_colon + '(?: ?\\p{Dash} ?' + integer_with_opt_colon + ')?'
+const integer_with_opt_sep = '\\d{1,3}[abc]?(?: ?[:：\\.] ?\\d{1,3}[abc]?)?'
+const verse_range = integer_with_opt_sep + '(?: ?\\p{Dash} ?' + integer_with_opt_sep + ')?'
 const trailing = '(?!\\d)'
 const ref_regex = new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
 

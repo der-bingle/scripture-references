@@ -94,7 +94,9 @@ export function verses_obj_to_str(ref:VersesRefArg){
 export function verses_str_to_obj(ref:string):VersesRef{
 
     // Clean ref
-    ref = ref.replace(/ /g, '')
+    ref = ref.replace(/ /g, '')  // Remove spaces
+        .replace(/\./g, ':').replace(/：/gu, ':')  // Normalise chap/verse seperators to common colon
+        .replace(/\p{Dash}/gu, '-')  // Normalise range separators to common hyphen
 
     // Init props
     let chapter_start:number
