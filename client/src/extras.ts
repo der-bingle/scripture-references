@@ -251,3 +251,46 @@ export function passage_obj_to_str(ref:PassageRefArg, book_names:BookNames, vers
     }
     return text
 }
+
+
+// Create new regex object for identifying passage references in text
+export function passage_str_regex(){
+    const book_num_prefix = '(?:(?:[123]|I{1,3}) ?)?'
+    const book_name = '[\\p{Letter}\\p{Dash} ]{2,18}\\.? ?'
+    const integer_with_opt_sep = '\\d{1,3}[abc]?(?: ?[:：\\.] ?\\d{1,3}[abc]?)?'
+    const verse_range = integer_with_opt_sep + '(?: ?\\p{Dash} ?' + integer_with_opt_sep + ')?'
+    const trailing = '(?!\\d)'
+    return new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
+}
+
+
+// Discover a passage reference in a block of text
+// Only the first match is returned (call again with remaining text to get subsequent ones)
+export function find_passage_str(text:string, book_names:BookNames):
+        {ref:PassageRef, match:string, index:number}|null{
+
+    // Create regex (will manually manipulate lastIndex property of it)
+    const regex = passage_str_regex()
+
+    // Loop until find a valid ref (not all regex matches will be valid)
+    while (true){
+        const match = regex.exec(text)
+        if (!match){
+            return null  // Either no matches or no valid matches...
+        }
+
+        // Confirm match is actually a valid ref
+        const ref = passage_str_to_obj(match[0], book_names)
+        if (ref && ref.chapter_start !== null){  // No whole book refs
+            return {ref, match: match[0], index: match.index}
+        }
+
+        // If invalid, try next word as match might still have included a partial ref
+        // e.g. "in 1 Corinthians 9" -> "in 1" -> "1 Corinthians 9"
+        const chars_to_next_word = match[0].indexOf(' ', 1)
+        if (chars_to_next_word >= 1){
+            // Backtrack to exclude just first word of previous match
+            regex.lastIndex -= (match[0].length - chars_to_next_word - 1)
+        }
+    }
+}
