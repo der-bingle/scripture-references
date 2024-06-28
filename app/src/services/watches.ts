@@ -152,3 +152,15 @@ watch([() => state.book, () => state.chapter, () => state.verse], () => {
 watch(() => state.dark, () => {
     post_message('dark')
 })
+
+
+// Try to navigate to verse when search changes
+watch(() => state.search, () => {
+    const ref = content.collection.detect_passage(state.search ?? '')
+    if (ref){
+        state.book = ref.book
+        state.chapter = ref.chapter_start ?? 1
+        state.verse = ref.verse_start ?? 1
+        state.target = [state.chapter, state.verse]
+    }
+})

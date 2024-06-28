@@ -2,15 +2,15 @@
 <template lang='pug'>
 
 v-toolbar(:density='density')
-    v-text-field.input(v-model='state.search' placeholder="Search..." hide-details density='compact'
-        variant='outlined')
+    v-text-field.input(v-model='state.search' placeholder="Passage..." hide-details density='compact'
+        variant='outlined' autofocus @blur='state.search = null')
 
     template(#append)
-        v-btn-toggle(color='secondary' density='compact')
-            v-btn {{ current_book_name }}
-            v-btn OT
-            v-btn NT
-            v-btn All
+        //- v-btn-toggle(color='secondary' density='compact')
+        //-     v-btn {{ current_book_name }}
+        //-     v-btn OT
+        //-     v-btn NT
+        //-     v-btn All
         v-btn(icon @click='state.search = null')
             app-icon(name='close')
 
