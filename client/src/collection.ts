@@ -472,6 +472,19 @@ export class BibleCollection {
         return [...Array(last_verse[book]![chapter-1]).keys()].map(i => i + 1)
     }
 
+    // Confirm if given book is within the specified testament
+    valid_testament(book:string, testament:'ot'|'nt'):boolean{
+        const index = this._manifest.books_ordered.indexOf(book)
+        if (index === -1){
+            return false
+        } else if (testament === 'nt' && index >= 39){
+            return true
+        } else if (testament === 'ot' && index < 39){
+            return true
+        }
+        return false
+    }
+
     // Make request for the text for a book of a translation (returns object for accessing it)
     async fetch_book(translation:string, book:string, format?:'html'):Promise<BibleBookHtml>
     async fetch_book(translation:string, book:string, format:'usx'):Promise<BibleBookUsx>
