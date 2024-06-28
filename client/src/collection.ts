@@ -82,6 +82,14 @@ export interface GetCompletionReturn {
     }
 }
 
+export interface SanitizedReference {
+    book:string
+    start_chapter:number
+    start_verse:number
+    end_chapter:number
+    end_verse:number
+}
+
 
 // Access to a collection's meta data, including languages and translations available
 export class BibleCollection {
@@ -470,6 +478,78 @@ export class BibleCollection {
         const last_verse = this._manifest.last_verse
         // WARN Position of each chapter is chapter-1 due to starting from 0
         return [...Array(last_verse[book]![chapter-1]).keys()].map(i => i + 1)
+    }
+
+    /* Force a given passage reference to be valid (providing as much or as little as desired)
+        Chapter and verse numbers will be forced to their closest valid equivalent
+        If validating only the book/chapter/verse simply extract the desired info and ignore the
+        rest of the results, as end values will default to same as start when not present.
+    */
+    sanitize_reference(book:string, chapter?:number, verse?:number):SanitizedReference
+    sanitize_reference(reference:PassageRefArg):SanitizedReference
+    sanitize_reference(book_or_obj:string|PassageRefArg, chapter?:number, verse?:number)
+            :SanitizedReference{
+
+        // Normalise args
+        let ref:SanitizedReference
+        if (typeof book_or_obj === 'string'){
+            ref = {
+                book: book_or_obj,
+                start_chapter: chapter ?? 1,
+                start_verse: verse ?? 1,
+                // Following will increase to whatever start is later
+                end_chapter: 1,
+                end_verse: 1,
+            }
+        } else {
+            ref = {
+                book: book_or_obj.book,
+                start_chapter: book_or_obj.chapter_start ?? 1,
+                start_verse: book_or_obj.verse_start ?? 1,
+                end_chapter: book_or_obj.chapter_end ?? book_or_obj.chapter_start ?? 1,
+                end_verse: book_or_obj.verse_end ?? book_or_obj.verse_start ?? 1,
+            }
+            // If didn't specify start_verse then dealing with whole chapters...
+            if (!book_or_obj.verse_start){
+                ref.end_verse = 999  // Will correct to last verse of chapter later
+            }
+        }
+
+        // Validate book
+        if (this._manifest.books_ordered.indexOf(ref.book) === -1){
+            ref.book = 'gen'
+        }
+
+        // Ensure start chapter is valid
+        const last_verse = this._manifest.last_verse[ref.book]!
+        if (ref.start_chapter < 1){
+            ref.start_chapter = 1
+            ref.start_verse = 1
+        } else if (ref.start_chapter > last_verse.length){
+            ref.start_chapter = last_verse.length
+            ref.start_verse = last_verse[last_verse.length-1]!
+        }
+
+        // Ensure start verse is valid
+        ref.start_verse = Math.min(Math.max(ref.start_verse, 1), last_verse[ref.start_chapter-1]!)
+
+        // Ensure end is not before start
+        if (ref.end_chapter < ref.start_chapter ||
+                (ref.end_chapter === ref.start_chapter && ref.end_verse < ref.start_verse)){
+            ref.end_chapter = ref.start_chapter
+            ref.end_verse = ref.start_verse
+        }
+
+        // Ensure end chapter is not invalid (already know is same or later than start)
+        if (ref.end_chapter > last_verse.length){
+            ref.end_chapter = last_verse.length
+            ref.end_verse = last_verse[last_verse.length-1]!
+        }
+
+        // Ensure end verse is valid
+        ref.end_verse = Math.min(Math.max(ref.end_verse, 1), last_verse[ref.end_chapter-1]!)
+
+        return ref
     }
 
     // Confirm if given book is within the specified testament
