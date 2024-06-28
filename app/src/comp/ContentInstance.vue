@@ -13,7 +13,7 @@ div.content(ref='content_div' :class='fetch_classes'
     div.single(v-if='state.content' v-html='state.content')
     template(v-else)
         div.verse(v-for='(item, verse_i) of state.content_verses[0]' :key='item.id')
-            div.vid {{ item.verse }}
+            div.vid {{ item.verse !== 0 ? item.verse : '' }}
             div.verse_trans(v-for='(trans, trans_i) of state.trans' :key='trans'
                 :class='direction[trans_i]'
                 v-html='state.content_verses[trans_i]?.[verse_i]?.content')

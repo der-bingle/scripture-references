@@ -77,7 +77,15 @@ watch([() => state.trans, () => state.book], async () => {
     if (books.length === 1){
         state.content = books[0]!.get_whole()
     } else {
-        state.content_verses = books.map(book => book ? book.get_list() : [])
+        state.content_verses = books.map(book => {
+            if (!book){
+                return []
+            }
+            const verses = book.get_list()
+            // `get_list()` doesn't auto-add attribution so create fake verses for it
+            verses.push({id: 0, chapter: 0, verse: 0, content: book.get_attribution()})
+            return verses
+        })
     }
 }, {deep: true})
 
