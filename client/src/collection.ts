@@ -386,15 +386,21 @@ export class BibleCollection {
     }
 
     // Get which books are available for a translation
-    get_books(translation:string, options:ObjT<GetBooksOptions>):Record<string, GetBooksItem>
-    get_books(translation:string, options?:ObjF<GetBooksOptions>):GetBooksItem[]
-    get_books(translation:string, {object, sort_by_name, testament, whole}:GetBooksOptions={}):
+    // If no translation is given, all books will be listed but marked as unavailable
+    get_books(translation:string|undefined,
+        options:ObjT<GetBooksOptions>):Record<string, GetBooksItem>
+    get_books(translation?:string, options?:ObjF<GetBooksOptions>):GetBooksItem[]
+    get_books(translation?:string, {object, sort_by_name, testament, whole}:GetBooksOptions={}):
             GetBooksItem[]|Record<string, GetBooksItem>{
 
-        this._ensure_trans_exists(translation)
+        // Get book names from translation (or standard English if no translation given)
+        let available = this._manifest.book_names_english
+        if (translation){
+            this._ensure_trans_exists(translation)
+            available = this._manifest.translations[translation]!.books
+        }
 
         // Create a list of the available books in traditional order
-        const available = this._manifest.translations[translation]!.books
         const slice = testament ? (testament === 'ot' ? [0, 39] : [39]) : []
         const list = this._manifest.books_ordered.slice(...slice)
             .filter(id => whole || id in available)
@@ -404,7 +410,7 @@ export class BibleCollection {
                     name: available[id] ?? this._manifest.book_names_english[id]!,
                     name_local: available[id] ?? '',
                     name_english: this._manifest.book_names_english[id]!,
-                    available: id in available,
+                    available: !!translation && id in available,
                 }
             })
 
