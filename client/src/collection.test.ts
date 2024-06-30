@@ -77,4 +77,40 @@ describe('BibleCollection', () => {
         )
     })
 
+    it("valid_reference", ({expect}) => {
+
+        // Valid basic args
+        expect(collection.valid_reference('2th')).toBe(true)
+        expect(collection.valid_reference('2th', 1)).toBe(true)
+        expect(collection.valid_reference('2th', 1, 1)).toBe(true)
+
+        // Invalid basic args
+        expect(collection.valid_reference('invalid')).toBe(false)
+        expect(collection.valid_reference('2th', -1)).toBe(false)
+        expect(collection.valid_reference('2th', 99)).toBe(false)
+        expect(collection.valid_reference('2th', 2, -1)).toBe(false)
+        expect(collection.valid_reference('2th', 2, 99)).toBe(false)
+
+        // Valid range
+        expect(collection.valid_reference({book: '2th', start_chapter: 2, end_chapter: 2}))
+            .toBe(true)
+        expect(collection.valid_reference({book: '2th', start_chapter: 2, end_chapter: 3}))
+            .toBe(true)
+        expect(collection.valid_reference({book: '2th',
+            start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 2})).toBe(true)
+
+        // Invalid range
+        expect(collection.valid_reference({book: '2th', start_chapter: 2, end_chapter: 1}))
+            .toBe(false)
+        expect(collection.valid_reference({book: '2th',
+            start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 99})).toBe(false)
+
+        // Nonsensical args
+        expect(collection.valid_reference({book: '2th', start_verse: 1})).toBe(false)
+        expect(collection.valid_reference({book: '2th', start_chapter: 1, end_verse: 1}))
+            .toBe(false)
+        expect(collection.valid_reference({book: '2th',
+            start_chapter: 1, start_verse: 1, end_chapter: 2})).toBe(false)
+    })
+
 })

@@ -552,6 +552,51 @@ export class BibleCollection {
         return ref
     }
 
+    // Confirm if a passage reference is valid, verifying book code and chapter/verse numbers
+    valid_reference(book:string, chapter?:number, verse?:number):boolean
+    valid_reference(reference:PassageRefArg):boolean
+    valid_reference(book_or_obj:string|PassageRefArg, chapter?:number, verse?:number):boolean{
+
+        // Normalize args
+        let ref:PassageRefArg
+        if (typeof book_or_obj !== 'string'){
+            ref = book_or_obj
+        } else {
+            ref = {
+                book: book_or_obj,
+                start_chapter: chapter ?? null,
+                start_verse: verse ?? null,
+            }
+        }
+
+        // Get sanitized reference
+        const sanitized = this.sanitize_reference(ref)
+
+        // Verify parts stayed same, but only those provided (ignoring null/undefined)
+        if (ref.book !== sanitized.book){
+            return false
+        }
+        for (const prop of ['start_chapter', 'start_verse', 'end_chapter', 'end_verse'] as const){
+            if (Number.isInteger(ref[prop]) && ref[prop] !== sanitized[prop]){
+                return false
+            }
+        }
+
+        // Also fail if provided args don't make sense
+        // NOTE Already know that no numbers in ref are 0/false due to above
+        if (!ref.start_chapter && (ref.end_chapter || ref.start_verse || ref.end_verse)){
+            return false  // e.g. Matt :1
+        }
+        if (ref.end_verse && !ref.start_verse){
+            return false  // e.g. Matt 1:-1
+        }
+        if (ref.start_verse && ref.end_chapter && !ref.end_verse){
+            return false  // e.g. Matt 1:1-2:
+        }
+
+        return true
+    }
+
     // Confirm if given book is within the specified testament
     valid_testament(book:string, testament:'ot'|'nt'):boolean{
         const index = this._manifest.books_ordered.indexOf(book)
