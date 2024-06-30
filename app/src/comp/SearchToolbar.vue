@@ -2,7 +2,7 @@
 <template lang='pug'>
 
 v-toolbar(:density='density')
-    v-text-field.input(v-model='state.search' placeholder="Passage..." hide-details density='compact'
+    v-text-field.input(v-model='state.search' placeholder="E.g. John 3:16" hide-details density='compact'
         variant='outlined' autofocus @blur='state.search = null')
 
     template(#append)
