@@ -272,7 +272,7 @@ export function passage_str_regex(){
     const book_name = '[\\p{Letter}\\p{Dash} ]{2,18}\\.? ?'
     const integer_with_opt_sep = '\\d{1,3}[abc]?(?: ?[:：\\.] ?\\d{1,3}[abc]?)?'
     const verse_range = integer_with_opt_sep + '(?: ?\\p{Dash} ?' + integer_with_opt_sep + ')?'
-    const trailing = '(?!\\d)'
+    const trailing = '(?![\\d\\p{Letter}@#$%])'
     return new RegExp(book_num_prefix + book_name + verse_range + trailing, 'uig')
 }
 
