@@ -3,27 +3,27 @@ import type {GetBooksItem} from './collection'
 
 
 export interface VersesRefPartialBook {
-    chapter_start:number
-    chapter_end:number
-    verse_start:number|null  // If null then range is entire chapters
-    verse_end:number|null  // If null then range is entire chapters
+    start_chapter:number
+    end_chapter:number
+    start_verse:number|null  // If null then range is entire chapters
+    end_verse:number|null  // If null then range is entire chapters
 }
 
 export type VersesRef = VersesRefPartialBook|null  // null if whole book
 
 export interface VersesRefArg {
-    chapter_start?:number|null  // Whole book if doesn't exist
-    chapter_end?:number|null  // Defaults to chapter_start
-    verse_start?:number|null  // If null then range is entire chapters
-    verse_end?:number|null  // Default to verse_start
+    start_chapter?:number|null  // Whole book if doesn't exist
+    end_chapter?:number|null  // Defaults to start_chapter
+    start_verse?:number|null  // If null then range is entire chapters
+    end_verse?:number|null  // Default to start_verse
 }
 
 export interface PassageRef {
     book:string
-    chapter_start:number|null
-    chapter_end:number|null
-    verse_start:number|null
-    verse_end:number|null
+    start_chapter:number|null
+    end_chapter:number|null
+    start_verse:number|null
+    end_verse:number|null
 }
 
 export interface PassageRefArg extends VersesRefArg {
@@ -56,43 +56,43 @@ function _normalise_book_names(book_names:BookNames):Record<string, string>{
 // Supports: Gen | Gen 1 | 1-2 | 1:1 | 1:1-2 | 1:1-2:2
 export function verses_obj_to_str(ref:VersesRefArg, verse_sep=':', range_sep='-'){
 
-    // If no chapter_start then ref must be for whole book
-    if (!ref.chapter_start){
+    // If no start_chapter then ref must be for whole book
+    if (!ref.start_chapter){
         return ''
     }
 
     // Assign defaults for missing properties
-    if (!ref.chapter_end){
-        ref.chapter_end = ref.chapter_start
+    if (!ref.end_chapter){
+        ref.end_chapter = ref.start_chapter
     }
-    if (ref.verse_start && !ref.verse_end){
-        ref.verse_end = ref.verse_start
+    if (ref.start_verse && !ref.end_verse){
+        ref.end_verse = ref.start_verse
     }
 
     // Return null if invalid properties
-    if ((ref.verse_end && !ref.verse_start) || (ref.chapter_end < ref.chapter_start)
-            || (ref.chapter_start === ref.chapter_end && ref.verse_start
-            && ref.verse_end! < ref.verse_start)){
+    if ((ref.end_verse && !ref.start_verse) || (ref.end_chapter < ref.start_chapter)
+            || (ref.start_chapter === ref.end_chapter && ref.start_verse
+            && ref.end_verse! < ref.start_verse)){
         return null
     }
 
     // If only a chapter ref, logic is much simpler
-    if (!ref.verse_start){
-        return ref.chapter_start === ref.chapter_end ? `${ref.chapter_start}`
-            : `${ref.chapter_start}${range_sep}${ref.chapter_end}`
+    if (!ref.start_verse){
+        return ref.start_chapter === ref.end_chapter ? `${ref.start_chapter}`
+            : `${ref.start_chapter}${range_sep}${ref.end_chapter}`
     }
 
     // See if a single verse
-    if (ref.chapter_start === ref.chapter_end && ref.verse_start === ref.verse_end){
-        return `${ref.chapter_start}${verse_sep}${ref.verse_start}`
+    if (ref.start_chapter === ref.end_chapter && ref.start_verse === ref.end_verse){
+        return `${ref.start_chapter}${verse_sep}${ref.start_verse}`
     }
 
     // Dealing with a range...
-    let out = `${ref.chapter_start}${verse_sep}${ref.verse_start}${range_sep}`
-    if (ref.chapter_end !== ref.chapter_start){
-        out += `${ref.chapter_end}${verse_sep}`
+    let out = `${ref.start_chapter}${verse_sep}${ref.start_verse}${range_sep}`
+    if (ref.end_chapter !== ref.start_chapter){
+        out += `${ref.end_chapter}${verse_sep}`
     }
-    return out + `${ref.verse_end!}`
+    return out + `${ref.end_verse!}`
 }
 
 
@@ -105,49 +105,49 @@ export function verses_str_to_obj(ref:string):VersesRef{
         .replace(/\p{Dash}/gu, '-')  // Normalise range separators to common hyphen
 
     // Init props
-    let chapter_start:number
-    let verse_start:number|null = null
-    let chapter_end:number|null = null
-    let verse_end:number|null = null
+    let start_chapter:number
+    let start_verse:number|null = null
+    let end_chapter:number|null = null
+    let end_verse:number|null = null
 
     if (!ref.includes(':')){
         // Dealing with chapters only
         const parts = ref.split('-')
-        chapter_start = parseInt(parts[0]!)
+        start_chapter = parseInt(parts[0]!)
         if (parts[1]){
-            chapter_end = parseInt(parts[1])
+            end_chapter = parseInt(parts[1])
         }
     } else {
         // Includes verses
         const parts = ref.split('-')
         const start_parts = parts[0]!.split(':')
-        chapter_start = parseInt(start_parts[0]!)
+        start_chapter = parseInt(start_parts[0]!)
         if (start_parts[1]){
-            verse_start = parseInt(start_parts[1])
+            start_verse = parseInt(start_parts[1])
         }
         if (parts[1]){
             // Is a range
             const end_parts = parts[1].split(':')
             if (end_parts.length > 1){
-                chapter_end = parseInt(end_parts[0]!)
-                verse_end = parseInt(end_parts[1]!)
+                end_chapter = parseInt(end_parts[0]!)
+                end_verse = parseInt(end_parts[1]!)
             } else {
-                chapter_end = chapter_start
-                verse_end = parseInt(end_parts[0]!)
+                end_chapter = start_chapter
+                end_verse = parseInt(end_parts[0]!)
             }
         }
     }
 
     // Chapter start should always be present
-    if (!chapter_start){
+    if (!start_chapter){
         return null
     }
 
     return {
-        chapter_start,
-        chapter_end: chapter_end ?? chapter_start,
-        verse_start,
-        verse_end: verse_end ?? verse_start,
+        start_chapter,
+        end_chapter: end_chapter ?? start_chapter,
+        start_verse,
+        end_verse: end_verse ?? start_verse,
     }
 }
 
@@ -245,10 +245,10 @@ export function passage_str_to_obj(ref:string, ...book_names:BookNames[]):Passag
     }
     return {
         book: book_code,
-        chapter_start: null,
-        chapter_end: null,
-        verse_start: null,
-        verse_end: null,
+        start_chapter: null,
+        end_chapter: null,
+        start_verse: null,
+        end_verse: null,
     }
 }
 
@@ -293,7 +293,7 @@ export function find_passage_str(input:string, ...book_names:BookNames[]):Passag
 
         // Confirm match is actually a valid ref
         const ref = passage_str_to_obj(match[0], ...book_names)
-        if (ref && ref.chapter_start !== null){  // No whole book refs
+        if (ref && ref.start_chapter !== null){  // No whole book refs
             return {ref, text: match[0], index: match.index}
         }
 

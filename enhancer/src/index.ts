@@ -60,7 +60,7 @@ export class BibleEnhancer {
         this._app_iframe.contentWindow?.postMessage({
             type: 'update',
             book: passage.book,
-            verse: `${passage.chapter_start ?? 1}:${passage.verse_start ?? 1}`,
+            verse: `${passage.start_chapter ?? 1}:${passage.start_verse ?? 1}`,
             trans: this._translations.join(','),
         }, this._app_origin)
 
@@ -271,7 +271,7 @@ export class BibleEnhancer {
             const ref_a = document.createElement('a')
             ref_a.setAttribute('href',
                 `${this._app_origin}#trans=${this._translations.join(',')}&book=${match.ref.book}`
-                    + `&verse=${match.ref.chapter_start ?? 1}:${match.ref.verse_start ?? 1}`)
+                    + `&verse=${match.ref.start_chapter ?? 1}:${match.ref.start_verse ?? 1}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
             ref_a.textContent = match.text

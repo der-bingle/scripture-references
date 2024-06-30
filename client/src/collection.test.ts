@@ -49,29 +49,29 @@ describe('BibleCollection', () => {
 
         // Valid range
         expect(collection.sanitize_reference(
-            {book: '2th', chapter_start: 2, chapter_end: 2}
+            {book: '2th', start_chapter: 2, end_chapter: 2}
         )).toEqual(
             {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 17}
         )
         expect(collection.sanitize_reference(
-            {book: '2th', chapter_start: 2, chapter_end: 3}
+            {book: '2th', start_chapter: 2, end_chapter: 3}
         )).toEqual(
             {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 3, end_verse: 18}
         )
         expect(collection.sanitize_reference(
-            {book: '2th', chapter_start: 2, verse_start: 1, chapter_end: 2, verse_end: 2}
+            {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 2}
         )).toEqual(
             {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 2}
         )
 
         // Invalid range
         expect(collection.sanitize_reference(
-            {book: '2th', chapter_start: 2, chapter_end: 1}
+            {book: '2th', start_chapter: 2, end_chapter: 1}
         )).toEqual(
             {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 1}
         )
         expect(collection.sanitize_reference(
-            {book: '2th', chapter_start: 2, verse_start: 1, chapter_end: 2, verse_end: 99}
+            {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 99}
         )).toEqual(
             {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 17}
         )

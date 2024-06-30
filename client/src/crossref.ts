@@ -4,10 +4,10 @@ import type {CrossrefData} from './shared_types'
 
 export interface CrossrefItem {
     book:string
-    chapter_start:number
-    chapter_end:number
-    verse_start:number|null
-    verse_end:number|null
+    start_chapter:number
+    end_chapter:number
+    start_verse:number|null
+    end_verse:number|null
     single_verse:boolean
 }
 
@@ -26,10 +26,10 @@ export class BookCrossref {
         return this._data[chapter]?.[verse]?.map(ref => {
             return {
                 book: ref[0],
-                chapter_start: ref[1],
-                verse_start: ref[2],
-                chapter_end: ref[3] ?? ref[1],
-                verse_end: ref[4] ?? ref[2],
+                start_chapter: ref[1],
+                start_verse: ref[2],
+                end_chapter: ref[3] ?? ref[1],
+                end_verse: ref[4] ?? ref[2],
                 single_verse: !!ref[2] && ref[3] === undefined,
             }
         }) ?? []

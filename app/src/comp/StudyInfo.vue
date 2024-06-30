@@ -46,8 +46,8 @@ watch(() => state.study, () => {
         return {
             label: `${book_names.value[crossref.book]!} ${verses_obj_to_str(crossref)!}`,
             view(){
-                change_passage(crossref.book, crossref.chapter_start,
-                    crossref.verse_start ?? undefined)
+                change_passage(crossref.book, crossref.start_chapter,
+                    crossref.start_verse ?? undefined)
             },
         }
     })

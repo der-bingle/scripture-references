@@ -159,8 +159,8 @@ watch(() => state.search, () => {
     const ref = content.collection.detect_passage(state.search ?? '')
     if (ref){
         state.book = ref.book
-        state.chapter = ref.chapter_start ?? 1
-        state.verse = ref.verse_start ?? 1
+        state.chapter = ref.start_chapter ?? 1
+        state.verse = ref.start_verse ?? 1
         state.target = [state.chapter, state.verse]
     }
 })

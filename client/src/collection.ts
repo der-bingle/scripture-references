@@ -504,13 +504,13 @@ export class BibleCollection {
         } else {
             ref = {
                 book: book_or_obj.book,
-                start_chapter: book_or_obj.chapter_start ?? 1,
-                start_verse: book_or_obj.verse_start ?? 1,
-                end_chapter: book_or_obj.chapter_end ?? book_or_obj.chapter_start ?? 1,
-                end_verse: book_or_obj.verse_end ?? book_or_obj.verse_start ?? 1,
+                start_chapter: book_or_obj.start_chapter ?? 1,
+                start_verse: book_or_obj.start_verse ?? 1,
+                end_chapter: book_or_obj.end_chapter ?? book_or_obj.start_chapter ?? 1,
+                end_verse: book_or_obj.end_verse ?? book_or_obj.start_verse ?? 1,
             }
             // If didn't specify start_verse then dealing with whole chapters...
-            if (!book_or_obj.verse_start){
+            if (!book_or_obj.start_verse){
                 ref.end_verse = 999  // Will correct to last verse of chapter later
             }
         }

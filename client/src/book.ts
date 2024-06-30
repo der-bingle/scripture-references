@@ -114,15 +114,15 @@ export class BibleBookHtml {
 
     // Get HTML for a specific passage specified by object (as returned by `verses_str_to_obj`)
     get_passage_from_obj(ref?:VersesRefArg|null, options:GetPassageOptions={}):string{
-        if (!ref || !ref.chapter_start){
+        if (!ref || !ref.start_chapter){
             return this.get_whole(options)
         }
-        const chapter_end = ref.chapter_end ?? ref.chapter_start
-        if (!ref.verse_start){
-            return this.get_chapters(ref.chapter_start, chapter_end, options)
+        const end_chapter = ref.end_chapter ?? ref.start_chapter
+        if (!ref.start_verse){
+            return this.get_chapters(ref.start_chapter, end_chapter, options)
         }
-        return this.get_passage(ref.chapter_start, ref.verse_start, chapter_end,
-            ref.verse_end ?? ref.verse_start, options)
+        return this.get_passage(ref.start_chapter, ref.start_verse, end_chapter,
+            ref.end_verse ?? ref.start_verse, options)
     }
 
     // Get HTML for multiple chapters

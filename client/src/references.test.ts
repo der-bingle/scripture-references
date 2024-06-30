@@ -7,32 +7,32 @@ import {verses_obj_to_str, verses_str_to_obj, book_name_to_code} from './referen
 describe('verses_obj_to_str', () => {
 
     it("Renders a single chapter reference", ({expect}) => {
-        expect(verses_obj_to_str({chapter_start: 1})).toEqual('1')
-        expect(verses_obj_to_str({chapter_start: 1, chapter_end: 1})).toEqual('1')
+        expect(verses_obj_to_str({start_chapter: 1})).toEqual('1')
+        expect(verses_obj_to_str({start_chapter: 1, end_chapter: 1})).toEqual('1')
     })
 
     it("Renders a multi-chapter reference", ({expect}) => {
-        expect(verses_obj_to_str({chapter_start: 1, chapter_end: 2})).toEqual('1-2')
+        expect(verses_obj_to_str({start_chapter: 1, end_chapter: 2})).toEqual('1-2')
     })
 
     it("Renders a single verse reference", ({expect}) => {
-        expect(verses_obj_to_str({chapter_start: 1, verse_start: 1})).toEqual('1:1')
-        expect(verses_obj_to_str({chapter_start: 1, verse_start: 1, chapter_end: 1, verse_end: 1})).toEqual('1:1')
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 1})).toEqual('1:1')
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})).toEqual('1:1')
     })
 
     it("Renders a multi-verse reference", ({expect}) => {
-        expect(verses_obj_to_str({chapter_start: 1, verse_start: 1, chapter_end: 1, verse_end: 2})).toEqual('1:1-2')
-        expect(verses_obj_to_str({chapter_start: 1, verse_start: 1, verse_end: 2})).toEqual('1:1-2')
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 2})).toEqual('1:1-2')
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 1, end_verse: 2})).toEqual('1:1-2')
     })
 
     it("Renders a cross-chapter reference", ({expect}) => {
-        expect(verses_obj_to_str({chapter_start: 1, verse_start: 1, chapter_end: 2, verse_end: 2})).toEqual('1:1-2:2')
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 2})).toEqual('1:1-2:2')
     })
 
     it("Does not render when params invalid", ({expect}) => {
-        expect(verses_obj_to_str({chapter_start: 1, verse_end: 2})).toEqual(null)
-        expect(verses_obj_to_str({chapter_start: 2, chapter_end: 1})).toEqual(null)
-        expect(verses_obj_to_str({chapter_start: 1, verse_start: 2, verse_end: 1})).toEqual(null)
+        expect(verses_obj_to_str({start_chapter: 1, end_verse: 2})).toEqual(null)
+        expect(verses_obj_to_str({start_chapter: 2, end_chapter: 1})).toEqual(null)
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 2, end_verse: 1})).toEqual(null)
     })
 
 })
@@ -42,46 +42,46 @@ describe('verses_str_to_obj', () => {
 
     it("Parses a single chapter", ({expect}) => {
         expect(verses_str_to_obj('1')).toEqual({
-            chapter_start: 1,
-            chapter_end: 1,
-            verse_start: null,
-            verse_end: null,
+            start_chapter: 1,
+            end_chapter: 1,
+            start_verse: null,
+            end_verse: null,
         })
     })
 
     it("Parses multiple chapters", ({expect}) => {
         expect(verses_str_to_obj('1-2')).toEqual({
-            chapter_start: 1,
-            chapter_end: 2,
-            verse_start: null,
-            verse_end: null,
+            start_chapter: 1,
+            end_chapter: 2,
+            start_verse: null,
+            end_verse: null,
         })
     })
 
     it("Parses a single verse", ({expect}) => {
         expect(verses_str_to_obj('1:1')).toEqual({
-            chapter_start: 1,
-            chapter_end: 1,
-            verse_start: 1,
-            verse_end: 1,
+            start_chapter: 1,
+            end_chapter: 1,
+            start_verse: 1,
+            end_verse: 1,
         })
     })
 
     it("Parses multiple verses", ({expect}) => {
         expect(verses_str_to_obj('1:1-2')).toEqual({
-            chapter_start: 1,
-            chapter_end: 1,
-            verse_start: 1,
-            verse_end: 2,
+            start_chapter: 1,
+            end_chapter: 1,
+            start_verse: 1,
+            end_verse: 2,
         })
     })
 
     it("Parses verses across chapters", ({expect}) => {
         expect(verses_str_to_obj('1:1-2:2')).toEqual({
-            chapter_start: 1,
-            chapter_end: 2,
-            verse_start: 1,
-            verse_end: 2,
+            start_chapter: 1,
+            end_chapter: 2,
+            start_verse: 1,
+            end_verse: 2,
         })
     })
 

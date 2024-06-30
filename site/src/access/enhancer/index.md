@@ -97,12 +97,12 @@ my_router.onRouteChanged(() => {
 })
 
 // Manually trigger display of embedded app
-enhancer.show_app({book: 'gen', chapter_start: 2, verse_start: 5})
+enhancer.show_app({book: 'gen', start_chapter: 2, start_verse: 5})
 enhancer.hide_app()
 
 // Manually enhance any element (e.g. button, span)
 enhancer.enhance_element(element,
-    {book: 'gen', chapter_start: 2, verse_start: 5, verse_end: 6})
+    {book: 'gen', start_chapter: 2, start_verse: 5, end_verse: 6})
 
 // Change the translations used
 enhancer.change_translation('eng_bsb', 'grc_sr')
