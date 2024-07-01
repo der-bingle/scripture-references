@@ -2,8 +2,8 @@
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
-import {BookNames, PassageRef, book_name_to_code, find_passage_str, find_passage_str_all,
-    passage_obj_to_str, passage_str_to_obj} from './references.js'
+import {BookNames, PassageRef, book_name_to_code, passage_str_regex, passage_obj_to_str,
+    passage_str_to_obj} from './references.js'
 import type {DistManifest} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
@@ -92,6 +92,12 @@ export interface SanitizedReference {
     start_verse:number
     end_chapter:number
     end_verse:number
+}
+
+export interface SanitizedReferenceMatch {
+    ref:SanitizedReference
+    text:string
+    index:number
 }
 
 
@@ -601,7 +607,7 @@ export class BibleCollection {
         // Get sanitized reference
         const sanitized = this.sanitize_reference(ref)
 
-        // Verify parts stayed same, but only those provided (ignoring null/undefined)
+        // Verify parts stayed same, but only those provided (ignoring undefined)
         if (ref.book !== sanitized.book){
             return false
         }
@@ -705,14 +711,52 @@ export class BibleCollection {
 
     // Detect the text and position of first passage reference in a block of text
     // Pass translation arg to correctly detect book names/abbreviations for that language/version
-    detect_passage_reference(text:string, translation?:string){
-        return find_passage_str(text, ...this._book_names_list(translation))
+    detect_passage_reference(text:string, translation?:string):SanitizedReferenceMatch|null{
+
+        // Get book names
+        const book_names = this._book_names_list(translation)
+
+        // Create regex (will manually manipulate lastIndex property of it)
+        const regex = passage_str_regex()
+
+        // Loop until find a valid ref (not all regex matches will be valid)
+        while (true){
+            const match = regex.exec(text)
+            if (!match){
+                return null  // Either no matches or no valid matches...
+            }
+
+            // Confirm match is actually a valid ref
+            const ref = passage_str_to_obj(match[0], ...book_names)
+            if (ref && this.valid_reference(ref) && ref.start_chapter){  // No whole book
+                const sane_ref = this.sanitize_reference(ref)
+                return {ref: sane_ref, text: match[0], index: match.index}
+            }
+
+            // If invalid, try next word as match might still have included a partial ref
+            // e.g. "in 1 Corinthians 9" -> "in 1" -> "1 Corinthians 9"
+            const chars_to_next_word = match[0].indexOf(' ', 1)
+            if (chars_to_next_word >= 1){
+                // Backtrack to exclude just first word of previous match
+                regex.lastIndex -= (match[0].length - chars_to_next_word - 1)
+            }
+        }
     }
 
     // Detect the text and position of all passage references in a block of text
     // Pass translation arg to correctly detect book names/abbreviations for that language/version
     detect_passage_references(text:string, translation?:string){
-        return find_passage_str_all(text, ...this._book_names_list(translation))
+        const matches:SanitizedReferenceMatch[] = []
+        while (true){
+            const match = this.detect_passage_reference(text, translation)
+            if (match){
+                matches.push(match)
+                text = text.slice(match.index + match.text.length + 1)
+            } else {
+                break
+            }
+        }
+        return matches
     }
 
     // Generate a human-readable passage reference from a data object
