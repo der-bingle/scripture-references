@@ -131,6 +131,11 @@ export function book_name_to_code(input:string, book_names:BookNames):string|nul
     // Clean the input
     input = clean(input)
 
+    // If a direct match to a code, just return it
+    if (input in simple_book_names){
+        return input
+    }
+
     // Normalise book names
     const normalised = Object.entries(simple_book_names)
         .map(([code, name]) => ([code, clean(name)] as [string, string]))
