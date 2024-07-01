@@ -71,7 +71,7 @@ Param           | Type          | Default   | Description
 `button1_color` | `CSS color`   | `currentColor` | A color for the button's fill.
 `trans`         | `lll_ttt`     | `[auto]`      | A translation to force use of (comma-separate for multiple). Must be a fetch(bible) id ([preview any translation](/content/bibles/) to find the id in the url).
 `book`          | `bbb`         | `[auto]`      | A book to show (otherwise remembers last opened).
-`verse`         | `chap:verse`  | `[auto]`      | A chapter and verse to show (otherwise remembers last viewed).
+`verse`         | `chap:verse`  | `[auto]`      | A chapter and verse to show (otherwise remembers last viewed). Pass a range to highlight a passage (e.g. 1:8-2:3).
 
 
 ## Messages
@@ -93,6 +93,28 @@ When the app is ready to receive messages it will emit the `ready` event. Whenev
 
 ### To the app
 You can use `postMessage` to send the app a message with `{"type": "update", ...}` and add any of the config params you'd like to change.
+
+```js
+window.addEventListener('message', event => {
+
+    // Only handle events from fetch(bible) app
+    const app_origin = 'https://app.fetch.bible'
+    if (event.origin !== app_origin){
+        return
+    }
+
+    // Once app is ready, update the status text
+    if (event.data.type === 'ready'){
+        // Send an update command to the app
+        event.source.postMessage({type: 'update', status: "Custom text"}, app_origin)
+    }
+
+    // If user clicks back button in app, hide the app
+    if (event.data.type === 'back'){
+        my_method_to_hide_iframe()
+    }
+})
+```
 
 
 ## Offline support
