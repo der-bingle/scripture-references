@@ -61,16 +61,14 @@ export class BibleEnhancer {
 
         // Sanitize arg
         const collection = await this.client.fetch_collection()
-        const sanitized = collection.sanitize_reference(passage)
 
         // Reveal app and navigate it to desired passage
         this._app_div.classList.add('fb-show')
         this._app_iframe.contentWindow?.postMessage({
             type: 'update',
-            book: sanitized.book,
-            verse: `${sanitized.start_chapter}:${sanitized.start_verse}`,
-            end: sanitized.range ? `${sanitized.end_chapter}:${sanitized.end_verse}` : null,
             trans: this._translations.join(','),
+            book: passage.book,
+            verse: collection.generate_passage_reference(passage, null),
         }, this._app_origin)
 
         // Optionally push item to history so browser back hides app rather than changing page
@@ -282,10 +280,9 @@ export class BibleEnhancer {
 
             // Turn ref text into a link
             const ref_a = document.createElement('a')
-            const end = match.ref.range ? `${match.ref.end_chapter}:${match.ref.end_verse}` : ''
-            ref_a.setAttribute('href',
-                `${this._app_origin}#trans=${this._translations.join(',')}&book=${match.ref.book}`
-                    + `&verse=${match.ref.start_chapter}:${match.ref.start_verse}&end=${end}`)
+            const verses = collection.generate_passage_reference(match.ref, null)
+            ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
+                + `&book=${match.ref.book}&verse=${verses}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
             ref_a.textContent = match.text
