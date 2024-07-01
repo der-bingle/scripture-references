@@ -55,12 +55,18 @@ export class BibleEnhancer {
     }
 
     // Show app and display given passage
-    show_app(passage:PassageRef){
+    async show_app(passage:PassageRef){
+
+        // Sanitize arg
+        const collection = await this.client.fetch_collection()
+        const sanitized = collection.sanitize_reference(passage)
+
+        // Reveal app and navigate it to desired passage
         this._app_div.classList.add('fb-show')
         this._app_iframe.contentWindow?.postMessage({
             type: 'update',
             book: passage.book,
-            verse: `${passage.start_chapter ?? 1}:${passage.start_verse ?? 1}`,
+            verse: `${sanitized.start_chapter}:${sanitized.start_verse}`,
             trans: this._translations.join(','),
         }, this._app_origin)
 
@@ -119,7 +125,7 @@ export class BibleEnhancer {
         // Open app when element clicked
         element.addEventListener('click', event => {
             event.preventDefault()  // Important if a link
-            this.show_app(ref)
+            void this.show_app(ref)
         })
 
         // The rest relates to hover box functionality, so skip if a touch device
@@ -198,7 +204,7 @@ export class BibleEnhancer {
 
         // Open app when click hover box
         hover_box.addEventListener('click', () => {
-            this.show_app(ref)
+            void this.show_app(ref)
         })
     }
 

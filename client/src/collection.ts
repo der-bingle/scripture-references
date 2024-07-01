@@ -495,9 +495,9 @@ export class BibleCollection {
         All properties are returned and `type`/`range` signifies what kind of reference it is.
     */
     sanitize_reference(book:string, chapter?:number, verse?:number):SanitizedReference
-    sanitize_reference(reference:PassageRef):SanitizedReference
-    sanitize_reference(book_or_obj:string|PassageRef, chapter?:number, verse?:number)
-            :SanitizedReference{
+    sanitize_reference(reference:PassageRef|SanitizedReference):SanitizedReference
+    sanitize_reference(book_or_obj:string|PassageRef|SanitizedReference, chapter?:number,
+            verse?:number):SanitizedReference{
 
         // Detect what props are provided (will use later)
         let chapters_given:boolean
@@ -525,12 +525,14 @@ export class BibleCollection {
                 book: book_or_obj.book,
                 start_chapter: book_or_obj.start_chapter ?? 1,
                 start_verse: book_or_obj.start_verse ?? 1,
-                end_chapter: book_or_obj.end_chapter ?? book_or_obj.start_chapter ?? 1,
-                end_verse: book_or_obj.end_verse ?? book_or_obj.start_verse ?? 1,
+                end_chapter: book_or_obj.end_chapter ?? 1,  // Will force up to start later
+                // If end_chapter given then dealing with whole chapters, otherwise a non-range
+                end_verse: book_or_obj.end_verse ?? (book_or_obj.end_chapter ? 999 : 1),
             }
-            // If didn't specify start_verse then dealing with whole chapters...
-            if (!book_or_obj.start_verse){
-                ref.end_verse = 999  // Will correct to last verse of chapter later
+            // If was given a pre-sanitized reference, still recheck, but need to correct below
+            if ('type' in book_or_obj){
+                verses_given = !['book', 'chapter', 'range_chapters'].includes(book_or_obj.type)
+                chapters_given = book_or_obj.type !== 'book'
             }
         }
 

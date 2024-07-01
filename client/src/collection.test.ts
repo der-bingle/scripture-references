@@ -78,7 +78,6 @@ describe('BibleCollection', () => {
             book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17}
         )
 
-
         // Invalid range
         expect(collection.sanitize_reference(
             {book: '2th', start_chapter: 2, end_chapter: 1}
@@ -90,6 +89,11 @@ describe('BibleCollection', () => {
         )).toEqual({type: 'range_verses', range: true,
             book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 17}
         )
+
+        // Sanitizing again does not change values
+        expect(collection.sanitize_reference(collection.sanitize_reference({book: '2th'})))
+            .toEqual({type: 'book', range: false, book: '2th', start_chapter: 1, start_verse: 1,
+            end_chapter: 1, end_verse: 1})
     })
 
     it("valid_reference", ({expect}) => {
