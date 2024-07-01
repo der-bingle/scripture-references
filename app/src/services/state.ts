@@ -113,7 +113,8 @@ const wide_query_handler = (event:MediaQueryListEvent) => {
 if ('addEventListener' in wide_query){
     wide_query.addEventListener('change', wide_query_handler)
 } else {
-    // For Safari less than 14
+    // @ts-ignore Legacy code for Safari less than 14
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     wide_query.addListener(wide_query_handler)
 }
 
