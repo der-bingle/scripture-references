@@ -3,7 +3,7 @@ import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} fro
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
 import {BookNames, PassageRef, book_name_to_code, passage_str_regex, passage_obj_to_str,
-    passage_str_to_obj} from './references.js'
+    passage_str_to_obj, verses_obj_to_str} from './references.js'
 import type {DistManifest} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
@@ -765,8 +765,9 @@ export class BibleCollection {
     // Generate a human-readable passage reference from a data object
     // `book_names` can either be a translation id or a mapping of book codes to names
     // This allows you to pass abbreviated names if you prefer (defaults to English names)
+    // If `book_names` is null then only the verse numbers will be returned
     generate_passage_reference(reference:PassageRef|SanitizedReference,
-            book_names?:string|BookNames, verse_sep=':', range_sep='-'){
+            book_names?:string|BookNames|null, verse_sep=':', range_sep='-'){
 
         // Sanitize reference
         const sanitized = this.sanitize_reference(reference)
@@ -775,7 +776,7 @@ export class BibleCollection {
         let book_names_data:BookNames = this._manifest.book_names_english
         if (typeof book_names === 'string'){
             book_names_data = this.get_books(book_names)  // Get names from a translation
-        } else if (typeof book_names === 'object'){
+        } else if (typeof book_names === 'object' && book_names !== null){
             book_names_data = book_names  // Custom names
         }
 
@@ -790,6 +791,9 @@ export class BibleCollection {
             delete props.end_chapter
         }
 
+        if (book_names === null){
+            return verses_obj_to_str(props, verse_sep, range_sep)
+        }
         return passage_obj_to_str(props, book_names_data, verse_sep, range_sep)
     }
 }
