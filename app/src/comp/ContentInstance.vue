@@ -13,7 +13,6 @@ div.content(ref='content_div' :class='fetch_classes'
     div.single(v-if='state.content' v-html='state.content')
     template(v-else)
         div.verse(v-for='(item, verse_i) of state.content_verses[0]' :key='item.id')
-            div.vid {{ item.verse !== 0 ? item.verse : '' }}
             div.verse_trans(v-for='(trans, trans_i) of state.trans' :key='trans'
                 :class='direction[trans_i]'
                 v-html='state.content_verses[trans_i]?.[verse_i]?.content')
@@ -193,11 +192,12 @@ const on_touch_cancel = () => {
 
 onMounted(() => {
     // Discover verse elements once mounted so can scroll/detect them
+    // NOTE Only adds if not yet defined (so skip ones in additonal translations)
     for (const node of content_div.value!.querySelectorAll('sup[data-v]')){
-        verse_nodes[(node as HTMLElement).dataset['v']!] = node as HTMLElement
+        verse_nodes[(node as HTMLElement).dataset['v']!] ??= node as HTMLElement
     }
     for (const node of content_div.value!.querySelectorAll('h3[data-c]')){
-        chapter_nodes[(node as HTMLElement).dataset['c']!] = node as HTMLElement
+        chapter_nodes[(node as HTMLElement).dataset['c']!] ??= node as HTMLElement
     }
 
     // Listen to clicks on verses for study info
@@ -269,8 +269,6 @@ watch(() => state.target, target => {
         font-size: 20px
         @media (min-width: 800px)
             font-size: 22px
-    &.no-verses .vid
-        display: none  // .vid is custom so must manually hide
 
 .single
     padding: 24px
@@ -305,23 +303,6 @@ watch(() => state.target, target => {
 .verse
     // Parallel translations
 
-    // Hide normal verse markers since will display custom on side
-    :deep(sup[data-v])
-        display: none
-
-    .vid
-        display: flex
-        width: 24px
-        font-size: 0.8em
-        justify-content: flex-end
-        align-items: center
-        opacity: 0.6
-
-        @media (max-width: 600px)
-            float: left
-            margin-right: 6px
-
-
     .verse_trans
         flex-basis: 0
         flex-grow: 1
@@ -329,6 +310,10 @@ watch(() => state.target, target => {
 
         &.rtl
             direction: rtl
+
+        // Hide verse markers in additional translations
+        &:not(:first-child) :deep(sup[data-v])
+            display: none
 
         // No top/bottom margin for verse as have padding already
         :deep(> *:first-child)
