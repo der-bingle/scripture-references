@@ -1,7 +1,9 @@
 
 import {BibleClient} from '@gracious.tech/fetch-client'
 
-import type {PassageRef, PassageRefMatch} from '@gracious.tech/fetch-client/dist/esm/references'
+import type {PassageRef} from '@gracious.tech/fetch-client/dist/esm/references'
+import type {SanitizedReference, SanitizedReferenceMatch} from
+    '@gracious.tech/fetch-client/dist/esm/collection'
 
 
 export class BibleEnhancer {
@@ -13,7 +15,7 @@ export class BibleEnhancer {
     _history:boolean
     _translations:string[]
     _before_history_push:()=>void
-    _hover_divs:[HTMLDivElement, PassageRef][] = []
+    _hover_divs:[HTMLDivElement, SanitizedReference][] = []
     // Detect whether device can hover (without emulation)
     _can_hover = self.matchMedia('(hover: hover)').matches
 
@@ -65,7 +67,7 @@ export class BibleEnhancer {
         this._app_div.classList.add('fb-show')
         this._app_iframe.contentWindow?.postMessage({
             type: 'update',
-            book: passage.book,
+            book: sanitized.book,
             verse: `${sanitized.start_chapter}:${sanitized.start_verse}`,
             trans: this._translations.join(','),
         }, this._app_origin)
@@ -90,7 +92,7 @@ export class BibleEnhancer {
     }
 
     // Request and set passage contents of a hover div
-    async _set_hover_contents(div:HTMLDivElement, ref:PassageRef){
+    async _set_hover_contents(div:HTMLDivElement, ref:SanitizedReference){
         const collection = await this.client.fetch_collection()
 
         // If translation hasn't been set yet, choose sensible default
@@ -116,7 +118,11 @@ export class BibleEnhancer {
     }
 
     // Enhance an element by showing passage on hover and triggering app display on click
-    enhance_element(element:HTMLElement, ref:PassageRef){
+    async enhance_element(element:HTMLElement, reference:PassageRef){
+
+        // Sanitize ref
+        const collection = await this.client.fetch_collection()
+        const ref = collection.sanitize_reference(reference)
 
         // Set custom property so can detect if an SPA has serialized the element and lost listeners
         // @ts-ignore Custom property
@@ -226,7 +232,7 @@ export class BibleEnhancer {
             }
             const ref = collection.detect_passage(link.textContent!, this._translations[0])
             if (ref){
-                this.enhance_element(link as HTMLElement, ref)
+                void this.enhance_element(link as HTMLElement, ref)
             }
         }
 
@@ -253,7 +259,7 @@ export class BibleEnhancer {
 
 
         // Get all relevant text nodes in advance (as modifying DOM will interrupt walk)
-        const nodes:[Text, PassageRefMatch][] = []
+        const nodes:[Text, SanitizedReferenceMatch][] = []
         while (walker.nextNode()){
             if (walker.currentNode.nodeType === Node.TEXT_NODE){
                 const match = collection.detect_passage_reference(walker.currentNode.textContent!,
@@ -265,7 +271,7 @@ export class BibleEnhancer {
         }
 
         // Util for turning a passage ref into an <a> element (returns trailing text node)
-        const linkify_ref = (node:Text, match:PassageRefMatch) => {
+        const linkify_ref = (node:Text, match:SanitizedReferenceMatch) => {
 
             // Separate ref text from preceeding text
             const ref_node = node.splitText(match.index)
@@ -277,14 +283,14 @@ export class BibleEnhancer {
             const ref_a = document.createElement('a')
             ref_a.setAttribute('href',
                 `${this._app_origin}#trans=${this._translations.join(',')}&book=${match.ref.book}`
-                    + `&verse=${match.ref.start_chapter ?? 1}:${match.ref.start_verse ?? 1}`)
+                    + `&verse=${match.ref.start_chapter}:${match.ref.start_verse}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
             ref_a.textContent = match.text
             ref_node.replaceWith(ref_a)
 
             // Enhance the new <a> element
-            this.enhance_element(ref_a, match.ref)
+            void this.enhance_element(ref_a, match.ref)
 
             // Return newly-created trailing text node
             return remainder
