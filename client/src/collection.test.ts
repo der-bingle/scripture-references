@@ -22,7 +22,8 @@ describe('BibleCollection', () => {
         last_verse: number_of_verses,
         books_ordered: books_ordered,
         translations: {},
-        language2to3: {}
+        language2to3: {},
+        book_names_english: {'2th': "2 Thes.", tit: "Titus"},
     }]])
 
     it("sanitize_reference", ({expect}) => {
@@ -111,6 +112,29 @@ describe('BibleCollection', () => {
             .toBe(false)
         expect(collection.valid_reference({book: '2th',
             start_chapter: 1, start_verse: 1, end_chapter: 2})).toBe(false)
+    })
+
+    it("generate_passage_reference", ({expect}) => {
+
+        const ref = {
+            range: false,
+            book: 'tit',
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: 1,
+            end_verse: 1,
+        }
+
+        // Interpret reference type property
+        expect(collection.generate_passage_reference({type: 'book', ...ref})).toBe('Titus')
+        expect(collection.generate_passage_reference({type: 'chapter', ...ref})).toBe('Titus 1')
+        expect(collection.generate_passage_reference({type: 'verse', ...ref})).toBe('Titus 1:1')
+        expect(collection.generate_passage_reference({type: 'range_verses', ...ref,
+            range: true, end_verse: 2})).toBe('Titus 1:1-2')
+        expect(collection.generate_passage_reference({type: 'range_chapters', ...ref,
+            range: true, end_chapter: 2})).toBe('Titus 1-2')
+        expect(collection.generate_passage_reference({type: 'range_multi', ...ref,
+            range: true, end_chapter: 2})).toBe('Titus 1:1-2:1')
     })
 
 })

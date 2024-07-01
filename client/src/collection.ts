@@ -2,7 +2,7 @@
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
-import {BookNames, PassageRefArg, book_name_to_code, find_passage_str, find_passage_str_all,
+import {BookNames, PassageRef, book_name_to_code, find_passage_str, find_passage_str_all,
     passage_obj_to_str, passage_str_to_obj} from './references.js'
 import type {DistManifest} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
@@ -82,7 +82,11 @@ export interface GetCompletionReturn {
     }
 }
 
+export type ReferenceType = 'book'|'chapter'|'verse'|'range_verses'|'range_chapters'|'range_multi'
+
 export interface SanitizedReference {
+    type:ReferenceType
+    range:boolean
     book:string
     start_chapter:number
     start_verse:number
@@ -486,8 +490,8 @@ export class BibleCollection {
         rest of the results, as end values will default to same as start when not present.
     */
     sanitize_reference(book:string, chapter?:number, verse?:number):SanitizedReference
-    sanitize_reference(reference:PassageRefArg):SanitizedReference
-    sanitize_reference(book_or_obj:string|PassageRefArg, chapter?:number, verse?:number)
+    sanitize_reference(reference:PassageRef):SanitizedReference
+    sanitize_reference(book_or_obj:string|PassageRef, chapter?:number, verse?:number)
             :SanitizedReference{
 
         // Normalise args
@@ -685,14 +689,31 @@ export class BibleCollection {
     // Generate a human-readable passage reference from a data object
     // `book_names` can either be a translation id or a mapping of book codes to names
     // This allows you to pass abbreviated names if you prefer (defaults to English names)
-    generate_passage_reference(reference:PassageRefArg, book_names?:string|BookNames, verse_sep=':',
-            range_sep='-'){
+    generate_passage_reference(reference:PassageRef|SanitizedReference,
+            book_names?:string|BookNames, verse_sep=':', range_sep='-'){
+
+        // Determine book names
         let book_names_data:BookNames = this._manifest.book_names_english
         if (typeof book_names === 'string'){
-            book_names_data = this.get_books(book_names)
+            book_names_data = this.get_books(book_names)  // Get names from a translation
         } else if (typeof book_names === 'object'){
-            book_names_data = book_names
+            book_names_data = book_names  // Custom names
         }
+
+        // If a sanitized reference, translate reference type to props `passage_obj_to_str` expects
+        if ('type' in reference){
+            const type = reference.type
+            reference = {...reference}  // Avoid modifying input
+            if (['book', 'chapter', 'range_chapters'].includes(type)){
+                delete reference.start_verse
+                delete reference.end_verse
+            }
+            if (type === 'book'){
+                delete reference.start_chapter
+                delete reference.end_chapter
+            }
+        }
+
         return passage_obj_to_str(reference, book_names_data, verse_sep, range_sep)
     }
 }
