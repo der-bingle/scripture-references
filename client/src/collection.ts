@@ -768,6 +768,9 @@ export class BibleCollection {
     generate_passage_reference(reference:PassageRef|SanitizedReference,
             book_names?:string|BookNames, verse_sep=':', range_sep='-'){
 
+        // Sanitize reference
+        const sanitized = this.sanitize_reference(reference)
+
         // Determine book names
         let book_names_data:BookNames = this._manifest.book_names_english
         if (typeof book_names === 'string'){
@@ -776,20 +779,17 @@ export class BibleCollection {
             book_names_data = book_names  // Custom names
         }
 
-        // If a sanitized reference, translate reference type to props `passage_obj_to_str` expects
-        if ('type' in reference){
-            const type = reference.type
-            reference = {...reference}  // Avoid modifying input
-            if (['book', 'chapter', 'range_chapters'].includes(type)){
-                delete reference.start_verse
-                delete reference.end_verse
-            }
-            if (type === 'book'){
-                delete reference.start_chapter
-                delete reference.end_chapter
-            }
+        // Conform sanitized reference type to props `passage_obj_to_str` expects
+        const props:PassageRef = {...sanitized}  // Will delete props so copy
+        if (['book', 'chapter', 'range_chapters'].includes(sanitized.type)){
+            delete props.start_verse
+            delete props.end_verse
+        }
+        if (sanitized.type === 'book'){
+            delete props.start_chapter
+            delete props.end_chapter
         }
 
-        return passage_obj_to_str(reference, book_names_data, verse_sep, range_sep)
+        return passage_obj_to_str(props, book_names_data, verse_sep, range_sep)
     }
 }
