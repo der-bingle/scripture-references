@@ -695,8 +695,12 @@ export class BibleCollection {
 
     // Detect which passage a human text passage reference refers to
     // Pass translation arg to correctly detect book names/abbreviations for that language/version
-    detect_passage(reference:string, translation?:string){
-        return passage_str_to_obj(reference, ...this._book_names_list(translation))
+    detect_passage(reference:string, translation?:string):SanitizedReference|null{
+        const detected = passage_str_to_obj(reference, ...this._book_names_list(translation))
+        if (!detected){
+            return null
+        }
+        return this.sanitize_reference(detected)
     }
 
     // Detect the text and position of first passage reference in a block of text
