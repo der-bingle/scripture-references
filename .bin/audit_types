@@ -8,5 +8,7 @@ cd "$(dirname "$(dirname "$0")")"
 
 npx tsc --noEmit --project collector
 npx tsc --noEmit --project client
+npx tsc --noEmit --project enhancer
+npx tsc --noEmit --project converters/usx-to-json
 npx vue-tsc --noEmit --project app
 npx vue-tsc --noEmit --project site
