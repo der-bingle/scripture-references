@@ -485,18 +485,23 @@ export class BibleCollection {
     }
 
     /* Force a given passage reference to be valid (providing as much or as little as desired)
-        Chapter and verse numbers will be forced to their closest valid equivalent
-        If validating only the book/chapter/verse simply extract the desired info and ignore the
-        rest of the results, as end values will default to same as start when not present.
+        Chapter and verse numbers will be forced to their closest valid equivalent.
+        All properties are returned and `type`/`range` signifies what kind of reference it is.
     */
     sanitize_reference(book:string, chapter?:number, verse?:number):SanitizedReference
     sanitize_reference(reference:PassageRef):SanitizedReference
     sanitize_reference(book_or_obj:string|PassageRef, chapter?:number, verse?:number)
             :SanitizedReference{
 
+        // Detect what props are provided (will use later)
+        let chapters_given:boolean
+        let verses_given:boolean
+
         // Normalise args
-        let ref:SanitizedReference
+        let ref:Omit<SanitizedReference, 'type'|'range'>
         if (typeof book_or_obj === 'string'){
+            chapters_given = chapter !== undefined
+            verses_given = verse !== undefined
             ref = {
                 book: book_or_obj,
                 start_chapter: chapter ?? 1,
@@ -506,6 +511,10 @@ export class BibleCollection {
                 end_verse: 1,
             }
         } else {
+            chapters_given = book_or_obj.start_chapter !== undefined
+                || book_or_obj.end_chapter !== undefined
+            verses_given = book_or_obj.start_verse !== undefined
+                || book_or_obj.end_verse !== undefined
             ref = {
                 book: book_or_obj.book,
                 start_chapter: book_or_obj.start_chapter ?? 1,
@@ -553,23 +562,39 @@ export class BibleCollection {
         // Ensure end verse is valid
         ref.end_verse = Math.min(Math.max(ref.end_verse, 1), last_verse[ref.end_chapter-1]!)
 
-        return ref
+        // Determine type
+        const chapters_same = ref.start_chapter === ref.end_chapter
+        const verses_same = ref.start_verse === ref.end_verse
+        let type:ReferenceType
+        if (chapters_same && verses_same){
+            type = chapters_given ? (verses_given ? 'verse' : 'chapter') : 'book'
+        } else {
+            type = chapters_same ? 'range_verses' : (verses_given ? 'range_multi': 'range_chapters')
+        }
+
+        // Identify if range completes chapters
+        if (type === 'range_multi' && ref.start_verse === 1
+                && ref.end_verse === last_verse[ref.end_chapter-1]){
+            type = 'range_chapters'
+        }
+
+        return {type, range: type.startsWith('range_'), ...ref}
     }
 
     // Confirm if a passage reference is valid, verifying book code and chapter/verse numbers
     valid_reference(book:string, chapter?:number, verse?:number):boolean
-    valid_reference(reference:PassageRefArg):boolean
-    valid_reference(book_or_obj:string|PassageRefArg, chapter?:number, verse?:number):boolean{
+    valid_reference(reference:PassageRef):boolean
+    valid_reference(book_or_obj:string|PassageRef, chapter?:number, verse?:number):boolean{
 
         // Normalize args
-        let ref:PassageRefArg
+        let ref:PassageRef
         if (typeof book_or_obj !== 'string'){
             ref = book_or_obj
         } else {
             ref = {
                 book: book_or_obj,
-                start_chapter: chapter ?? null,
-                start_verse: verse ?? null,
+                start_chapter: chapter,
+                start_verse: verse,
             }
         }
 
