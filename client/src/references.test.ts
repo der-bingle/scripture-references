@@ -29,10 +29,10 @@ describe('verses_obj_to_str', () => {
         expect(verses_obj_to_str({start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 2})).toEqual('1:1-2:2')
     })
 
-    it("Does not render when params invalid", ({expect}) => {
-        expect(verses_obj_to_str({start_chapter: 1, end_verse: 2})).toEqual(null)
-        expect(verses_obj_to_str({start_chapter: 2, end_chapter: 1})).toEqual(null)
-        expect(verses_obj_to_str({start_chapter: 1, start_verse: 2, end_verse: 1})).toEqual(null)
+    it("Always renders, even if input invalid", ({expect}) => {
+        expect(verses_obj_to_str({start_chapter: 1, end_verse: 2})).toEqual('1:2')
+        expect(verses_obj_to_str({start_chapter: 2, end_chapter: 1})).toEqual('2-1')
+        expect(verses_obj_to_str({start_chapter: 1, start_verse: 2, end_verse: 1})).toEqual('1:2-1')
     })
 
 })
@@ -43,35 +43,35 @@ describe('verses_str_to_obj', () => {
     it("Parses a single chapter", ({expect}) => {
         expect(verses_str_to_obj('1')).toEqual({
             start_chapter: 1,
-            end_chapter: 1,
-            start_verse: null,
-            end_verse: null,
+            start_verse: undefined,
+            end_chapter: undefined,
+            end_verse: undefined,
         })
     })
 
     it("Parses multiple chapters", ({expect}) => {
         expect(verses_str_to_obj('1-2')).toEqual({
             start_chapter: 1,
+            start_verse: undefined,
             end_chapter: 2,
-            start_verse: null,
-            end_verse: null,
+            end_verse: undefined,
         })
     })
 
     it("Parses a single verse", ({expect}) => {
         expect(verses_str_to_obj('1:1')).toEqual({
             start_chapter: 1,
-            end_chapter: 1,
             start_verse: 1,
-            end_verse: 1,
+            end_chapter: undefined,
+            end_verse: undefined,
         })
     })
 
     it("Parses multiple verses", ({expect}) => {
         expect(verses_str_to_obj('1:1-2')).toEqual({
             start_chapter: 1,
-            end_chapter: 1,
             start_verse: 1,
+            end_chapter: undefined,
             end_verse: 2,
         })
     })
@@ -79,14 +79,43 @@ describe('verses_str_to_obj', () => {
     it("Parses verses across chapters", ({expect}) => {
         expect(verses_str_to_obj('1:1-2:2')).toEqual({
             start_chapter: 1,
-            end_chapter: 2,
             start_verse: 1,
+            end_chapter: 2,
             end_verse: 2,
         })
     })
 
-    it("Does not parse invalid references", ({expect}) => {
-        expect(verses_str_to_obj('nothing')).toEqual(null)
+    it("Salvages what it can from invalid references", ({expect}) => {
+        expect(verses_str_to_obj('x')).toEqual({
+            start_chapter: undefined,
+            start_verse: undefined,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+        expect(verses_str_to_obj('1:x')).toEqual({
+            start_chapter: 1,
+            start_verse: undefined,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+        expect(verses_str_to_obj('1:1-x')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+        expect(verses_str_to_obj('1:1-1:x')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: 1,
+            end_verse: undefined,
+        })
+        expect(verses_str_to_obj('1-2:1')).toEqual({
+            start_chapter: 1,
+            start_verse: undefined,
+            end_chapter: 2,
+            end_verse: 1,
+        })
     })
 
 })

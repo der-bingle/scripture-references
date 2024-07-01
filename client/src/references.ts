@@ -1,32 +1,17 @@
 
+import {parse_int} from './utils.js'
+
 import type {GetBooksItem} from './collection'
 
 
-export interface VersesRefPartialBook {
-    start_chapter:number
-    end_chapter:number
-    start_verse:number|null  // If null then range is entire chapters
-    end_verse:number|null  // If null then range is entire chapters
+export interface VersesRef {
+    start_chapter?:number|undefined
+    start_verse?:number|undefined
+    end_chapter?:number|undefined
+    end_verse?:number|undefined
 }
 
-export type VersesRef = VersesRefPartialBook|null  // null if whole book
-
-export interface VersesRefArg {
-    start_chapter?:number|null  // Whole book if doesn't exist
-    end_chapter?:number|null  // Defaults to start_chapter
-    start_verse?:number|null  // If null then range is entire chapters
-    end_verse?:number|null  // Default to start_verse
-}
-
-export interface PassageRef {
-    book:string
-    start_chapter:number|null
-    end_chapter:number|null
-    start_verse:number|null
-    end_verse:number|null
-}
-
-export interface PassageRefArg extends VersesRefArg {
+export interface PassageRef extends VersesRef {
     book:string
 }
 
@@ -52,28 +37,22 @@ function _normalise_book_names(book_names:BookNames):Record<string, string>{
 }
 
 
-// Format verses reference to a readable string
+// Format verses reference to a readable string (but doesn't validate the numbers)
 // Supports: Gen | Gen 1 | 1-2 | 1:1 | 1:1-2 | 1:1-2:2
-export function verses_obj_to_str(ref:VersesRefArg, verse_sep=':', range_sep='-'){
+// If a whole book then chapters must be und., if whole chapters then verses must be und.
+export function verses_obj_to_str(ref:VersesRef, verse_sep=':', range_sep='-'){
 
-    // If no start_chapter then ref must be for whole book
-    if (!ref.start_chapter){
+    // If no chapters then ref must be for whole book
+    if (!ref.start_chapter && !ref.end_chapter){
         return ''
     }
 
     // Assign defaults for missing properties
-    if (!ref.end_chapter){
-        ref.end_chapter = ref.start_chapter
-    }
-    if (ref.start_verse && !ref.end_verse){
-        ref.end_verse = ref.start_verse
-    }
-
-    // Return null if invalid properties
-    if ((ref.end_verse && !ref.start_verse) || (ref.end_chapter < ref.start_chapter)
-            || (ref.start_chapter === ref.end_chapter && ref.start_verse
-            && ref.end_verse! < ref.start_verse)){
-        return null
+    ref.start_chapter ??= ref.end_chapter!
+    ref.end_chapter ??= ref.start_chapter
+    if (ref.start_verse || ref.end_verse){
+        ref.start_verse ??= ref.start_chapter !== ref.end_chapter ? 1 : (ref.end_verse ?? 1)
+        ref.end_verse ??= ref.start_verse
     }
 
     // If only a chapter ref, logic is much simpler
@@ -96,7 +75,7 @@ export function verses_obj_to_str(ref:VersesRefArg, verse_sep=':', range_sep='-'
 }
 
 
-// Parse verses reference string into an object
+// Parse verses reference string into an object (but does not validate numbers)
 export function verses_str_to_obj(ref:string):VersesRef{
 
     // Clean ref
@@ -105,50 +84,37 @@ export function verses_str_to_obj(ref:string):VersesRef{
         .replace(/\p{Dash}/gu, '-')  // Normalise range separators to common hyphen
 
     // Init props
-    let start_chapter:number
-    let start_verse:number|null = null
-    let end_chapter:number|null = null
-    let end_verse:number|null = null
+    let start_chapter:number|undefined
+    let start_verse:number|undefined
+    let end_chapter:number|undefined
+    let end_verse:number|undefined
 
     if (!ref.includes(':')){
         // Dealing with chapters only
         const parts = ref.split('-')
-        start_chapter = parseInt(parts[0]!)
-        if (parts[1]){
-            end_chapter = parseInt(parts[1])
-        }
+        start_chapter = parse_int(parts[0]!) ?? undefined
+        end_chapter = parse_int(parts[1] ?? '') ?? undefined
     } else {
         // Includes verses
         const parts = ref.split('-')
         const start_parts = parts[0]!.split(':')
-        start_chapter = parseInt(start_parts[0]!)
-        if (start_parts[1]){
-            start_verse = parseInt(start_parts[1])
-        }
+        start_chapter = parse_int(start_parts[0]!) ?? undefined
+        start_verse = parse_int(start_parts[1] ?? '') ?? undefined
         if (parts[1]){
             // Is a range
             const end_parts = parts[1].split(':')
             if (end_parts.length > 1){
-                end_chapter = parseInt(end_parts[0]!)
-                end_verse = parseInt(end_parts[1]!)
+                // Specifies end chapter
+                end_chapter = parse_int(end_parts[0]!) ?? undefined
+                end_verse = parse_int(end_parts[1]!) ?? undefined
             } else {
-                end_chapter = start_chapter
-                end_verse = parseInt(end_parts[0]!)
+                // End verse is in same chapter
+                end_verse = parse_int(end_parts[0]!) ?? undefined
             }
         }
     }
 
-    // Chapter start should always be present
-    if (!start_chapter){
-        return null
-    }
-
-    return {
-        start_chapter,
-        end_chapter: end_chapter ?? start_chapter,
-        start_verse,
-        end_verse: end_verse ?? start_verse,
-    }
+    return {start_chapter, start_verse, end_chapter, end_verse}
 }
 
 
@@ -215,7 +181,7 @@ export function book_name_to_code(input:string, book_names:BookNames):string|nul
 }
 
 
-// Parse passage reference string into an object
+// Parse passage reference string into an object (but does not validate chapter/verse numbers)
 export function passage_str_to_obj(ref:string, ...book_names:BookNames[]):PassageRef|null{
     ref = ref.trim()
 
@@ -238,23 +204,14 @@ export function passage_str_to_obj(ref:string, ...book_names:BookNames[]):Passag
         return null
     }
 
-    // If verses can't be parsed, assume whole book
+    // Parse verses
     const verses = verses_str_to_obj(ref.slice(verses_start))
-    if (verses){
-        return {book: book_code, ...verses}
-    }
-    return {
-        book: book_code,
-        start_chapter: null,
-        end_chapter: null,
-        start_verse: null,
-        end_verse: null,
-    }
+    return {book: book_code, ...verses}
 }
 
 
 // Format passage reference to a readable string
-export function passage_obj_to_str(ref:PassageRefArg, book_names:BookNames, verse_sep=':',
+export function passage_obj_to_str(ref:PassageRef, book_names:BookNames, verse_sep=':',
         range_sep='-'):string{
     const simple_book_names = _normalise_book_names(book_names)
     let text = simple_book_names[ref.book] ?? ''
