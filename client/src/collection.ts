@@ -525,7 +525,8 @@ export class BibleCollection {
                 book: book_or_obj.book,
                 start_chapter: book_or_obj.start_chapter ?? 1,
                 start_verse: book_or_obj.start_verse ?? 1,
-                end_chapter: book_or_obj.end_chapter ?? 1,  // Will force up to start later
+                // Unlike simple args, obj arg may be a range so need to default more carefully
+                end_chapter: book_or_obj.end_chapter ?? book_or_obj.start_chapter ?? 1,
                 // If end_chapter given then dealing with whole chapters, otherwise a non-range
                 end_verse: book_or_obj.end_verse ?? (book_or_obj.end_chapter ? 999 : 1),
             }

@@ -116,6 +116,8 @@ describe('BibleCollection', () => {
         expect(collection.valid_reference({book: '2th', start_chapter: 2, end_chapter: 3}))
             .toBe(true)
         expect(collection.valid_reference({book: '2th',
+            start_chapter: 2, start_verse: 1, end_verse: 2})).toBe(true)
+        expect(collection.valid_reference({book: '2th',
             start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 2})).toBe(true)
 
         // Invalid range
