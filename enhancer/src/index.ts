@@ -69,6 +69,7 @@ export class BibleEnhancer {
             type: 'update',
             book: sanitized.book,
             verse: `${sanitized.start_chapter}:${sanitized.start_verse}`,
+            end: sanitized.range ? `${sanitized.end_chapter}:${sanitized.end_verse}` : null,
             trans: this._translations.join(','),
         }, this._app_origin)
 
@@ -281,9 +282,10 @@ export class BibleEnhancer {
 
             // Turn ref text into a link
             const ref_a = document.createElement('a')
+            const end = match.ref.range ? `${match.ref.end_chapter}:${match.ref.end_verse}` : ''
             ref_a.setAttribute('href',
                 `${this._app_origin}#trans=${this._translations.join(',')}&book=${match.ref.book}`
-                    + `&verse=${match.ref.start_chapter}:${match.ref.start_verse}`)
+                    + `&verse=${match.ref.start_chapter}:${match.ref.start_verse}&end=${end}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
             ref_a.textContent = match.text
