@@ -1,6 +1,6 @@
 // Watches that mix data sources
 
-import {watch} from 'vue'
+import {nextTick, watch} from 'vue'
 
 import {state} from './state'
 import {content} from './content'
@@ -121,16 +121,12 @@ self.addEventListener('message', event => {
         if (typeof data['trans'] === 'string'){
             state.trans = data['trans'].split(',') as [string, ...string[]]
         }
-        if (typeof data['book'] === 'string'){
-            state.book = data['book']
-        }
-        if (typeof data['verse'] === 'string'){
-            const target:number[] = data['verse'].split(':').map(val => parseInt(val, 10))
-            if (target.length === 2){
-                state.chapter = target[0]!
-                state.verse = target[1]!
-                state.target = target as [number, number]
-            }
+        if (typeof data['search'] === 'string'){
+            state.search = data['search']
+            // Trigger parsing and then reset so search toolbar doesn't appear
+            void nextTick(() => {
+                state.search = null
+            })
         }
     }
 })
@@ -156,11 +152,11 @@ watch(() => state.dark, () => {
 
 // Try to navigate to verse when search changes
 watch(() => state.search, () => {
-    const ref = content.collection.detect_passage(state.search ?? '')
-    if (ref){
-        state.book = ref.book
-        state.chapter = ref.start_chapter
-        state.verse = ref.start_verse
-        state.target = [state.chapter, state.verse]
+    const match = content.collection.detect_passage_reference(state.search ?? '')
+    if (match){
+        state.book = match.ref.book
+        state.chapter = match.ref.start_chapter
+        state.verse = match.ref.start_verse
+        state.passage = match.ref
     }
 })

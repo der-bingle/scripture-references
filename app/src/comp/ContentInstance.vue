@@ -26,6 +26,7 @@ import {ref, onMounted, watch, computed} from 'vue'
 
 import {state, change_chapter} from '@/services/state'
 import {chapters, direction} from '@/services/computes'
+import {content} from '@/services/content'
 
 
 // Swipe distance tracking
@@ -108,12 +109,21 @@ function cancel_swipe(){
 }
 
 
-const scroll_to_verse = ([chapter, verse]:[number, number]) => {
+const scroll_to_verse = (chapter:number, verse:number) => {
     // Scroll to the given verse
+
+    // Get node for verse marker
+    let node = verse_nodes[`${chapter}:${verse}`]
+    if (!node){
+        // Fallback on previous verse
+        const prev = content.collection.get_prev_verse(state.book, chapter, verse)
+        if (prev){
+            node = verse_nodes[`${prev.start_chapter}:${prev.start_verse}`]
+        }
+    }
 
     // Fallback on first of chapter if verse missing
     // NOTE Also better to use chapter node if first verse, so can show any headings too
-    let node = verse_nodes[`${chapter}:${verse}`] ?? verse_nodes[`${chapter}:${verse-1}`]
     if (!node || verse === 1){
         node = chapter_nodes[chapter]
     }
@@ -131,12 +141,6 @@ const scroll_to_verse = ([chapter, verse]:[number, number]) => {
         const top = Math.max(0, content_div.value!.scrollTop + rect.top - buffer)
         content_div.value!.scroll({top})
     }
-
-    // Reset target once DOM gets a chance to finish scrolling
-    // NOTE This is needed to block `chapter/verse` updating while scrolling past other verses
-    setTimeout(() => {
-        state.target = null
-    }, 300)
 }
 
 
@@ -209,24 +213,26 @@ onMounted(() => {
     }
 
     // Scroll to current chapter
-    scroll_to_verse(state.target ?? [state.chapter, state.verse])
+    scroll_to_verse(state.chapter, state.verse)
+
+    // Highlight passage if specified
+    if (state.passage){
+        highlight_passage()
+    }
 
     // Update chapter/verse in state when scroll past them
     const observer = new IntersectionObserver((entries) => {
-        // Prevent state change while moving to a verse to prevent user confusion
-        if (!state.target){
-            for (const entry of entries){
+        for (const entry of entries){
 
-                // Ignore when nodes leave capture area, only listen when they enter
-                if (!entry.isIntersecting){
-                    continue
-                }
-
-                const [ch, v] = (entry.target as HTMLElement).dataset['v']!.split(':')
-                state.chapter = parseInt(ch!)
-                state.verse = parseInt(v!)
-                break  // Only pay attention to one verse if multiple
+            // Ignore when nodes leave capture area, only listen when they enter
+            if (!entry.isIntersecting){
+                continue
             }
+
+            const [ch, v] = (entry.target as HTMLElement).dataset['v']!.split(':')
+            state.chapter = parseInt(ch!)
+            state.verse = parseInt(v!)
+            break  // Only pay attention to one verse if multiple
         }
     }, {
         root: content_div.value!,
@@ -239,12 +245,55 @@ onMounted(() => {
 })
 
 
-watch(() => state.target, target => {
-    // Scroll to verse whenever target changes
-    if (target !== null){
-        scroll_to_verse(target)
+watch(() => state.passage, passage => {
+    // Navigate and highlight passage when it changes
+    if (!passage){
+        return
     }
+    scroll_to_verse(passage.start_chapter, passage.start_verse)
+    highlight_passage()
 })
+
+
+const highlight_passage = () => {
+    const passage = state.passage
+    // These types make sense to highlight (range_chapters would be too long and unnecessary)
+    const types = ['verse', 'range_verses', 'range_multi']
+    if (CSS.highlights && passage && types.includes(passage.type)){
+
+        // Start range at start verse marker
+        const range = new Range()
+        const start = verse_nodes[`${passage.start_chapter}:${passage.start_verse}`]
+        if (!start){
+            return  // Start is missing for some reason. Highlighting is non-essential so ignore
+        }
+        range.setStartBefore(start)
+
+        // Get verse marker for verse after last verse so can select up to it
+        const after_end = content.collection.get_next_verse(passage, true)
+        let end:HTMLElement|undefined
+        if (!after_end){
+            // Final verse of book, so select up to attribution
+            end = content_div.value?.querySelector('.fb-attribution') ?? undefined
+        } else if (after_end.start_verse === 1){
+            // If range ends at chapter, stop at the chapter node itself to avoid highlighting it
+            end = chapter_nodes[after_end.start_chapter]
+        } else {
+            // Select up to the next verse marker
+            end = verse_nodes[`${after_end.start_chapter}:${after_end.start_verse}`]
+        }
+
+        // If can't find end, simply end after the verse's current paragraph
+        if (end){
+            range.setEndBefore(end)
+        } else if (start.parentElement){
+            range.setEndAfter(start.parentElement)
+        }
+
+        // Register the range as a highlight
+        CSS.highlights.set('passage', new Highlight(range))
+    }
+}
 
 
 </script>
@@ -333,5 +382,9 @@ watch(() => state.target, target => {
     @media (min-width: 600px)
         display: flex
 
+
+.content :deep(::highlight(passage))
+    text-decoration-skip-ink: none  // Distracting and color faint enough to not clash with glyphs
+    text-decoration: solid underline #cc04 5px
 
 </style>

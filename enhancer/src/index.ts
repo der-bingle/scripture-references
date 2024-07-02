@@ -67,8 +67,7 @@ export class BibleEnhancer {
         this._app_iframe.contentWindow?.postMessage({
             type: 'update',
             trans: this._translations.join(','),
-            book: passage.book,
-            verse: collection.generate_passage_reference(passage, null),
+            search: passage.book + collection.generate_passage_reference(passage, null),
         }, this._app_origin)
 
         // Optionally push item to history so browser back hides app rather than changing page
@@ -282,7 +281,7 @@ export class BibleEnhancer {
             const ref_a = document.createElement('a')
             const verses = collection.generate_passage_reference(match.ref, null)
             ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
-                + `&book=${match.ref.book}&verse=${verses}`)
+                + `&search=${match.ref.book}${verses}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
             ref_a.textContent = match.text

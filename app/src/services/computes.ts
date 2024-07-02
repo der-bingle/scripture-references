@@ -34,8 +34,7 @@ export const chapter_display = computed(() => {
     if (chapters.value.length === 1){
         return current_book_name.value
     }
-    // Show chapter target if still navigating to it so user knows their action was applied
-    return `${current_book_name.value} ${state.target?.[0] || state.chapter}`
+    return `${current_book_name.value} ${state.chapter}`
 })
 
 

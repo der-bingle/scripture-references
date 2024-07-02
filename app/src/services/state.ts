@@ -2,7 +2,8 @@
 import {reactive, computed, watch} from 'vue'
 
 import type {IndividualVerse} from '@gracious.tech/fetch-client/dist/esm/book'
-import {BookCrossref} from '@gracious.tech/fetch-client/dist/esm/crossref'
+import type {BookCrossref} from '@gracious.tech/fetch-client/dist/esm/crossref'
+import type {SanitizedReference} from '@gracious.tech/fetch-client/dist/esm/collection'
 
 
 // LOCAL STORAGE
@@ -47,12 +48,6 @@ const params = new URLSearchParams(self.location.hash.slice(1))
 
 
 // Init default state
-const target_raw = (params.get('verse') ?? local_storage.getItem('verse') ?? '').split(':')
-    .map(val => parseInt(val, 10))
-let target = null as null|[number, number]
-if (target_raw[0] && target_raw[1]){
-    target = target_raw.slice(0, 2) as [number, number]
-}
 const init_dark = params.get('dark') ?? local_storage.getItem('dark')
 export const state = reactive({
 
@@ -73,11 +68,7 @@ export const state = reactive({
     // NOTE init.ts will ensure this has at least one translation before app loads
     trans: ((params.get('trans') ?? local_storage.getItem('trans'))?.split(',') ?? []
         ) as unknown as [string, ...string[]],
-    book: params.get('book') ?? local_storage.getItem('book') ?? 'jhn',
-    // `chapter/verse` is "currently-detected" / `target` is "currently-navigating-to" (else null)
-    chapter: target ? target[0] : 1,
-    verse: target ? target[1] : 1,
-    target,
+    search: params.get('search') ?? local_storage.getItem('search') ?? null as null|string,
 
     // NOT CONFIGURABLE
 
@@ -91,6 +82,10 @@ export const state = reactive({
     font_size: local_storage.getItem('font_size') ?? 'regular',
 
     // State
+    book: 'gen',
+    chapter: 1,  // Currently being viewed
+    verse: 1,  // Currently being viewed
+    passage: null as null|SanitizedReference,  // Targeted/highlighted ()
     offline: false,
     content: '',
     content_verses: [] as IndividualVerse<string>[][],
@@ -99,7 +94,6 @@ export const state = reactive({
     show_style_dialog: false,
     show_about_dialog: false,
     wide: wide_query.matches,
-    search: null as null|string,
     study: null as null|[string, number, number],
     crossref: null as BookCrossref|null,
     notes: null as Record<string, Record<string, string>>|null,
@@ -144,7 +138,15 @@ export const dialog_max_width = computed(() => {
 export const change_chapter = (chapter:number, verse=1) => {
     state.chapter = chapter
     state.verse = verse
-    state.target = [chapter, verse]
+    state.passage = {
+        type: 'chapter',
+        range: false,
+        book: state.book,
+        start_chapter: chapter,
+        start_verse: verse,
+        end_chapter: chapter,
+        end_verse: verse,
+    }
 }
 
 
@@ -161,11 +163,10 @@ export const change_passage = (book:string, chapter=1, verse=1) => {
 watch(() => state.trans, () => {
     local_storage.setItem('trans', state.trans.join(','))
 }, {deep: true})
-watch(() => state.book, () => {
-    local_storage.setItem('book', state.book)
-})
-watch([() => state.chapter, () => state.verse], () => {
-    local_storage.setItem('verse', `${state.chapter}:${state.verse}`)
+watch([() => state.book, () => state.chapter, () => state.verse], () => {
+    // NOTE Saving what search should be to reproduce the current view (not actual search value)
+    // E.g. If user searched for "example" and then navigated to Gen 1:1, saved value is "gen1:1"
+    local_storage.setItem('search', `${state.book}${state.chapter}:${state.verse}`)
 })
 watch(() => state.dark, () => {
     local_storage.setItem('dark', String(state.dark))

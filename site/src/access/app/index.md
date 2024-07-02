@@ -52,7 +52,7 @@ You can use the app in the following ways:
 ## Customisation
 You can pass config to the app when it first loads via search params embedded within the `#` of the URL. They should be in the same format as regular search params (i.e. you can use `URLSearchParams` to create them).
 
-**Example:** https://app.fetch.bible/#book=exo&verse=10:1&back=true&dark=true
+**Example:** https://app.fetch.bible/#back=true&dark=true&search=exo10:1
 
 
 ## Interaction
@@ -61,17 +61,16 @@ If you embed the app as an iframe or webview then you can use Javascript `postMe
 ## Params
 These are the params available for use in the URL `#` and/or `postMessage` calls:
 
-Param           | Type          | Default   | Description
-| -             | -             | -         | -
-`dark`          | `true\|false` | `[auto]`  | Whether to force dark/light theme. Only use this if your app already has a theme setting that you want to sync with, and also update it by listening for changes via this app's own theme setting).
-`status`        | `string`      | `[disabled]` | A status message to display in the toolbar (must be short and may get cut off).
-`color`         | `#rrggbb`     | `#c12bdb` | A theme color for the app (must be in `#rrggbb` format).
-`back`          | `true\|URL` | `false`   | Whether to show a back button in the toolbar (iframes should listen to click via postMessage, don't use URL if using an iframe/webview).
-`button1_icon`  | `coordinates` | `[disabled]` | The icon to display for a custom button in the toolbar. It must be a string for an SVG `<path d="">` that must conform to a 48x48 viewport (any value from a [Material icon/symbol](https://fonts.google.com/icons) will work).
+Param           | Type          | Default        | Description
+| -             | -             | -              | -
+`dark`          | `true\|false` | `[auto]`       | Whether to force dark/light theme. Only use this if your app already has a theme setting that you want to sync with, and also update it by listening for changes via this app's own theme setting).
+`status`        | `string`      | `[disabled]`   | A status message to display in the toolbar (must be short and may get cut off).
+`color`         | `#rrggbb`     | `#c12bdb`      | A theme color for the app (must be in `#rrggbb` format).
+`back`          | `true\|URL`   | `false`        | Whether to show a back button in the toolbar (iframes should listen to click via postMessage, don't use URL if using an iframe/webview).
+`button1_icon`  | `coordinates` | `[disabled]`   | The icon to display for a custom button in the toolbar. It must be a string for an SVG `<path d="">` that must conform to a 48x48 viewport (any value from a [Material icon/symbol](https://fonts.google.com/icons) will work).
 `button1_color` | `CSS color`   | `currentColor` | A color for the button's fill.
-`trans`         | `lll_ttt`     | `[auto]`      | A translation to force use of (comma-separate for multiple). Must be a fetch(bible) id ([preview any translation](/content/bibles/) to find the id in the url).
-`book`          | `bbb`         | `[auto]`      | A book to show (otherwise remembers last opened).
-`verse`         | `chap:verse`  | `[auto]`      | A chapter and verse to show (otherwise remembers last viewed). Pass a range to highlight a passage (e.g. 1:8-2:3).
+`trans`         | `lll_ttt`     | `[auto]`       | A translation to force use of (comma-separate for multiple). Must be a fetch(bible) id ([preview any translation](/content/bibles/) to find the id in the url).
+`search`        | `string`      | `[auto]`       | A passage reference in the language of the given translations (English names and book codes always work, e.g. `Genesis 1:1`).
 
 
 ## Messages
