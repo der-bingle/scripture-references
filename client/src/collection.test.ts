@@ -26,6 +26,52 @@ describe('BibleCollection', () => {
         book_names_english: {'2th': "2 Thes.", tit: "Titus"},
     }]])
 
+    it("get_prev_verse", ({expect}) => {
+
+        const gen_result = (chapter:number, verse:number) => {
+            return {
+                type: 'verse',
+                range: false,
+                book: '2th',
+                start_chapter: chapter,
+                start_verse: verse,
+                end_chapter: chapter,
+                end_verse: verse,
+            }
+        }
+
+        expect(collection.get_prev_verse('2th', 1, 1)).toEqual(null)
+        expect(collection.get_prev_verse('2th', 1, 2)).toEqual(gen_result(1, 1))
+        expect(collection.get_prev_verse('2th', 2, 1)).toEqual(gen_result(1, 12))
+        expect(collection.get_prev_verse({book: '2th', start_chapter: 2, start_verse: 1}))
+            .toEqual(gen_result(1, 12))
+        expect(collection.get_prev_verse({book: '2th', start_chapter: 1, start_verse: 1,
+            end_chapter: 2, end_verse: 1}, true)).toEqual(gen_result(1, 12))
+    })
+
+    it("get_next_verse", ({expect}) => {
+
+        const gen_result = (chapter:number, verse:number) => {
+            return {
+                type: 'verse',
+                range: false,
+                book: '2th',
+                start_chapter: chapter,
+                start_verse: verse,
+                end_chapter: chapter,
+                end_verse: verse,
+            }
+        }
+
+        expect(collection.get_next_verse('2th', 1, 1)).toEqual(gen_result(1, 2))
+        expect(collection.get_next_verse('2th', 1, 12)).toEqual(gen_result(2, 1))
+        expect(collection.get_next_verse('2th', 3, 18)).toEqual(null)
+        expect(collection.get_next_verse({book: '2th', start_chapter: 2, start_verse: 1}))
+            .toEqual(gen_result(2, 2))
+        expect(collection.get_next_verse({book: '2th', start_chapter: 1, start_verse: 1,
+            end_chapter: 2, end_verse: 1}, true)).toEqual(gen_result(2, 2))
+    })
+
     it("sanitize_reference", ({expect}) => {
 
         // Valid basic args

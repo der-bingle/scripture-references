@@ -490,6 +490,109 @@ export class BibleCollection {
         return [...Array(last_verse[book]![chapter-1]).keys()].map(i => i + 1)
     }
 
+    // Get a reference for the verse previous to the one supplied in input (accounting for chapters)
+    // If a reference object is given, the end verse can optionally be used as input instead
+    // but the output will always be for a single verse (ranges ignored).
+    get_prev_verse(book:string, chapter:number, verse:number):SanitizedReference|null
+    get_prev_verse(reference:PassageRef|SanitizedReference, end?:boolean):SanitizedReference|null
+    get_prev_verse(book_or_obj:string|PassageRef|SanitizedReference, chapter_or_end?:number|boolean,
+            verse_arg?:number):SanitizedReference|null{
+
+        // Handle different arg options
+        let ref:PassageRef
+        let end = false
+        if (typeof book_or_obj === 'string'){
+            ref = {book: book_or_obj, start_chapter: Number(chapter_or_end), start_verse: verse_arg}
+        } else {
+            ref = {...book_or_obj}  // Avoid modifying input
+            end = chapter_or_end === true
+        }
+
+        // When passing a reference object, the end verse can optionally be used instead of start
+        let chapter = end ? ref.end_chapter : ref.start_chapter
+        let verse = end ? ref.end_verse : ref.start_verse
+
+        // Ensure ref valid
+        if (!this.valid_reference(ref) || !chapter || !verse){
+            return null
+        }
+
+        // Ensure action possible
+        if (chapter === 1 && verse === 1){
+            return null
+        }
+
+        // Go back a verse
+        if (verse === 1){
+            chapter -= 1
+            verse = this._manifest.last_verse[ref.book]![chapter-1]!
+        } else {
+            verse -= 1
+        }
+
+        return {
+            type: 'verse',
+            range: false,
+            book: ref.book,
+            start_chapter: chapter,
+            start_verse: verse,
+            end_chapter: chapter,
+            end_verse: verse,
+        }
+    }
+
+    // Get a reference for the next verse for the one supplied in input (accounting for chapters)
+    // If a reference object is given, the end verse can optionally be used as input instead
+    // but the output will always be for a single verse (ranges ignored).
+    get_next_verse(book:string, chapter:number, verse:number):SanitizedReference|null
+    get_next_verse(reference:PassageRef|SanitizedReference, end?:boolean):SanitizedReference|null
+    get_next_verse(book_or_obj:string|PassageRef|SanitizedReference, chapter_or_end?:number|boolean,
+            verse_arg?:number):SanitizedReference|null{
+
+        // Handle different arg options
+        let ref:PassageRef
+        let end = false
+        if (typeof book_or_obj === 'string'){
+            ref = {book: book_or_obj, start_chapter: Number(chapter_or_end), start_verse: verse_arg}
+        } else {
+            ref = {...book_or_obj}  // Avoid modifying input
+            end = chapter_or_end === true
+        }
+
+        // When passing a reference object, the end verse can optionally be used instead of start
+        let chapter = end ? ref.end_chapter : ref.start_chapter
+        let verse = end ? ref.end_verse : ref.start_verse
+
+        // Ensure ref valid
+        if (!this.valid_reference(ref) || !chapter || !verse){
+            return null
+        }
+
+        // Ensure action possible
+        const last_verse = this._manifest.last_verse[ref.book]!
+        if (chapter === last_verse.length && verse === last_verse[last_verse.length-1]){
+            return null
+        }
+
+        // Go forward a verse
+        if (verse === last_verse[chapter-1]){
+            chapter += 1
+            verse = 1
+        } else {
+            verse += 1
+        }
+
+        return {
+            type: 'verse',
+            range: false,
+            book: ref.book,
+            start_chapter: chapter,
+            start_verse: verse,
+            end_chapter: chapter,
+            end_verse: verse,
+        }
+    }
+
     /* Force a given passage reference to be valid (providing as much or as little as desired)
         Chapter and verse numbers will be forced to their closest valid equivalent.
         All properties are returned and `type`/`range` signifies what kind of reference it is.
