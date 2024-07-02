@@ -1,5 +1,8 @@
 
-// TODO Get from client and publish separate to manifest as only needed for non-JS languages
+
+// Re-export chapter/verse numbers, so source only in one module (usx-to-json)
+export {number_of_verses as last_verse} from 'usx-to-json'
+
 
 // Bible book ids in traditional order
 export const books_ordered = [
@@ -80,78 +83,4 @@ export const book_names_english: Record<string, string> = {
     '3jn': "3 John",
     'jud': "Jude",
     'rev': "Revelation",
-}
-
-
-// The most common abbreviations for Bible books per language
-// Aiming for short but also easily recognisable
-export const book_abbreviations: Record<string, Record<string, string>> = {
-    'eng': {
-        'gen': "Gen",
-        'exo': "Exo",
-        'lev': "Lev",
-        'num': "Num",
-        'deu': "Deut",
-        'jos': "Josh",
-        'jdg': "Judg",
-        'rut': "Ruth",
-        '1sa': "1 Sam",
-        '2sa': "2 Sam",
-        '1ki': "1 King",
-        '2ki': "2 King",
-        '1ch': "1 Chr",
-        '2ch': "2 Chr",
-        'ezr': "Ezra",
-        'neh': "Neh",
-        'est': "Est",
-        'job': "Job",
-        'psa': "Psalm",
-        'pro': "Prov",
-        'ecc': "Ecc",
-        'sng': "Song",
-        'isa': "Isa",
-        'jer': "Jer",
-        'lam': "Lam",
-        'ezk': "Ezek",
-        'dan': "Dan",
-        'hos': "Hos",
-        'jol': "Joel",
-        'amo': "Amos",
-        'oba': "Obad",
-        'jon': "Jonah",
-        'mic': "Micah",
-        'nam': "Nahum",
-        'hab': "Hab",
-        'zep': "Zeph",
-        'hag': "Hag",
-        'zec': "Zech",
-        'mal': "Mal",
-        'mat': "Matt",
-        'mrk': "Mark",
-        'luk': "Luke",
-        'jhn': "John",
-        'act': "Acts",
-        'rom': "Rom",
-        '1co': "1 Cor",
-        '2co': "2 Cor",
-        'gal': "Gal",
-        'eph': "Eph",
-        'php': "Phil",
-        'col': "Col",
-        '1th': "1 Thes",
-        '2th': "2 Thes",
-        '1ti': "1 Tim",
-        '2ti': "2 Tim",
-        'tit': "Titus",
-        'phm': "Phil",
-        'heb': "Heb",
-        'jas': "James",
-        '1pe': "1 Pet",
-        '2pe': "2 Pet",
-        '1jn': "1 John",
-        '2jn': "2 John",
-        '3jn': "3 John",
-        'jud': "Jude",
-        'rev': "Rev",
-    },
 }

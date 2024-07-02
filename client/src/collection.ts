@@ -1,6 +1,7 @@
 
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
+import {book_names_english, books_ordered, last_verse} from './data.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
 import {BookNames, PassageRef, book_name_to_code, passage_str_regex, passage_obj_to_str,
     passage_str_to_obj, verses_obj_to_str} from './references.js'
@@ -128,10 +129,7 @@ export class BibleCollection {
 
         // Start with an empty manifest with common metadata extracted from first manifest
         this._manifest = {
-            book_names_english: manifests[0][1].book_names_english,
-            books_ordered: manifests[0][1].books_ordered,
             licenses: manifests[0][1].licenses,  // Still useful even if resolved within transl.s
-            last_verse: manifests[0][1].last_verse,
             languages: {},
             language2to3: {},
             translations: {},
@@ -211,7 +209,7 @@ export class BibleCollection {
     _ensure_book_exists(translation:string, book:string){
         // Util that throws if book doesn't exist
         this._ensure_trans_exists(translation)
-        if (!this._manifest.books_ordered.includes(book)){
+        if (!books_ordered.includes(book)){
             throw new Error(`Book id "${book}" is not valid (should be 3 letters lowercase)`)
         }
         if (! this.has_book(translation, book)){
@@ -348,7 +346,7 @@ export class BibleCollection {
         if (exclude_incomplete){
             list = list.filter(item => {
                 const count = Object.keys(this._manifest.translations[item.id]!.books).length
-                return count === this._manifest.books_ordered.length
+                return count === books_ordered.length
             })
         }
 
@@ -385,7 +383,7 @@ export class BibleCollection {
                 }
 
                 // Consider as a candidate until something better comes up
-                const full = Object.keys(data.books).length === this._manifest.books_ordered.length
+                const full = Object.keys(data.books).length === books_ordered.length
                 if (
                     !candidate  // Something better than nothing
                     || (!candidate_full && full)  // Full translation better than partial
@@ -412,7 +410,7 @@ export class BibleCollection {
             GetBooksItem[]|Record<string, GetBooksItem>{
 
         // Get book names from translation (or standard English if no translation given)
-        let available = this._manifest.book_names_english
+        let available = book_names_english
         if (translation){
             this._ensure_trans_exists(translation)
             available = this._manifest.translations[translation]!.books
@@ -420,14 +418,14 @@ export class BibleCollection {
 
         // Create a list of the available books in traditional order
         const slice = testament ? (testament === 'ot' ? [0, 39] : [39]) : []
-        const list = this._manifest.books_ordered.slice(...slice)
+        const list = books_ordered.slice(...slice)
             .filter(id => whole || id in available)
             .map(id => {
                 return {
                     id,
-                    name: available[id] ?? this._manifest.book_names_english[id]!,
+                    name: available[id] ?? book_names_english[id]!,
                     name_local: available[id] ?? '',
-                    name_english: this._manifest.book_names_english[id]!,
+                    name_english: book_names_english[id]!,
                     available: !!translation && id in available,
                 }
             })
@@ -465,7 +463,7 @@ export class BibleCollection {
         // Look through books adding to either `available` or `missing`
         const trans_books = this._manifest.translations[translation]!.books
         let testament:'ot'|'nt' = 'ot'
-        for (const book of this._manifest.books_ordered){
+        for (const book of books_ordered){
             if (book === 'mat'){
                 testament = 'nt'  // Switch testament when reach Matthew (books ordered)
             }
@@ -478,14 +476,12 @@ export class BibleCollection {
 
     // Get chapter numbers for a book
     get_chapters(book:string):number[]{
-        const last_verse = this._manifest.last_verse
         // NOTE Need to +1 since chapter numbers are derived from place in last_verse array
         return [...Array(last_verse[book]!.length).keys()].map(i => i + 1)
     }
 
     // Get verse numbers for a chapter
     get_verses(book:string, chapter:number):number[]{
-        const last_verse = this._manifest.last_verse
         // WARN Position of each chapter is chapter-1 due to starting from 0
         return [...Array(last_verse[book]![chapter-1]).keys()].map(i => i + 1)
     }
@@ -525,7 +521,7 @@ export class BibleCollection {
         // Go back a verse
         if (verse === 1){
             chapter -= 1
-            verse = this._manifest.last_verse[ref.book]![chapter-1]!
+            verse = last_verse[ref.book]![chapter-1]!
         } else {
             verse -= 1
         }
@@ -569,13 +565,14 @@ export class BibleCollection {
         }
 
         // Ensure action possible
-        const last_verse = this._manifest.last_verse[ref.book]!
-        if (chapter === last_verse.length && verse === last_verse[last_verse.length-1]){
+        const last_verse_book = last_verse[ref.book]!
+        if (chapter === last_verse_book.length
+                && verse === last_verse_book[last_verse_book.length-1]){
             return null
         }
 
         // Go forward a verse
-        if (verse === last_verse[chapter-1]){
+        if (verse === last_verse_book[chapter-1]){
             chapter += 1
             verse = 1
         } else {
@@ -641,22 +638,23 @@ export class BibleCollection {
         }
 
         // Validate book
-        if (this._manifest.books_ordered.indexOf(ref.book) === -1){
+        if (books_ordered.indexOf(ref.book) === -1){
             ref.book = 'gen'
         }
 
         // Ensure start chapter is valid
-        const last_verse = this._manifest.last_verse[ref.book]!
+        const last_verse_book = last_verse[ref.book]!
         if (ref.start_chapter < 1){
             ref.start_chapter = 1
             ref.start_verse = 1
-        } else if (ref.start_chapter > last_verse.length){
-            ref.start_chapter = last_verse.length
-            ref.start_verse = last_verse[last_verse.length-1]!
+        } else if (ref.start_chapter > last_verse_book.length){
+            ref.start_chapter = last_verse_book.length
+            ref.start_verse = last_verse_book[last_verse_book.length-1]!
         }
 
         // Ensure start verse is valid
-        ref.start_verse = Math.min(Math.max(ref.start_verse, 1), last_verse[ref.start_chapter-1]!)
+        ref.start_verse = Math.min(Math.max(ref.start_verse, 1),
+            last_verse_book[ref.start_chapter-1]!)
 
         // Ensure end is not before start
         if (ref.end_chapter < ref.start_chapter ||
@@ -666,13 +664,13 @@ export class BibleCollection {
         }
 
         // Ensure end chapter is not invalid (already know is same or later than start)
-        if (ref.end_chapter > last_verse.length){
-            ref.end_chapter = last_verse.length
-            ref.end_verse = last_verse[last_verse.length-1]!
+        if (ref.end_chapter > last_verse_book.length){
+            ref.end_chapter = last_verse_book.length
+            ref.end_verse = last_verse_book[last_verse_book.length-1]!
         }
 
         // Ensure end verse is valid
-        ref.end_verse = Math.min(Math.max(ref.end_verse, 1), last_verse[ref.end_chapter-1]!)
+        ref.end_verse = Math.min(Math.max(ref.end_verse, 1), last_verse_book[ref.end_chapter-1]!)
 
         // Determine type
         const chapters_same = ref.start_chapter === ref.end_chapter
@@ -686,7 +684,7 @@ export class BibleCollection {
 
         // Identify if range completes chapters
         if (type === 'range_multi' && ref.start_verse === 1
-                && ref.end_verse === last_verse[ref.end_chapter-1]){
+                && ref.end_verse === last_verse_book[ref.end_chapter-1]){
             type = 'range_chapters'
         }
 
@@ -740,7 +738,7 @@ export class BibleCollection {
 
     // Confirm if given book is within the specified testament
     valid_testament(book:string, testament:'ot'|'nt'):boolean{
-        const index = this._manifest.books_ordered.indexOf(book)
+        const index = books_ordered.indexOf(book)
         if (index === -1){
             return false
         } else if (testament === 'nt' && index >= 39){
@@ -793,12 +791,12 @@ export class BibleCollection {
     // Detect which book a name refers to (defaults to English, pass translation for other language)
     detect_book(name:string, translation?:string){
         return book_name_to_code(name,
-            translation ? this.get_books(translation) : this._manifest.book_names_english)
+            translation ? this.get_books(translation) : book_names_english)
     }
 
     // @internal
     _book_names_list(translation?:string){
-        const book_names:BookNames[] = [this._manifest.book_names_english]
+        const book_names:BookNames[] = [book_names_english]
         if (translation){
             book_names.unshift(this.get_books(translation))
         }
@@ -876,7 +874,7 @@ export class BibleCollection {
         const sanitized = this.sanitize_reference(reference)
 
         // Determine book names
-        let book_names_data:BookNames = this._manifest.book_names_english
+        let book_names_data:BookNames = book_names_english
         if (typeof book_names === 'string'){
             book_names_data = this.get_books(book_names)  // Get names from a translation
         } else if (typeof book_names === 'object' && book_names !== null){

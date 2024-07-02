@@ -116,9 +116,6 @@ export interface DistManifest {
     translations:Record<string, DistTranslation>
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
-    books_ordered:string[]
-    book_names_english:Record<string, string>
-    last_verse:Record<string, number[]>
     licenses:Record<string, MetaStandardLicense>
 }
 
