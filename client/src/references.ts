@@ -1,5 +1,6 @@
 
 import {parse_int} from './utils.js'
+import {last_verse, books_ordered} from './data.js'
 
 import type {GetBooksItem} from './collection'
 
@@ -16,6 +17,24 @@ export interface PassageRef extends VersesRef {
 }
 
 export type BookNames = Record<string, string>|Record<string, GetBooksItem>|GetBooksItem[]
+
+export type ReferenceType = 'book'|'chapter'|'verse'|'range_verses'|'range_chapters'|'range_multi'
+
+export interface SanitizedReference {
+    type:ReferenceType
+    range:boolean
+    book:string
+    start_chapter:number
+    start_verse:number
+    end_chapter:number
+    end_verse:number
+}
+
+export interface SanitizedReferenceMatch {
+    ref:SanitizedReference
+    text:string
+    index:number
+}
 
 
 // Util for normalising book_names input to a simple record
@@ -219,6 +238,277 @@ export function passage_obj_to_str(ref:PassageRef, book_names:BookNames, verse_s
         text += ' ' + verses
     }
     return text
+}
+
+
+/* Force a given passage reference to be valid (providing as much or as little as desired)
+    Chapter and verse numbers will be forced to their closest valid equivalent.
+    All properties are returned and `type`/`range` signifies what kind of reference it is.
+*/
+export function sanitize_reference(book:string, chapter?:number, verse?:number):SanitizedReference
+export function sanitize_reference(reference:PassageRef|SanitizedReference):SanitizedReference
+export function sanitize_reference(book_or_obj:string|PassageRef|SanitizedReference,
+        chapter?:number, verse?:number):SanitizedReference{
+
+    // Detect what props are provided (will use later)
+    let chapters_given:boolean
+    let verses_given:boolean
+
+    // Normalise args
+    let ref:Omit<SanitizedReference, 'type'|'range'>
+    if (typeof book_or_obj === 'string'){
+        chapters_given = chapter !== undefined
+        verses_given = verse !== undefined
+        ref = {
+            book: book_or_obj,
+            start_chapter: chapter ?? 1,
+            start_verse: verse ?? 1,
+            // Following will increase to whatever start is later
+            end_chapter: 1,
+            end_verse: 1,
+        }
+    } else {
+        chapters_given = book_or_obj.start_chapter !== undefined
+            || book_or_obj.end_chapter !== undefined
+        verses_given = book_or_obj.start_verse !== undefined
+            || book_or_obj.end_verse !== undefined
+        ref = {
+            book: book_or_obj.book,
+            start_chapter: book_or_obj.start_chapter ?? 1,
+            start_verse: book_or_obj.start_verse ?? 1,
+            // Unlike simple args, obj arg may be a range so need to default more carefully
+            end_chapter: book_or_obj.end_chapter ?? book_or_obj.start_chapter ?? 1,
+            // If end_chapter given then dealing with whole chapters, otherwise a non-range
+            end_verse: book_or_obj.end_verse ?? (book_or_obj.end_chapter ? 999 : 1),
+        }
+        // If was given a pre-sanitized reference, still recheck, but need to correct below
+        if ('type' in book_or_obj){
+            verses_given = !['book', 'chapter', 'range_chapters'].includes(book_or_obj.type)
+            chapters_given = book_or_obj.type !== 'book'
+        }
+    }
+
+    // Validate book
+    if (books_ordered.indexOf(ref.book) === -1){
+        ref.book = 'gen'
+    }
+
+    // Ensure start chapter is valid
+    const last_verse_book = last_verse[ref.book]!
+    if (ref.start_chapter < 1){
+        ref.start_chapter = 1
+        ref.start_verse = 1
+    } else if (ref.start_chapter > last_verse_book.length){
+        ref.start_chapter = last_verse_book.length
+        ref.start_verse = last_verse_book[last_verse_book.length-1]!
+    }
+
+    // Ensure start verse is valid
+    ref.start_verse = Math.min(Math.max(ref.start_verse, 1),
+        last_verse_book[ref.start_chapter-1]!)
+
+    // Ensure end is not before start
+    if (ref.end_chapter < ref.start_chapter ||
+            (ref.end_chapter === ref.start_chapter && ref.end_verse < ref.start_verse)){
+        ref.end_chapter = ref.start_chapter
+        ref.end_verse = ref.start_verse
+    }
+
+    // Ensure end chapter is not invalid (already know is same or later than start)
+    if (ref.end_chapter > last_verse_book.length){
+        ref.end_chapter = last_verse_book.length
+        ref.end_verse = last_verse_book[last_verse_book.length-1]!
+    }
+
+    // Ensure end verse is valid
+    ref.end_verse = Math.min(Math.max(ref.end_verse, 1), last_verse_book[ref.end_chapter-1]!)
+
+    // Determine type
+    const chapters_same = ref.start_chapter === ref.end_chapter
+    const verses_same = ref.start_verse === ref.end_verse
+    let type:ReferenceType
+    if (chapters_same && verses_same){
+        type = chapters_given ? (verses_given ? 'verse' : 'chapter') : 'book'
+    } else {
+        type = chapters_same ? 'range_verses' : (verses_given ? 'range_multi': 'range_chapters')
+    }
+
+    // Identify if range completes chapters
+    if (type === 'range_multi' && ref.start_verse === 1
+            && ref.end_verse === last_verse_book[ref.end_chapter-1]){
+        type = 'range_chapters'
+    }
+
+    return {type, range: type.startsWith('range_'), ...ref}
+}
+
+
+// Confirm if a passage reference is valid, verifying book code and chapter/verse numbers
+export function valid_reference(book:string, chapter?:number, verse?:number):boolean
+export function valid_reference(reference:PassageRef):boolean
+export function valid_reference(book_or_obj:string|PassageRef, chapter?:number, verse?:number)
+        :boolean{
+
+    // Normalize args
+    let ref:PassageRef
+    if (typeof book_or_obj !== 'string'){
+        ref = book_or_obj
+    } else {
+        ref = {
+            book: book_or_obj,
+            start_chapter: chapter,
+            start_verse: verse,
+        }
+    }
+
+    // Get sanitized reference
+    const sanitized = sanitize_reference(ref)
+
+    // Verify parts stayed same, but only those provided (ignoring undefined)
+    if (ref.book !== sanitized.book){
+        return false
+    }
+    for (const prop of ['start_chapter', 'start_verse', 'end_chapter', 'end_verse'] as const){
+        if (Number.isInteger(ref[prop]) && ref[prop] !== sanitized[prop]){
+            return false
+        }
+    }
+
+    // Also fail if provided args don't make sense
+    // NOTE Already know that no numbers in ref are 0/false due to above
+    if (!ref.start_chapter && (ref.end_chapter || ref.start_verse || ref.end_verse)){
+        return false  // e.g. Matt :1
+    }
+    if (ref.end_verse && !ref.start_verse){
+        return false  // e.g. Matt 1:-1
+    }
+    if (ref.start_verse && ref.end_chapter && !ref.end_verse){
+        return false  // e.g. Matt 1:1-2:
+    }
+
+    return true
+}
+
+
+// Confirm if given book is within the specified testament
+export function valid_testament(book:string, testament:'ot'|'nt'):boolean{
+    const index = books_ordered.indexOf(book)
+    if (index === -1){
+        return false
+    } else if (testament === 'nt' && index >= 39){
+        return true
+    } else if (testament === 'ot' && index < 39){
+        return true
+    }
+    return false
+}
+
+
+// Get a reference for the verse previous to the one supplied in input (accounting for chapters)
+// If a reference object is given, the end verse can optionally be used as input instead
+// but the output will always be for a single verse (ranges ignored).
+export function get_prev_verse(book:string, chapter:number, verse:number):SanitizedReference|null
+export function get_prev_verse(reference:PassageRef|SanitizedReference, end?:boolean)
+    :SanitizedReference|null
+export function get_prev_verse(book_or_obj:string|PassageRef|SanitizedReference,
+        chapter_or_end?:number|boolean, verse_arg?:number):SanitizedReference|null{
+
+    // Handle different arg options
+    let ref:PassageRef
+    let end = false
+    if (typeof book_or_obj === 'string'){
+        ref = {book: book_or_obj, start_chapter: Number(chapter_or_end), start_verse: verse_arg}
+    } else {
+        ref = {...book_or_obj}  // Avoid modifying input
+        end = chapter_or_end === true
+    }
+
+    // When passing a reference object, the end verse can optionally be used instead of start
+    let chapter = end ? ref.end_chapter : ref.start_chapter
+    let verse = end ? ref.end_verse : ref.start_verse
+
+    // Ensure ref valid
+    if (!valid_reference(ref) || !chapter || !verse){
+        return null
+    }
+
+    // Ensure action possible
+    if (chapter === 1 && verse === 1){
+        return null
+    }
+
+    // Go back a verse
+    if (verse === 1){
+        chapter -= 1
+        verse = last_verse[ref.book]![chapter-1]!
+    } else {
+        verse -= 1
+    }
+
+    return {
+        type: 'verse',
+        range: false,
+        book: ref.book,
+        start_chapter: chapter,
+        start_verse: verse,
+        end_chapter: chapter,
+        end_verse: verse,
+    }
+}
+
+
+// Get a reference for the next verse for the one supplied in input (accounting for chapters)
+// If a reference object is given, the end verse can optionally be used as input instead
+// but the output will always be for a single verse (ranges ignored).
+export function get_next_verse(book:string, chapter:number, verse:number):SanitizedReference|null
+export function get_next_verse(reference:PassageRef|SanitizedReference, end?:boolean)
+    :SanitizedReference|null
+export function get_next_verse(book_or_obj:string|PassageRef|SanitizedReference,
+        chapter_or_end?:number|boolean, verse_arg?:number):SanitizedReference|null{
+
+    // Handle different arg options
+    let ref:PassageRef
+    let end = false
+    if (typeof book_or_obj === 'string'){
+        ref = {book: book_or_obj, start_chapter: Number(chapter_or_end), start_verse: verse_arg}
+    } else {
+        ref = {...book_or_obj}  // Avoid modifying input
+        end = chapter_or_end === true
+    }
+
+    // When passing a reference object, the end verse can optionally be used instead of start
+    let chapter = end ? ref.end_chapter : ref.start_chapter
+    let verse = end ? ref.end_verse : ref.start_verse
+
+    // Ensure ref valid
+    if (!valid_reference(ref) || !chapter || !verse){
+        return null
+    }
+
+    // Ensure action possible
+    const last_verse_book = last_verse[ref.book]!
+    if (chapter === last_verse_book.length
+            && verse === last_verse_book[last_verse_book.length-1]){
+        return null
+    }
+
+    // Go forward a verse
+    if (verse === last_verse_book[chapter-1]){
+        chapter += 1
+        verse = 1
+    } else {
+        verse += 1
+    }
+
+    return {
+        type: 'verse',
+        range: false,
+        book: ref.book,
+        start_chapter: chapter,
+        start_verse: verse,
+        end_chapter: chapter,
+        end_verse: verse,
+    }
 }
 
 

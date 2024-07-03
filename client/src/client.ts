@@ -4,7 +4,7 @@ import {BibleCollection} from './collection.js'
 import {BookCrossref} from './crossref.js'
 
 import type {UsageOptions, UsageConfig} from './types'
-import type {CrossrefData, DistManifest} from './shared_types'
+import type {CrossrefData, DistManifest, OneOrMore} from './shared_types'
 
 
 // The options available for configuring a BibleClient

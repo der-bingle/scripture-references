@@ -2,9 +2,7 @@
 // UTILS
 
 
-declare global {
-    type OneOrMore<T> = [T, ...T[]]
-}
+export type OneOrMore<T> = [T, ...T[]]
 
 
 // GENERIC META STRUCTURES (common to sources and dist)
