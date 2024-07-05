@@ -2,8 +2,8 @@
 <template lang='pug'>
 
 v-toolbar(:density='density')
-    v-text-field.input(v-model='state.search' placeholder="E.g. John 3:16" hide-details density='compact'
-        variant='outlined' autofocus @blur='state.search = null')
+    v-text-field.input(v-model='state.search' placeholder="E.g. John 3:16" hide-details
+        density='compact' variant='outlined' autofocus @blur='state.search = null')
 
     template(#append)
         //- v-btn-toggle(color='secondary' density='compact')
@@ -21,7 +21,6 @@ v-toolbar(:density='density')
 
 
 import {density, state} from '@/services/state'
-import {current_book_name} from '@/services/computes'
 
 
 </script>

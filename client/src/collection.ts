@@ -1,14 +1,11 @@
 
+import {book_names_english, books_ordered, PassageReference, detect_references,
+} from '@gracious.tech/bible-references'
+
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
-import {book_names_english, books_ordered} from './data.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
-import {book_name_to_code, passage_str_regex, passage_obj_to_str,
-    passage_str_to_obj, verses_obj_to_str, sanitize_reference, valid_reference,
-} from './references.js'
 
-import type {SanitizedReference, SanitizedReferenceMatch, BookNames, PassageRef,
-} from './references.js'
 import type {DistManifest, OneOrMore} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
@@ -499,113 +496,54 @@ export class BibleCollection {
         return promise
     }
 
-    // Detect which book a name refers to (defaults to English, pass translation for other language)
-    detect_book(name:string, translation?:string){
-        return book_name_to_code(name,
-            translation ? this.get_books(translation) : book_names_english)
+    // @internal Get list of book names for given translations
+    _book_names_list(translation:string|string[]=[], always_detect_english=true){
+
+        // Key by name so can support multiple names for single book and ensure no duplicate names
+        const name_to_code:Record<string, string> = {}
+
+        // Give first translations priority (JS orders keys by first assigned)
+        const translations = typeof translation === 'string' ? [translation] : translation
+        for (const trans of translations){
+            this._ensure_trans_exists(trans)
+            const books = this._manifest.translations[trans]!.books
+            for (const [code, name] of Object.entries(books)){
+                name_to_code[name] = code  // Reassigning shouldn't affect order of keys
+            }
+        }
+
+        // Optionally add English last so is lowest priority
+        if (always_detect_english){
+            for (const [code, name] of Object.entries(book_names_english)){
+                name_to_code[name] = code
+            }
+        }
+
+        // Return list reversed (code -> name) as expected by references module
+        return Object.entries(name_to_code).map(([name, code]) => [code, name] as [string, string])
     }
 
-    // @internal
-    _book_names_list(translation?:string){
-        const book_names:BookNames[] = [book_names_english]
+    // Detect bible references in a block of text using book names of given translation(s)
+    // A generator is returned and can be passed updated text each time it yields a result
+    detect_references(text:string, translation:string|string[]=[], always_detect_english=true){
+        return detect_references(text, this._book_names_list(translation, always_detect_english))
+    }
+
+    // Parse a single bible reference string into a PassageReference object (validating it)
+    // Supports only single passages (for e.g. Matt 10:6,8 use `detect_references`)
+    string_to_reference(text:string, translation:string|string[]=[],
+            always_detect_english=true){
+        return PassageReference.from_string(text,
+            this._book_names_list(translation, always_detect_english))
+    }
+
+    // Render a PassageReference object as a string using the given translation's book names
+    reference_to_string(reference:PassageReference, translation?:string){
+        let book_names = book_names_english
         if (translation){
-            book_names.unshift(this.get_books(translation))
+            this._ensure_trans_exists(translation)
+            book_names = this._manifest.translations[translation]!.books
         }
-        return book_names
-    }
-
-    // Detect which passage a human text passage reference refers to
-    // Pass translation arg to correctly detect book names/abbreviations for that language/version
-    detect_passage(reference:string, translation?:string):SanitizedReference|null{
-        const detected = passage_str_to_obj(reference, ...this._book_names_list(translation))
-        if (!detected){
-            return null
-        }
-        return sanitize_reference(detected)
-    }
-
-    // Detect the text and position of first passage reference in a block of text
-    // Pass translation arg to correctly detect book names/abbreviations for that language/version
-    detect_passage_reference(text:string, translation?:string):SanitizedReferenceMatch|null{
-
-        // Get book names
-        const book_names = this._book_names_list(translation)
-
-        // Create regex (will manually manipulate lastIndex property of it)
-        const regex = passage_str_regex()
-
-        // Loop until find a valid ref (not all regex matches will be valid)
-        while (true){
-            const match = regex.exec(text)
-            if (!match){
-                return null  // Either no matches or no valid matches...
-            }
-
-            // Confirm match is actually a valid ref
-            const ref = passage_str_to_obj(match[0], ...book_names)
-            if (ref && valid_reference(ref) && ref.start_chapter){  // No whole book
-                const sane_ref = sanitize_reference(ref)
-                return {ref: sane_ref, text: match[0], index: match.index}
-            }
-
-            // If invalid, try next word as match might still have included a partial ref
-            // e.g. "in 1 Corinthians 9" -> "in 1" -> "1 Corinthians 9"
-            const chars_to_next_word = match[0].indexOf(' ', 1)
-            if (chars_to_next_word >= 1){
-                // Backtrack to exclude just first word of previous match
-                regex.lastIndex -= (match[0].length - chars_to_next_word - 1)
-            }
-        }
-    }
-
-    // Detect the text and position of all passage references in a block of text
-    // Pass translation arg to correctly detect book names/abbreviations for that language/version
-    detect_passage_references(text:string, translation?:string){
-        const matches:SanitizedReferenceMatch[] = []
-        while (true){
-            const match = this.detect_passage_reference(text, translation)
-            if (match){
-                matches.push(match)
-                text = text.slice(match.index + match.text.length + 1)
-            } else {
-                break
-            }
-        }
-        return matches
-    }
-
-    // Generate a human-readable passage reference from a data object
-    // `book_names` can either be a translation id or a mapping of book codes to names
-    // This allows you to pass abbreviated names if you prefer (defaults to English names)
-    // If `book_names` is null then only the verse numbers will be returned
-    generate_passage_reference(reference:PassageRef|SanitizedReference,
-            book_names?:string|BookNames|null, verse_sep=':', range_sep='-'){
-
-        // Sanitize reference
-        const sanitized = sanitize_reference(reference)
-
-        // Determine book names
-        let book_names_data:BookNames = book_names_english
-        if (typeof book_names === 'string'){
-            book_names_data = this.get_books(book_names)  // Get names from a translation
-        } else if (typeof book_names === 'object' && book_names !== null){
-            book_names_data = book_names  // Custom names
-        }
-
-        // Conform sanitized reference type to props `passage_obj_to_str` expects
-        const props:PassageRef = {...sanitized}  // Will delete props so copy
-        if (['book', 'chapter', 'range_chapters'].includes(sanitized.type)){
-            delete props.start_verse
-            delete props.end_verse
-        }
-        if (sanitized.type === 'book'){
-            delete props.start_chapter
-            delete props.end_chapter
-        }
-
-        if (book_names === null){
-            return verses_obj_to_str(props, verse_sep, range_sep)
-        }
-        return passage_obj_to_str(props, book_names_data, verse_sep, range_sep)
+        return reference.toString(book_names)
     }
 }

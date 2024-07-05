@@ -19,9 +19,9 @@ template(v-if='crossrefs.length')
 
 import {computed, watch, ref, nextTick} from 'vue'
 
-import {verses_obj_to_str} from '@gracious.tech/fetch-client'
+import {PassageReference} from '@gracious.tech/fetch-client'
 
-import {change_passage, state} from '@/services/state'
+import {change_book, state} from '@/services/state'
 import {book_names} from '@/services/computes'
 
 
@@ -30,7 +30,7 @@ const verse_label = computed(() => {
         return ''
     }
     const [book, chapter, verse] = state.study
-    return `${book_names.value[book]!} ${chapter}:${verse}`
+    return new PassageReference(book, chapter, verse).toString(book_names.value)
 })
 
 
@@ -43,11 +43,11 @@ watch(() => state.study, () => {
         return
     }
     crossrefs.value = state.crossref.get_refs(state.study[1], state.study[2]).map(crossref => {
+        const ref = new PassageReference(crossref)
         return {
-            label: `${book_names.value[crossref.book]!} ${verses_obj_to_str(crossref)!}`,
+            label: ref.toString(book_names.value),
             view(){
-                change_passage(crossref.book, crossref.start_chapter,
-                    crossref.start_verse ?? undefined)
+                change_book(crossref)
             },
         }
     })
@@ -67,10 +67,12 @@ watch(() => state.study, () => {
     void nextTick(() => {
         for (const ref_span of notes_div.value?.querySelectorAll('span[data-ref]') ?? []){
             ref_span.addEventListener('click', event => {
-                const [book, ch, v] =
-                    (event.target as HTMLDivElement).dataset['ref']?.split(',') ?? []
+                const parts = (event.target as HTMLDivElement).dataset['ref']?.split(',') ?? []
+                const book = parts[0]
                 if (book){
-                    change_passage(book, ch ? parseInt(ch) : undefined, v ? parseInt(v) : undefined)
+                    const [start_chapter, start_verse, end_chapter, end_verse] = parts.slice(1)
+                        .map(part => part === undefined ? undefined : parseInt(part))
+                    change_book({book, start_chapter, start_verse, end_chapter, end_verse})
                 }
             })
         }
@@ -80,8 +82,8 @@ watch(() => state.study, () => {
 
 
 const return_to_verse = () => {
-    const [book, chapter, verse] = state.study!
-    change_passage(book, chapter, verse)
+    const [book, start_chapter, start_verse] = state.study!
+    change_book({book, start_chapter, start_verse})
 }
 
 

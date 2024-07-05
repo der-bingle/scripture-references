@@ -1,7 +1,7 @@
 
 // The number of verses for every chapter of the Bible
 // WARN Chapters are zero-indexed (i.e chapter 1 is at index 0)
-export const number_of_verses:Record<string, number[]> = {
+export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
     '1ch': [
         54,
         55,
@@ -1323,4 +1323,4 @@ export const number_of_verses:Record<string, number[]> = {
         15,
         20,
     ],
-}
+})

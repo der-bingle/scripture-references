@@ -99,7 +99,7 @@ watch(() => state.color, value => {
     self.document.body.parentElement!.style.backgroundColor = value
 }, {immediate: true})
 watch(() => state.dark, value => {
-    theme.name.value = value ? 'dark' : 'light'
+    theme.global.name.value = value ? 'dark' : 'light'
 })
 
 onMounted(() => {

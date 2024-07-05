@@ -1,5 +1,5 @@
 
-import {number_of_verses} from './stats.js'
+import {last_verse} from '@gracious.tech/bible-references'
 
 
 // Detect book and expected number of verses
@@ -16,9 +16,9 @@ export function get_num_verses(usx_element:Element){
         throw new Error("USX is missing <book> element")
     }
     const book_code = book_element.getAttribute('code')?.toLowerCase()
-    if (!book_code || !(book_code in number_of_verses)){
+    if (!book_code || !(book_code in last_verse)){
         throw Error(`Book code invalid: ${book_code!}`)
     }
 
-    return number_of_verses[book_code]!
+    return last_verse[book_code]!
 }

@@ -1,9 +1,8 @@
 
 import {reactive, computed, watch} from 'vue'
 
-import type {IndividualVerse} from '@gracious.tech/fetch-client/dist/esm/book'
-import type {BookCrossref} from '@gracious.tech/fetch-client/dist/esm/crossref'
-import type {SanitizedReference} from '@gracious.tech/fetch-client/dist/esm/collection'
+import {IndividualVerse, BookCrossref, PassageReference, PassageArgs}
+    from '@gracious.tech/fetch-client'
 
 
 // LOCAL STORAGE
@@ -85,7 +84,7 @@ export const state = reactive({
     book: 'gen',
     chapter: 1,  // Currently being viewed
     verse: 1,  // Currently being viewed
-    passage: null as null|SanitizedReference,  // Targeted/highlighted ()
+    passage: null as null|PassageReference,  // Targeted/highlighted ()
     offline: false,
     content: '',
     content_verses: [] as IndividualVerse<string>[][],
@@ -134,26 +133,20 @@ export const dialog_max_width = computed(() => {
 // METHODS
 
 
-// Change chapter helper
-export const change_chapter = (chapter:number, verse=1) => {
-    state.chapter = chapter
-    state.verse = verse
-    state.passage = {
-        type: 'chapter',
-        range: false,
-        book: state.book,
-        start_chapter: chapter,
-        start_verse: verse,
-        end_chapter: chapter,
-        end_verse: verse,
-    }
+// Change passage within same book
+export const change_passage = (start_chapter:number, start_verse?:number, end_chapter?:number,
+    end_verse?:number) => {
+    state.chapter = start_chapter
+    state.verse = start_verse ?? 1
+    state.passage = new PassageReference(
+        {book: state.book, start_chapter, start_verse, end_chapter, end_verse})
 }
 
 
-// Change passage helper
-export const change_passage = (book:string, chapter=1, verse=1) => {
-    state.book = book
-    change_chapter(chapter, verse)
+// Change book
+export const change_book = (ref:PassageArgs) => {
+    state.book = ref.book
+    change_passage(ref.start_chapter ?? 1, ref.start_verse, ref.end_chapter, ref.end_verse)
 }
 
 

@@ -1,7 +1,7 @@
 {
-  "name": "usx-to-json",
+  "name": "@gracious.tech/bible-references",
   "version": "0.0.0",
-  "description": "Convert USX Bible format to JSON with verse contents in either HTML or plain text.",
+  "description": "Bible reference detection, parsing, and rendering that supports any language.",
   "type": "module",
   "exports": {
     "import": "./dist/esm/index.js",
@@ -17,16 +17,12 @@
   },
   "keywords": [
     "bible",
-    "usx",
-    "html"
+    "reference"
   ],
   "author": "Gracious Tech",
   "license": "MIT-0",
   "bugs": {
     "url": "https://github.com/gracious-tech/fetch/issues"
   },
-  "homepage": "https://github.com/gracious-tech/fetch/tree/master/converters/usx-to-json",
-  "dependencies": {
-    "@gracious.tech/bible-references": "^0.0.0"
-  }
+  "homepage": "https://github.com/gracious-tech/fetch/tree/master/references"
 }

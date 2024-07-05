@@ -2,6 +2,8 @@
 
 import {computed} from 'vue'
 
+import {get_chapters} from '@gracious.tech/bible-references'
+
 import {content} from '@/services/content'
 import {state} from '@/services/state'
 
@@ -22,7 +24,7 @@ export const current_book_name = computed(() => {
 // List of chapters for current book
 export const chapters = computed(() => {
     if (content.collection.has_book(state.trans[0], state.book)){
-        return content.collection.get_chapters(state.book)
+        return get_chapters(state.book)
     }
     return []
 })

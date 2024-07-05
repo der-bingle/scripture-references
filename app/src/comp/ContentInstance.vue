@@ -24,9 +24,10 @@ div.content(ref='content_div' :class='fetch_classes'
 
 import {ref, onMounted, watch, computed} from 'vue'
 
-import {state, change_chapter} from '@/services/state'
+import {PassageReference} from '@gracious.tech/bible-references'
+
+import {state, change_passage} from '@/services/state'
 import {chapters, direction} from '@/services/computes'
-import {content} from '@/services/content'
 
 
 // Swipe distance tracking
@@ -116,7 +117,7 @@ const scroll_to_verse = (chapter:number, verse:number) => {
     let node = verse_nodes[`${chapter}:${verse}`]
     if (!node){
         // Fallback on previous verse
-        const prev = content.collection.get_prev_verse(state.book, chapter, verse)
+        const prev = new PassageReference(state.book, chapter, verse).get_prev_verse()
         if (prev){
             node = verse_nodes[`${prev.start_chapter}:${prev.start_verse}`]
         }
@@ -160,9 +161,9 @@ const on_touch_end = () => {
     // Once a touch action ends, determine if should change chapter
     const distance = intentional_swipe_distance()
     if (distance > 50 && state.chapter < chapters.value.length){
-        change_chapter(state.chapter + 1)
+        change_passage(state.chapter + 1)
     } else if (distance < -50 && state.chapter > 1){
-        change_chapter(state.chapter - 1)
+        change_passage(state.chapter - 1)
     }
     cancel_swipe()
 }
@@ -259,7 +260,7 @@ const highlight_passage = () => {
     const passage = state.passage
     // These types make sense to highlight (range_chapters would be too long and unnecessary)
     const types = ['verse', 'range_verses', 'range_multi']
-    if (CSS.highlights && passage && types.includes(passage.type)){
+    if ('highlights' in CSS && passage && types.includes(passage.type)){
 
         // Start range at start verse marker
         const range = new Range()
@@ -270,7 +271,7 @@ const highlight_passage = () => {
         range.setStartBefore(start)
 
         // Get verse marker for verse after last verse so can select up to it
-        const after_end = content.collection.get_next_verse(passage, true)
+        const after_end = passage.get_next_verse(true)
         let end:HTMLElement|undefined
         if (!after_end){
             // Final verse of book, so select up to attribution
@@ -291,6 +292,8 @@ const highlight_passage = () => {
         }
 
         // Register the range as a highlight
+        // @ts-ignore New feature
+        // eslint-disable-next-line
         CSS.highlights.set('passage', new Highlight(range))
     }
 }

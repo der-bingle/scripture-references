@@ -3,9 +3,9 @@ import {join} from 'node:path'
 import {readFileSync} from 'node:fs'
 
 import {describe, it} from 'vitest'
+import {last_verse} from '@gracious.tech/bible-references'
 
 import {usx_to_json_html} from './html.js'
-import {number_of_verses} from './stats.js'
 
 const test_usx = readFileSync(join(__dirname, '..', '..', 'test.usx'), {encoding: 'utf8'})
 
@@ -24,12 +24,12 @@ describe("usx_to_json_html", () => {
         expect(output.contents).toHaveLength(3)
         expect(output.contents[0]).toHaveLength(0)
         // Account for 0 verse
-        expect(output.contents[1]).toHaveLength((number_of_verses['hag'][0] as number) + 1)
-        expect(output.contents[2]).toHaveLength((number_of_verses['hag'][1] as number) + 1)
-        for (let i = 0; i <= number_of_verses['hag'][0]; i++) {
+        expect(output.contents[1]).toHaveLength((last_verse['hag'][0] as number) + 1)
+        expect(output.contents[2]).toHaveLength((last_verse['hag'][1] as number) + 1)
+        for (let i = 0; i <= last_verse['hag'][0]; i++) {
             expect(output.contents[1][i]).toHaveLength(3)
         }
-        for (let i = 1; i <= number_of_verses['hag'][1]; i++) {
+        for (let i = 1; i <= last_verse['hag'][1]; i++) {
             expect(output.contents[2][i]).toHaveLength(3)
         }
     })

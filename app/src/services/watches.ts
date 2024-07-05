@@ -70,7 +70,8 @@ watch([() => state.trans, () => state.book], async () => {
     })
     void fetch(`${content.client._data_endpoint}notes/eng_tyndale/html/${state.book}.json`)
         .then(async resp => {
-            state.notes = (await resp.json())['verses'] as Record<string, Record<string, string>>
+            state.notes =
+                (await resp.json() as {verses: Record<string, Record<string, string>>})['verses']
         })
 
     // Get either plain HTML or separated verses
@@ -152,7 +153,7 @@ watch(() => state.dark, () => {
 
 // Try to navigate to verse when search changes
 watch(() => state.search, () => {
-    const match = content.collection.detect_passage_reference(state.search ?? '')
+    const match = content.collection.detect_references(state.search ?? '', state.trans).next().value
     if (match){
         state.book = match.ref.book
         state.chapter = match.ref.start_chapter

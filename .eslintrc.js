@@ -8,9 +8,12 @@ module.exports = {
         tsconfigRootDir: __dirname,
         // Treat all files using component tsconfig, and node for everything else
         project: [
-            './collector/tsconfig.json',
-            './client/tsconfig.json',
             './app/tsconfig.json',
+            './client/tsconfig.json',
+            './collector/tsconfig.json',
+            './converters/usx-to-json/tsconfig.json',
+            './enhancer/tsconfig.json',
+            './references/tsconfig.json',
             './site/tsconfig.json',
             './tsconfig_base.jsonc',  // Hack for still parsing non-matching (eg .js files)
         ],

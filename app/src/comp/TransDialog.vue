@@ -52,7 +52,6 @@ import {computed, ref, watch} from 'vue'
 
 import {state, langs, dialog_max_width} from '@/services/state'
 import {content} from '@/services/content'
-import type {VList} from 'vuetify/lib/components/VList/index'
 
 
 // Contants
@@ -67,7 +66,7 @@ const show_languages = ref(false)
 const displayed_language = ref(langs.value[0])
 const languages_search = ref('')
 const languages_show_all = ref(false)
-const lang_list_comp = ref<InstanceType<typeof VList>>()
+const lang_list_comp = ref<{$el: HTMLElement}>()
 
 
 // Computes

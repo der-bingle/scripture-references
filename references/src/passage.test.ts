@@ -1,0 +1,359 @@
+
+import {describe, it} from 'vitest'
+
+import {PassageReference, _detect_book, _verses_str_to_obj} from './passage.js'
+import {book_names_english} from './data.js'
+
+
+function simple(start_chapter:number, start_verse:number, end_chapter?:number, end_verse?:number){
+    return {
+        start_chapter,
+        start_verse,
+        end_chapter: end_chapter ?? start_chapter,
+        end_verse: end_verse ?? start_verse,
+    }
+}
+
+
+describe('_verses_str_to_obj', () => {
+
+    it("Parses a single chapter", ({expect}) => {
+        expect(_verses_str_to_obj('1')).toEqual({
+            start_chapter: 1,
+            start_verse: undefined,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+    })
+
+    it("Parses multiple chapters", ({expect}) => {
+        expect(_verses_str_to_obj('1-2')).toEqual({
+            start_chapter: 1,
+            start_verse: undefined,
+            end_chapter: 2,
+            end_verse: undefined,
+        })
+    })
+
+    it("Parses a single verse", ({expect}) => {
+        expect(_verses_str_to_obj('1:1')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+    })
+
+    it("Parses multiple verses", ({expect}) => {
+        expect(_verses_str_to_obj('1:1-2')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: undefined,
+            end_verse: 2,
+        })
+    })
+
+    it("Parses verses across chapters", ({expect}) => {
+        expect(_verses_str_to_obj('1:1-2:2')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: 2,
+            end_verse: 2,
+        })
+    })
+
+    it("Salvages what it can from invalid references", ({expect}) => {
+        expect(_verses_str_to_obj('x')).toEqual({
+            start_chapter: undefined,
+            start_verse: undefined,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+        expect(_verses_str_to_obj('1:x')).toEqual({
+            start_chapter: 1,
+            start_verse: undefined,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+        expect(_verses_str_to_obj('1:1-x')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: undefined,
+            end_verse: undefined,
+        })
+        expect(_verses_str_to_obj('1:1-1:x')).toEqual({
+            start_chapter: 1,
+            start_verse: 1,
+            end_chapter: 1,
+            end_verse: undefined,
+        })
+        expect(_verses_str_to_obj('1-2:1')).toEqual({
+            start_chapter: 1,
+            start_verse: undefined,
+            end_chapter: 2,
+            end_verse: 1,
+        })
+    })
+
+})
+
+
+describe('_detect_book', () => {
+
+    const book_names = Object.entries(book_names_english)
+
+    for (const [code, name] of book_names){
+        it(`Identifies "${name}" as '${code}'`, ({expect}) => {
+            expect(_detect_book(name, book_names)).toEqual(code)
+        })
+    }
+
+    for (const [code, abbrevs] of Object.entries(book_name_abbreviations)){
+        for (const abbrev of abbrevs){
+            it(`Identifies "${abbrev}" as '${code}'`, ({expect}) => {
+                expect(_detect_book(abbrev, book_names)).toEqual(code)
+            })
+        }
+    }
+
+    it("Returns null if can't match", ({expect}) => {
+        expect(_detect_book('nothing', book_names)).toEqual(null)
+    })
+
+    it("Returns null if multiple matches", ({expect}) => {
+        expect(_detect_book('j', book_names)).toEqual(null)
+    })
+})
+
+
+describe('get_prev_verse', () => {
+
+    it("Accounts for chapters", ({expect}) => {
+        expect(new PassageReference('2th', 1, 1).get_prev_verse()).toBe(null)
+        expect(new PassageReference('2th', 1, 2).get_prev_verse()).toMatchObject(simple(1, 1))
+        expect(new PassageReference('2th', 2, 1).get_prev_verse()).toMatchObject(simple(1, 12))
+    })
+
+    it("Gets previous from end when arg passed", ({expect}) => {
+        expect(new PassageReference({book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2,
+            end_verse: 1}).get_prev_verse(true))
+            .toMatchObject(simple(1, 12))
+    })
+})
+
+
+describe('get_next_verse', () => {
+
+    it("Accounts for chapters", ({expect}) => {
+        expect(new PassageReference('2th', 1, 1).get_next_verse()).toMatchObject(simple(1, 2))
+        expect(new PassageReference('2th', 1, 12).get_next_verse()).toMatchObject(simple(2, 1))
+        expect(new PassageReference('2th', 3, 18).get_next_verse()).toBe(null)
+    })
+
+    it("Gets next from end when arg passed", ({expect}) => {
+        expect(new PassageReference({book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2,
+            end_verse: 1}).get_next_verse(true))
+            .toMatchObject(simple(2, 2))
+    })
+})
+
+
+describe('constructor', () => {
+
+    it("Interprets basic args", ({expect}) => {
+        expect(new PassageReference('2th')).toMatchObject({type: 'book', range: false,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+        expect(new PassageReference('2th', 1)).toMatchObject({type: 'chapter', range: false,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+        expect(new PassageReference('2th', 1, 1)).toMatchObject({type: 'verse', range: false,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+    })
+
+    it("Interprets invalid basic args", ({expect}) => {
+        expect(new PassageReference('invalid')).toMatchObject({type: 'book', range: false,
+            book: 'gen', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+        expect(new PassageReference('2th', -1)).toMatchObject({type: 'chapter', range: false,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+        expect(new PassageReference('2th', 99)).toMatchObject({type: 'chapter', range: false,
+            book: '2th', start_chapter: 3, start_verse: 18, end_chapter: 3, end_verse: 18})
+        expect(new PassageReference('2th', 2, -1)).toMatchObject({type: 'verse', range: false,
+            book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 1})
+        expect(new PassageReference('2th', 2, 99)).toMatchObject({type: 'verse', range: false,
+            book: '2th', start_chapter: 2, start_verse: 17, end_chapter: 2, end_verse: 17})
+    })
+
+    it("Interprets range args", ({expect}) => {
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 2, end_chapter: 3}
+        )).toMatchObject({type: 'range_chapters', range: true,
+            book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 3, end_verse: 18})
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 2, start_verse: 1, end_verse: 2}
+        )).toMatchObject({type: 'range_verses', range: true,
+            book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 2})
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 1}
+        )).toMatchObject({type: 'range_multi', range: true,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 1})
+    })
+
+    it("Simplifies ranges", ({expect}) => {
+        // Simplify if range is really a single verse or a range of chapters
+        // NOTE book/chapter types are for navigating to a position rather than specifying a range
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1}
+        )).toMatchObject({type: 'verse', range: false,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17}
+        )).toMatchObject({type: 'range_chapters', range: true,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17})
+    })
+
+    it("Interprets invalid range args", ({expect}) => {
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 2, end_chapter: 1}
+        )).toMatchObject({type: 'chapter', range: false,
+            book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 1})
+        expect(new PassageReference(
+            {book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 99}
+        )).toMatchObject({type: 'range_verses', range: true,
+            book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 17})
+    })
+
+    it("Interprets non-sensical args", ({expect}) => {
+        expect(new PassageReference({book: '2th', start_verse: 1}
+        )).toMatchObject({type: 'book', range: false,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
+        expect(new PassageReference({book: '2th', start_chapter: 2, end_verse: 5}))
+            .toMatchObject({type: 'range_verses', range: true,
+            book: '2th', start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 5})
+        expect(new PassageReference({book: '2th', start_chapter: 1, start_verse: 1,
+            end_chapter: 2}))
+            .toMatchObject({type: 'range_chapters', range: true,
+            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17})
+    })
+
+})
+
+
+describe('from_string', () => {
+
+    it("Interprets single digits as verses for single chapter books", ({expect}) => {
+
+        // To confirm multi-chapter books are interpreted as chapter
+        expect(PassageReference.from_string("1 John 1")!.type).toBe('chapter')
+        expect(PassageReference.from_string("1 John 2-3"))
+            .toMatchObject({start_chapter: 2, start_verse: 1, end_chapter: 3, end_verse: 24})
+
+        // Single chapter books
+        // NOTE It's still expected to re-render these with toString() as 1:1 for clarity
+        expect(PassageReference.from_string("Obadiah 1")!.type).toBe('verse')
+        expect(PassageReference.from_string("Philemon 1")!.type).toBe('verse')
+        expect(PassageReference.from_string("2 John 1")!.type).toBe('verse')
+        expect(PassageReference.from_string("3 John 1")!.type).toBe('verse')
+        expect(PassageReference.from_string("Jude 1")!.type).toBe('verse')
+
+        expect(PassageReference.from_string("Obadiah 2-3"))
+            .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
+        expect(PassageReference.from_string("Philemon 2-3"))
+            .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
+        expect(PassageReference.from_string("2 John 2-3"))
+            .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
+        expect(PassageReference.from_string("3 John 2-3"))
+            .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
+        expect(PassageReference.from_string("Jude 2-3"))
+            .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
+    })
+
+})
+
+describe('toString', () => {
+
+    it("Renders when coercing to a string", ({expect}) => {
+        expect(`${new PassageReference('tit')}`).toBe('Titus')
+    })
+
+    it("Renders passage types correctly", ({expect}) => {
+        expect(new PassageReference('tit').toString()).toBe('Titus')
+        expect(new PassageReference('tit', 1).toString()).toBe('Titus 1')
+        expect(new PassageReference('tit', 1, 1).toString()).toBe('Titus 1:1')
+        expect(new PassageReference({book: 'tit', start_chapter: 1, start_verse: 1, end_verse: 2})
+            .toString()).toBe('Titus 1:1-2')
+        expect(new PassageReference({book: 'tit', start_chapter: 1, end_chapter: 2}).toString())
+            .toBe('Titus 1-2')
+        expect(new PassageReference({book: 'tit', start_chapter: 1, start_verse: 1, end_chapter: 2,
+            end_verse: 1}).toString()).toBe('Titus 1:1-2:1')
+    })
+
+})
+
+
+const book_name_abbreviations = {
+    "gen": ["Gen.", "Ge.", "Gn."],
+    "exo": ["Ex.", "Exod.", "Exo."],
+    "lev": ["Lev.", "Le.", "Lv."],
+    "num": ["Num.", "Nu.", "Nm.", "Nb."],
+    "deu": ["Deut.", "De.", "Dt."],
+    "jos": ["Josh.", "Jos.", "Jsh."],
+    "jdg": ["Judg.", "Jdg.", "Jg.", "Jdgs."],
+    "rut": ["Ruth", "Rth.", "Ru."],
+    "1sa": ["1 Sam.", "1 Sm.", "1 Sa.", "1 S.", "I Sam.", "I Sa.", "1Sam.", "1Sa.", "1S.", "1st Samuel", "1st Sam.", "First Samuel", "First Sam."],
+    "2sa": ["2 Sam.", "2 Sm.", "2 Sa.", "2 S.", "II Sam.", "II Sa.", "2Sam.", "2Sa.", "2S.", "2nd Samuel", "2nd Sam.", "Second Samuel", "Second Sam."],
+    "1ki": ["1 Kings", "1 Kgs", "1 Ki", "1Kgs", "1Kin", "1Ki", "1K", "I Kgs", "I Ki", "1st Kings", "1st Kgs", "First Kings", "First Kgs"],
+    "2ki": ["2 Kings", "2 Kgs.", "2 Ki.", "2Kgs.", "2Kin.", "2Ki.", "2K.", "II Kgs.", "II Ki.", "2nd Kings", "2nd Kgs.", "Second Kings", "Second Kgs."],
+    "1ch": ["1 Chron.", "1 Chr.", "1 Ch.", "1Chron.", "1Chr.", "1Ch.", "I Chron.", "I Chr.", "I Ch.", "1st Chronicles", "1st Chron.", "First Chronicles", "First Chron."],
+    "2ch": ["2 Chron.", "2 Chr.", "2 Ch.", "2Chron.", "2Chr.", "2Ch.", "II Chron.", "II Chr.", "II Ch.", "2nd Chronicles", "2nd Chron.", "Second Chronicles", "Second Chron."],
+    "ezr": ["Ezra", "Ezr.", "Ez."],
+    "neh": ["Neh.", "Ne."],
+    "est": ["Est.", "Esth.", "Es."],
+    "job": ["Job", "Jb."],
+    "psa": ["Ps.", "Psalm", "Pslm.", "Psa.", "Psm.", "Pss."],
+    "pro": ["Prov", "Pro.", "Prv.", "Pr."],
+    "ecc": ["Eccles.", "Eccle.", "Ecc.", "Ec."],
+    "sng": ["Song", "Song of Songs", "SOS.", "So."],
+    "isa": ["Isa.", "Is."],
+    "jer": ["Jer.", "Je.", "Jr."],
+    "lam": ["Lam.", "La."],
+    "ezk": ["Ezek.", "Eze.", "Ezk."],
+    "dan": ["Dan.", "Da.", "Dn."],
+    "hos": ["Hos.", "Ho."],
+    "jol": ["Joel", "Jl."],
+    "amo": ["Amos", "Am."],
+    "oba": ["Obad.", "Ob."],
+    "jon": ["Jonah", "Jnh.", "Jon."],
+    "mic": ["Mic.", "Mc."],
+    "nam": ["Nah.", "Na."],
+    "hab": ["Hab.", "Hb."],
+    "zep": ["Zeph.", "Zep.", "Zp."],
+    "hag": ["Hag.", "Hg."],
+    "zec": ["Zech.", "Zec.", "Zc."],
+    "mal": ["Mal.", "Ml."],
+    "mat": ["Matt.", "Mt."],
+    "mrk": ["Mark", "Mrk", "Mar", "Mk", "Mr"],
+    "luk": ["Luke", "Luk", "Lk"],
+    "jhn": ["John", "Joh", "Jhn", "Jn"],
+    "act": ["Acts", "Act", "Ac"],
+    "rom": ["Rom.", "Ro.", "Rm."],
+    "1co": ["1 Cor.", "1 Co.", "I Cor.", "I Co.", "1Cor.", "1Co.", "I Corinthians", "1Corinthians", "1st Corinthians", "First Corinthians"],
+    "2co": ["2 Cor.", "2 Co.", "II Cor.", "II Co.", "2Cor.", "2Co.", "II Corinthians", "2Corinthians", "2nd Corinthians", "Second Corinthians"],
+    "gal": ["Gal.", "Ga."],
+    "eph": ["Eph.", "Ephes."],
+    "php": ["Phil.", "Php.", "Pp."],
+    "col": ["Col.", "Co."],
+    "1th": ["1 Thess.", "1 Thes.", "1 Th.", "I Thessalonians", "I Thess.", "I Thes.", "I Th.", "1Thessalonians", "1Thess.", "1Thes.", "1Th.", "1st Thessalonians", "1st Thess.", "First Thessalonians", "First Thess."],
+    "2th": ["2 Thess.", "2 Thes.", "2 Th.", "II Thessalonians", "II Thess.", "II Thes.", "II Th.", "2Thessalonians", "2Thess.", "2Thes.", "2Th.", "2nd Thessalonians", "2nd Thess.", "Second Thessalonians", "Second Thess."],
+    "1ti": ["1 Tim.", "1 Ti.", "I Timothy", "I Tim.", "I Ti.", "1Timothy", "1Tim.", "1Ti.", "1st Timothy", "1st Tim.", "First Timothy", "First Tim."],
+    "2ti": ["2 Tim.", "2 Ti.", "II Timothy", "II Tim.", "II Ti.", "2Timothy", "2Tim.", "2Ti.", "2nd Timothy", "2nd Tim.", "Second Timothy", "Second Tim."],
+    "tit": ["Titus", "Tit", "ti"],
+    "phm": ["Philem.", "Phm.", "Pm."],
+    "heb": ["Heb."],
+    "jas": ["James", "Jas", "Jm"],
+    "1pe": ["1 Pet.", "1 Pe.", "1 Pt.", "1 P.", "I Pet.", "I Pt.", "I Pe.", "1Peter", "1Pet.", "1Pe.", "1Pt.", "1P.", "I Peter", "1st Peter", "First Peter"],
+    "2pe": ["2 Pet.", "2 Pe.", "2 Pt.", "2 P.", "II Peter", "II Pet.", "II Pt.", "II Pe.", "2Peter", "2Pet.", "2Pe.", "2Pt.", "2P.", "2nd Peter", "Second Peter"],
+    "1jn": ["1 John", "1 Jhn.", "1 Jn.", "1 J.", "1John", "1Jhn.", "1Joh.", "1Jn.", "1Jo.", "1J.", "I John", "I Jhn.", "I Joh.", "I Jn.", "I Jo.", "1st John", "First John"],
+    "2jn": ["2 John", "2 Jhn.", "2 Jn.", "2 J.", "2John", "2Jhn.", "2Joh.", "2Jn.", "2Jo.", "2J.", "II John", "II Jhn.", "II Joh.", "II Jn.", "II Jo.", "2nd John", "Second John"],
+    "3jn": ["3 John", "3 Jhn.", "3 Jn.", "3 J.", "3John", "3Jhn.", "3Joh.", "3Jn.", "3Jo.", "3J.", "III John", "III Jhn.", "III Joh.", "III Jn.", "III Jo.", "3rd John", "Third John"],
+    "jud": ["Jude", "Jud.", "Jd."],
+    "rev": ["Rev", "Re"],
+}

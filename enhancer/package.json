@@ -5,10 +5,10 @@
   "type": "module",
   "exports": {
     ".": {
-        "import": "./dist/esm/index.js"
+      "import": "./dist/esm/index.js"
     },
     "./styles.css": {
-        "import": "./dist/styles.css"
+      "import": "./dist/styles.css"
     }
   },
   "types": "./dist/esm/index.d.ts",

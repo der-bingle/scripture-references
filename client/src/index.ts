@@ -1,8 +1,51 @@
 
-// Assume all data is helpful to export
-export * from './data.js'
+// Export everything intended for direct use (code and types)
 
-// Only export things that are going to be useful to avoid confusing users
+
+// Re-export everything from bible-references for convenience
+export * from '@gracious.tech/bible-references'
+export type * from '@gracious.tech/bible-references'
+
+
+// Code
+// NOTE Don't export classes not meant to be initiated directly, export them as types instead
 export {BibleClient} from './client.js'
-export {verses_obj_to_str, verses_str_to_obj, book_name_to_code, passage_obj_to_str,
-    passage_str_to_obj, passage_str_regex} from './references.js'
+
+
+// Types (only expose those relevant to the user and willing to support going forward)
+export type {
+    GetPassageOptions,
+    GetTxtOptions,
+    IndividualVerse,
+    BibleBook,
+    BibleBookHtml,
+    BibleBookTxt,
+    BibleBookUsfm,
+    BibleBookUsx,
+} from './book.js'
+
+export type {BibleClientConfig} from './client.js'
+
+export type {
+    GetLanguagesOptions,
+    GetLanguagesItem,
+    GetTranslationsOptions,
+    GetTranslationsItem,
+    GetBooksOptions,
+    GetBooksItem,
+    GetCompletionReturn,
+    BibleCollection,
+} from './collection.js'
+
+export type {
+    CrossrefItem,
+    BookCrossref,
+} from './crossref.js'
+
+export type {
+    UsageConfig,
+    UsageOptions,
+    RuntimeLicense,
+    RuntimeTranslation,
+    RuntimeManifest,
+} from './types.js'

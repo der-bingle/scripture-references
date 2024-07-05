@@ -3,7 +3,8 @@
 set -e
 cd "$(dirname "$(dirname "$0")")/site"
 
-# Do fresh build of components that site relies on
+# Do fresh build of components that site relies on since will be bundled
+../.bin/build_references
 ../.bin/build_client
 ../.bin/build_client_docs
 ../.bin/build_enhancer

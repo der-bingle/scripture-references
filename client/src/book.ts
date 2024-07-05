@@ -1,7 +1,9 @@
 
+import {PassageReference} from '@gracious.tech/bible-references'
+
 import {escape_html, num_to_letters} from './utils.js'
+
 import type {RuntimeLicense, RuntimeTranslation} from './types'
-import type {VersesRef} from './references'
 import type {BibleJsonHtml, BibleJsonTxt, TxtContent} from './shared_types'
 
 
@@ -112,17 +114,16 @@ export class BibleBookHtml {
         return out + this._attribution(options.attribute)
     }
 
-    // Get HTML for a specific passage specified by object (as returned by `verses_str_to_obj`)
-    get_passage_from_obj(ref?:VersesRef|null, options:GetPassageOptions={}):string{
-        if (!ref || !ref.start_chapter){
+    // Get HTML for a specific passage specified by a PassageReference object
+    get_passage_from_ref(ref:PassageReference, options:GetPassageOptions={}):string{
+        if (ref.type === 'book'){
             return this.get_whole(options)
         }
-        const end_chapter = ref.end_chapter ?? ref.start_chapter
-        if (!ref.start_verse){
-            return this.get_chapters(ref.start_chapter, end_chapter, options)
+        if (ref.type === 'chapter' || ref.type === 'range_chapters'){
+            return this.get_chapters(ref.start_chapter, ref.end_chapter, options)
         }
-        return this.get_passage(ref.start_chapter, ref.start_verse, end_chapter,
-            ref.end_verse ?? ref.start_verse, options)
+        return this.get_passage(ref.start_chapter, ref.start_verse, ref.end_chapter, ref.end_verse,
+            options)
     }
 
     // Get HTML for multiple chapters
@@ -255,7 +256,7 @@ export class BibleBookUsfm {
 
 
 // Convert a plain text array to a Markdown string
-export function txt_array_to_markdown(contents:TxtContent[], headings=true, notes=true):string{
+function txt_array_to_markdown(contents:TxtContent[], headings=true, notes=true):string{
 
     // Collect footnotes for later appending
     const footnotes:string[] = []

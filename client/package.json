@@ -32,6 +32,9 @@
     "url": "https://github.com/gracious-tech/fetch/issues"
   },
   "homepage": "https://fetch.bible/",
+  "dependencies": {
+    "@gracious.tech/bible-references": "^0.0.0"
+  },
   "devDependencies": {
     "sass": "^1.63.4"
   }

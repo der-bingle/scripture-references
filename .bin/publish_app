@@ -3,7 +3,8 @@
 set -e
 cd "$(dirname "$(dirname "$0")")/app"
 
-# Do fresh build of client since app relies on it
+# Do fresh build of components app relies on since they're bundled when published
+../.bin/build_references
 ../.bin/build_client
 
 ../.bin/build_app

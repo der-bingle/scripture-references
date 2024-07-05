@@ -43,6 +43,14 @@ Supported formats:
  * Matt 9:37-10:8
  * Matt 10
  * Matt 9-10
+ * Philemon 2-3  (numbers refer to verses when only one chapter)
+
+Multi-passage detection:
+
+ * Matt 10:6,8
+ * Matt 10:8,11:1
+ * Matt 10:8, John 3:16
+ * Matt 10:8,10; John 3:16
 
 It also works with references in other languages, as long as a translation of that language is specified when constructing `BibleEnhancer`. Change the language below and it will discover the following references, accounting for a variety of different reference styles.
 
@@ -52,9 +60,26 @@ It also works with references in other languages, as long as a translation of th
 
 <VPButton :text='btn_text' @click='toggle_language' theme='alt' />
 
+It does not detect whole book or multi-book references as there would be too many false-positives.
+
+ * Luke is my friend.
+ * Gen-Exo
+ * 1-3 John
+
+
 ## Usage
 
 Supports browsers with ES2019+
+
+
+### Express Usage
+
+Add the following to the `<head>` of your page:
+
+`<script type="module" crossorigin src="https://fetch.bible/enhance.js"></script>`
+
+
+### Standard Usage
 
 ```js
 import {BibleEnhancer} from '@gracious.tech/fetch-enhancer'

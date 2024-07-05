@@ -10,9 +10,9 @@ v-list(density='compact' color='primary')
             v-list-item(:active='book === item.id' :disabled='!item.available'
                     @click='select_book(item.id)')
                 v-list-item-title {{ item.name }}
-            v-list-item(v-if='i < nt_books.length' :active='book === nt_books[i].id'
-                    :disabled='!nt_books[i].available' @click='select_book(nt_books[i].id)')
-                v-list-item-title {{ nt_books[i].name }}
+            v-list-item(v-if='i < nt_books.length' :active='book === nt_books[i]?.id'
+                    :disabled='!nt_books[i]?.available' @click='select_book(nt_books[i]?.id)')
+                v-list-item-title {{ nt_books[i]?.name }}
 
         div.chapters(v-if='(book === item.id || book === nt_books[i]?.id) && chapters.length > 1'
                 :class='{nt: book === nt_books[i]?.id}')
@@ -27,7 +27,7 @@ v-list(density='compact' color='primary')
 
 import {computed} from 'vue'
 
-import {state, change_chapter, change_passage} from '@/services/state'
+import {state, change_book, change_passage} from '@/services/state'
 import {content} from '@/services/content'
 import {chapters} from '@/services/computes'
 
@@ -47,8 +47,8 @@ const nt_books = computed(() => {
 
 
 // Change book
-const select_book = (id:string) => {
-    change_passage(id)
+const select_book = (id?:string) => {
+    change_book({book: id!})  // Only optional above to get around typings in template
     if (chapters.value.length === 1){
         state.show_select_chapter = false
     }
@@ -57,7 +57,7 @@ const select_book = (id:string) => {
 
 // Change chapter
 const select_ch = (num:number) => {
-    change_chapter(num)
+    change_passage(num)
     state.show_select_chapter = false
 }
 

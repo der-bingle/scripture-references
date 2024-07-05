@@ -1,5 +1,5 @@
 
-import {last_verse} from './data.js'
+import {last_verse} from './last_verse.js'
 
 
 // Get chapter numbers for a book
