@@ -134,8 +134,8 @@ export const dialog_max_width = computed(() => {
 
 
 // Change passage within same book
-export const change_passage = (start_chapter:number, start_verse?:number, end_chapter?:number,
-    end_verse?:number) => {
+export const change_passage = (start_chapter:number, start_verse?:number|null,
+        end_chapter?:number|null, end_verse?:number|null) => {
     state.chapter = start_chapter
     state.verse = start_verse ?? 1
     state.passage = new PassageReference(
