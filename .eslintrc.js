@@ -47,6 +47,7 @@ module.exports = {
         'indent': ['warn', 4, {
             SwitchCase: 1,
             FunctionDeclaration: {parameters: 2},
+            FunctionExpression: {parameters: 2},
             // eslint doesn't handle class methods well yet, so ignore identing of their params
             ignoredNodes: ['MethodDefinition Identifier'],
         }],
