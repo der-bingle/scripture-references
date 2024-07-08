@@ -1,7 +1,7 @@
 #!/bin/bash
 # Publish client
 set -e
-cd "$(dirname "$(dirname "$0")")/client"
+cd "$(realpath -m "$0/../..")/client"
 
 ../.bin/build_client
 npm publish --access=public

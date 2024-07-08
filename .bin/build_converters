@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build converters
 set -e
-cd "$(dirname "$(dirname "$0")")/converters"
+cd "$(realpath -m "$0/../..")/converters"
 
 
 # Do in each dir

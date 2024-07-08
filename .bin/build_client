@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build client
 set -e
-cd "$(dirname "$(dirname "$0")")/client"
+cd "$(realpath -m "$0/../..")/client"
 
 
 # PACKAGING LIBRARIES BEST PRACTICES

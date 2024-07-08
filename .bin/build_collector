@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build collector
 set -e
-cd "$(dirname "$(dirname "$0")")/collector"
+cd "$(realpath -m "$0/../..")/collector"
 
 
 rm -rf dist

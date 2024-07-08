@@ -1,7 +1,7 @@
 #!/bin/bash
 # Publish enhancer
 set -e
-cd "$(dirname "$(dirname "$0")")/enhancer"
+cd "$(realpath -m "$0/../..")/enhancer"
 
 ../.bin/build_enhancer
 npm publish --access=public

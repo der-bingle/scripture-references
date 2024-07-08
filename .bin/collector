@@ -1,7 +1,7 @@
 #!/bin/bash
 # Execute collector within the test collection
 set -e
-cd "$(dirname "$(dirname "$0")")/collection"
+cd "$(realpath -m "$0/../..")/collection"
 
 
 ../.bin/build_collector --log-level=warning

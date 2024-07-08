@@ -1,7 +1,7 @@
 #!/bin/bash
 # Serve site prod mode
 set -e
-cd "$(dirname "$(dirname "$0")")/site"
+cd "$(realpath -m "$0/../..")/site"
 
 npx vitepress build
 npx vitepress preview

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd "$(dirname "$(dirname "$0")")"
+cd "$(realpath -m "$0/../..")"
 
 # Upgrade modules to latest versions and remove lock files so deps also upgraded
 npx ncu -u

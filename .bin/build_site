@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build site
 set -e
-cd "$(dirname "$(dirname "$0")")/site"
+cd "$(realpath -m "$0/../..")/site"
 
 npx vitepress build
