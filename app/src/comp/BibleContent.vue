@@ -8,7 +8,7 @@ div.offline(v-if='state.offline')
 
 
 //- Key to retrigger onmount actions each time content changes
-ContentInstance(v-else-if='state.content || state.content_verses.length' :key='content_key')
+ContentInstance(v-else-if='state.content || state.content_verses.length')
 
 div.loading(v-else)
     svg.loading(viewBox='0 0 100 100' preserveAspectRatio='xMidYMid meet')
@@ -19,18 +19,8 @@ div.loading(v-else)
 
 <script lang='ts' setup>
 
-import {computed} from 'vue'
-
 import ContentInstance from './ContentInstance.vue'
 import {state} from '@/services/state'
-
-
-const content_key = computed(() => {
-    if (!state.content && !state.content_verses){
-        return ''  // So triggers change when content has loaded (not just if translation differs)
-    }
-    return state.trans.join(',') + '/' + state.book
-})
 
 
 const retry = () => {

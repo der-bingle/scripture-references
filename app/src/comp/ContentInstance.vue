@@ -36,14 +36,15 @@ let touch_start_y:number|null = null
 let touch_end_x:number|null = null
 let touch_end_y:number|null = null
 
-// Verse nodes
-const verse_nodes = {} as Record<string, HTMLElement>
-const chapter_nodes = {} as Record<string, HTMLElement>
-
 // References to DOM elements
 const swipe_prev = ref<HTMLDivElement>()
 const swipe_next = ref<HTMLDivElement>()
 const content_div = ref<HTMLDivElement>()
+
+// Manual DOM access
+let verse_nodes:Record<string, HTMLElement>
+let chapter_nodes:Record<string, HTMLElement>
+let observer:IntersectionObserver
 
 
 // Fetch classes
@@ -195,12 +196,21 @@ const on_touch_cancel = () => {
 }
 
 
-onMounted(() => {
+// Manual interaction with DOM of verses
+const update_dom = () => {
+
+    // Disconnect previous observer (if one)
+    if (observer){
+        observer.disconnect()
+    }
+
     // Discover verse elements once mounted so can scroll/detect them
-    // NOTE Only adds if not yet defined (so skip ones in additonal translations)
+    // NOTE Only adds if not yet defined (so skip ones in additional translations)
+    verse_nodes = {}
     for (const node of content_div.value!.querySelectorAll('sup[data-v]')){
         verse_nodes[(node as HTMLElement).dataset['v']!] ??= node as HTMLElement
     }
+    chapter_nodes = {}
     for (const node of content_div.value!.querySelectorAll('h3[data-c]')){
         chapter_nodes[(node as HTMLElement).dataset['c']!] ??= node as HTMLElement
     }
@@ -222,7 +232,7 @@ onMounted(() => {
     }
 
     // Update chapter/verse in state when scroll past them
-    const observer = new IntersectionObserver((entries) => {
+    observer = new IntersectionObserver((entries) => {
         for (const entry of entries){
 
             // Ignore when nodes leave capture area, only listen when they enter
@@ -243,6 +253,13 @@ onMounted(() => {
     for (const verse of Object.values(verse_nodes)){
         observer.observe(verse)
     }
+}
+
+
+onMounted(() => {
+    watch([() => state.content, () => state.content_verses], () => {
+        update_dom()
+    }, {immediate: true, flush: 'post'})  // Trigger after DOM updated
 })
 
 
