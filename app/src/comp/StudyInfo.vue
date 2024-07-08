@@ -11,6 +11,10 @@ template(v-if='crossrefs.length')
     h5(class='mb-2') Cross references
     template(v-for='crossref of crossrefs' :key='crossref.label')
         v-chip(class='mr-2 mb-2' size='small' @click='crossref.view') {{ crossref.label }}
+template(v-if='original')
+    h5 Original language
+    div.orig(v-html='original'
+        class='fetch-bible no-verses no-chapters no-headings no-notes no-red-letter')
 
 </template>
 
@@ -81,6 +85,17 @@ watch(() => state.study, () => {
 }, {immediate: true})
 
 
+// WARN Using watch instead of compute so that only updated when `study` changes
+const original = ref('')
+watch(() => state.study, () => {
+    if (!state.study || !state.original){
+        original.value = ''
+        return
+    }
+    original.value = state.original.get_verse(state.study[1], state.study[2], {attribute: false})
+}, {immediate: true})
+
+
 const return_to_verse = () => {
     const [book, start_chapter, start_verse] = state.study!
     change_book({book, start_chapter, start_verse})
@@ -105,5 +120,9 @@ h5
 .notes :deep() span[data-ref]
     color: rgb(var(--v-theme-primary))
     cursor: pointer
+
+.orig
+    margin-bottom: 24px
+    font-size: 16px !important
 
 </style>

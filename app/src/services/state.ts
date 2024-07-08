@@ -1,7 +1,7 @@
 
 import {reactive, computed, watch} from 'vue'
 
-import {IndividualVerse, BookCrossref, PassageReference, PassageArgs}
+import {IndividualVerse, BookCrossref, PassageReference, PassageArgs, BibleBookHtml}
     from '@gracious.tech/fetch-client'
 
 
@@ -96,6 +96,7 @@ export const state = reactive({
     study: null as null|[string, number, number],
     crossref: null as BookCrossref|null,
     notes: null as Record<string, Record<string, string>>|null,
+    original: null as BibleBookHtml|null,
 })
 
 

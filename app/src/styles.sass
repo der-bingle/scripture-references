@@ -1,9 +1,19 @@
 
+@font-face
+    font-family: 'Noto Serif Hebrew'
+    font-style: normal
+    font-weight: 400
+    src: url(@/assets/fonts/noto_serif_hebrew.woff2) format('woff2')
+    unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F
+
+
 html
     // Place on html so iOS overscroll etc won't show white bg
     background-image: url(@/assets/background.svg)
     height: 100%  // Else bg image doesn't show
     overflow: hidden !important  // Override Vuetify
+    // NOTE Noto Serif Hebrew doesn't contain non-Hebrew chars, so will only apply to Hebrew chars
+    font-family: 'Noto Serif Hebrew', Roboto, sans-serif !important
 
 body
     height: 100%

@@ -1,6 +1,7 @@
 // Watches that mix data sources
 
 import {nextTick, watch} from 'vue'
+import {PassageReference} from '@gracious.tech/fetch-client'
 
 import {state} from './state'
 import {content} from './content'
@@ -39,6 +40,7 @@ watch([() => state.trans, () => state.book], async () => {
     state.content_verses = []
     state.crossref = null
     state.notes = null
+    state.original = null
 
     // If first/primary trans doesn't have current book, change to a valid book
     if (!content.collection.has_book(state.trans[0], state.book)){
@@ -73,6 +75,13 @@ watch([() => state.trans, () => state.book], async () => {
             state.notes =
                 (await resp.json() as {verses: Record<string, Record<string, string>>})['verses']
         })
+    const orig_trans = new PassageReference(state.book).ot ? 'hbo_wlc' : 'grc_sr'
+    // TODO Only need to check has book since hbo_wlc lacking some books due to parsing issues
+    if (content.collection.has_book(orig_trans, state.book)){
+        void content.collection.fetch_book(orig_trans, state.book).then(book => {
+            state.original = book
+        })
+    }
 
     // Get either plain HTML or separated verses
     if (books.length === 1){

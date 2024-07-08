@@ -64,6 +64,7 @@ module.exports = {
         '@typescript-eslint/explicit-module-boundary-types': 'off',  // TS auto detect saves time
         'vue/max-attributes-per-line': 'off',  // Allow attributes split across e.g. 2 lines
         'vue/first-attribute-linebreak': 'off',  // Do whatever looks nicest instead
+        'vue/attributes-order': 'off',  // Too opinionated
         'vue/html-quotes': 'off',  // Single quotes for vars and double for strings
         'vue/no-v-html': 'off',  // Legit uses for injecting HTML, especially own HTML
 

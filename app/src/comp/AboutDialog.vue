@@ -11,7 +11,8 @@ v-dialog(v-model='state.show_about_dialog' :fullscreen='!state.wide' :max-width=
                     app-icon(name='close')
         v-card-text(class='pa-6')
             p This app is powered by #[a(href='https://fetch.bible' target='_blank') fetch(bible)]
-            p Study notes by #[a(href='https://tyndaleopenresources.com/' target='_blank') Tyndale House Publishers] (#[a(href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank') CC BY-SA])
+            p Study notes by #[a(href='https://tyndaleopenresources.com/' target='_blank') Tyndale House Publishers]
+            p Original languages: #[a(href='https://hb.openscriptures.org/' target='_blank') Leningrad Codex] used for Old Testament, #[a(href='https://greekcntr.org/' target='_blank') Statistical Restoration] for New Testament.
 
 
 </template>
