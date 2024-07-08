@@ -41,7 +41,7 @@ export function enable_watches(){
                 }
             }
         })
-    }, {deep: true})
+    }, {deep: true, immediate: true})
 
 
     // Auto-load content as translations/book changes
@@ -110,7 +110,7 @@ export function enable_watches(){
                 return verses
             })
         }
-    }, {deep: true})
+    }, {deep: true, immediate: true})
 
 
     // Listen to messages from a parent frame
