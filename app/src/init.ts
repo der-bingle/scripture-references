@@ -4,6 +4,7 @@ import {createVuetify} from 'vuetify'
 
 import AppRoot from './comp/AppRoot.vue'
 import AppIcon from '@/comp/AppIcon.vue'
+import {enable_watches, apply_search} from '@/services/watches'
 import {state} from '@/services/state'
 import {content} from '@/services/content'
 import {post_message} from '@/services/post'
@@ -13,12 +14,6 @@ import {post_message} from '@/services/post'
 import './styles.sass'
 import '@gracious.tech/fetch-client/client.css'
 import 'vuetify/styles'
-
-
-// Enable watches
-// NOTE Must import after state so don't trigger changes immediately
-import '@/services/watches'
-import {apply_search} from '@/services/watches'
 
 
 // Create app
@@ -65,15 +60,18 @@ void content.client.fetch_collection().then(collection => {
     content.translations = collection.get_translations({object: true})
     content.languages = collection.get_languages({object: true})
 
-    // Parse initial search
-    apply_search()
-    state.search = null
-
     // Ensure all trans codes are valid
     // NOTE Changing also triggers content to load for the first time
     const valid_trans = state.trans.filter(code => code in content.translations)
     state.trans = valid_trans.length ? (valid_trans as [string, ...string[]])
         : [content.collection.get_preferred_translation()]
+
+    // Parse initial search
+    apply_search()
+    state.search = null
+
+    // Enable watches
+    enable_watches()
 
     // Tell parent ready to communicate (once a trans has been set)
     post_message('ready')
