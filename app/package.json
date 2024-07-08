@@ -1,6 +1,6 @@
 {
     "name": "@gracious.tech/fetch-app",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Configurable bible app powered by fetch(bible)",
     "files": [
         "dist"
@@ -20,7 +20,7 @@
     },
     "homepage": "https://fetch.bible/",
     "devDependencies": {
-        "@gracious.tech/fetch-client": "^0.8.0",
+        "@gracious.tech/fetch-client": "^0.8.1",
         "@material-symbols/svg-400": "^0.8.0",
         "@types/pug": "^2.0.6",
         "@vitejs/plugin-vue": "^4.2.3",
