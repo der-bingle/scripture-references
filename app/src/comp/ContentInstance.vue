@@ -248,54 +248,91 @@ onMounted(() => {
 
 watch(() => state.passage, passage => {
     // Navigate and highlight passage when it changes
-    if (!passage){
-        return
+    if (passage){
+        scroll_to_verse(passage.start_chapter, passage.start_verse)
     }
-    scroll_to_verse(passage.start_chapter, passage.start_verse)
     highlight_passage()
 })
 
 
+watch(() => state.study, study => {
+    highlight_study_verse()
+})
+
+
+// Highlight (or clear) the verse being studied
+const highlight_study_verse = () => {
+    if (state.study){
+        highlight_range(new PassageReference(...state.study), 'study')
+    } else {
+        clear_highlight('study')
+    }
+}
+
+
+// Highlight (or clear) the current passage in focus
 const highlight_passage = () => {
-    const passage = state.passage
     // These types make sense to highlight (range_chapters would be too long and unnecessary)
     const types = ['verse', 'range_verses', 'range_multi']
-    if ('highlights' in CSS && passage && types.includes(passage.type)){
+    if (state.passage && types.includes(state.passage.type)){
+        highlight_range(state.passage, 'passage')
+    } else {
+        clear_highlight('passage')
+    }
+}
 
-        // Start range at start verse marker
-        const range = new Range()
-        const start = verse_nodes[`${passage.start_chapter}:${passage.start_verse}`]
-        if (!start){
-            return  // Start is missing for some reason. Highlighting is non-essential so ignore
-        }
-        range.setStartBefore(start)
 
-        // Get verse marker for verse after last verse so can select up to it
-        const after_end = passage.get_next_verse(true)
-        let end:HTMLElement|undefined
-        if (!after_end){
-            // Final verse of book, so select up to attribution
-            end = content_div.value?.querySelector('.fb-attribution') ?? undefined
-        } else if (after_end.start_verse === 1){
-            // If range ends at chapter, stop at the chapter node itself to avoid highlighting it
-            end = chapter_nodes[after_end.start_chapter]
-        } else {
-            // Select up to the next verse marker
-            end = verse_nodes[`${after_end.start_chapter}:${after_end.start_verse}`]
-        }
-
-        // If can't find end, simply end after the verse's current paragraph
-        if (end){
-            range.setEndBefore(end)
-        } else if (start.parentElement){
-            range.setEndAfter(start.parentElement)
-        }
-
-        // Register the range as a highlight
+// Clear a highlight
+const clear_highlight = (id:string) => {
+    if ('highlights' in CSS){
         // @ts-ignore New feature
         // eslint-disable-next-line
-        CSS.highlights.set('passage', new Highlight(range))
+        CSS.highlights.delete(id)
     }
+}
+
+
+// Highlight a range of text
+const highlight_range = (passage:PassageReference, id:string) => {
+
+    // Ensure browser supports
+    if (! ('highlights' in CSS)){
+        return
+    }
+
+    // Start range at start verse marker
+    const range = new Range()
+    const start = verse_nodes[`${passage.start_chapter}:${passage.start_verse}`]
+    if (!start){
+        return  // Start is missing for some reason. Highlighting is non-essential so ignore
+    }
+    range.setStartBefore(start)
+
+    // Get verse marker for verse after last verse so can select up to it
+    const after_end = passage.get_next_verse(true)
+    let end:HTMLElement|undefined
+    if (!after_end){
+        // Final verse of book, so select up to attribution
+        end = content_div.value?.querySelector('.fb-attribution') ?? undefined
+    } else if (after_end.start_verse === 1){
+        // If range ends at chapter, stop at the chapter node itself to avoid highlighting it
+        end = chapter_nodes[after_end.start_chapter]
+    } else {
+        // Select up to the next verse marker
+        end = verse_nodes[`${after_end.start_chapter}:${after_end.start_verse}`]
+    }
+
+    // If can't find end, simply end after the verse's current paragraph
+    if (end){
+        range.setEndBefore(end)
+    } else if (start.parentElement){
+        range.setEndAfter(start.parentElement)
+    }
+
+    // Register the range as a highlight
+    // @ts-ignore New feature
+    // eslint-disable-next-line
+    CSS.highlights.set(id, new Highlight(range))
 }
 
 
@@ -389,5 +426,9 @@ const highlight_passage = () => {
 .content :deep(::highlight(passage))
     text-decoration-skip-ink: none  // Distracting and color faint enough to not clash with glyphs
     text-decoration: solid underline #cc04 5px
+
+.content :deep(::highlight(study))
+    text-decoration-skip-ink: none  // Distracting and color faint enough to not clash with glyphs
+    text-decoration: solid underline #c0c4 5px
 
 </style>
