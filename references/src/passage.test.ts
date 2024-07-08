@@ -123,6 +123,11 @@ describe('_detect_book', () => {
     it("Returns null if multiple matches", ({expect}) => {
         expect(_detect_book('j', book_names)).toEqual(null)
     })
+
+    it("Still parses some kinds of ambiguous references", ({expect}) => {
+        // Phil could be Philemon or Philippians but is generally understood to be the later
+        expect(_detect_book("Phil", book_names)).toEqual('php')
+    })
 })
 
 
