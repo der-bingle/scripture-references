@@ -152,7 +152,7 @@ watch(() => state.dark, () => {
 
 
 // Try to navigate to verse when search changes
-watch(() => state.search, () => {
+export function apply_search(){
     const match = content.collection.detect_references(state.search ?? '', state.trans).next().value
     if (match){
         state.book = match.ref.book
@@ -160,4 +160,5 @@ watch(() => state.search, () => {
         state.verse = match.ref.start_verse
         state.passage = match.ref
     }
-})
+}
+watch(() => state.search, apply_search)

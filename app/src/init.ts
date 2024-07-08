@@ -16,7 +16,9 @@ import 'vuetify/styles'
 
 
 // Enable watches
+// NOTE Must import after state so don't trigger changes immediately
 import '@/services/watches'
+import {apply_search} from '@/services/watches'
 
 
 // Create app
@@ -62,6 +64,10 @@ void content.client.fetch_collection().then(collection => {
     content.collection = collection
     content.translations = collection.get_translations({object: true})
     content.languages = collection.get_languages({object: true})
+
+    // Parse initial search
+    apply_search()
+    state.search = null
 
     // Ensure all trans codes are valid
     // NOTE Changing also triggers content to load for the first time
