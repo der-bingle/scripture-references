@@ -80,7 +80,7 @@ export function* detect_references(text:string,
                 }
 
                 // Since this regex uses a capture group, need to get index of capture
-                const add_match_real_index = add_match.index + add_match[0].indexOf(match[1]!)
+                const add_match_real_index = add_match.index + add_match[0].indexOf(add_match[1]!)
 
                 // Confirm valid ref, prefixing with book (and opt end chapter) from main ref
                 let prefix = ref.book
