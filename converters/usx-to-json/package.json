@@ -27,6 +27,6 @@
   },
   "homepage": "https://github.com/gracious-tech/fetch/tree/master/converters/usx-to-json",
   "dependencies": {
-    "@gracious.tech/bible-references": "^0.0.1"
+    "@gracious.tech/bible-references": "^0.0.2"
   }
 }
