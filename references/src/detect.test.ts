@@ -46,7 +46,7 @@ describe('detect_references', () => {
     })
 
     it("Provides accurate indexing from last match", ({expect}) => {
-        let text = "Multiple Gen 2:3 refs like John 3:16 and Matt 10:8"
+        let text = "Multiple Gen 2:3 refs like John 3:16 and Matt 10:8."
         let result = ""
         const detector = detect_references(text)
 
@@ -69,7 +69,36 @@ describe('detect_references', () => {
         text = text.slice(ref3.index_from_prev_match + ref3.text.length)
 
         expect(detector.next().value).toBe(null)
-        expect(result).toBe("Multiple X refs like X and X")
+        result += text  // Add whatever is left
+        expect(result).toBe("Multiple X refs like X and X.")
+    })
+
+    it("Provides accurate indexing from last match #2", ({expect}) => {
+        let text = "Examples (1 Cor 9:18, 2 Cor 2:17, 2 Cor 11:7)"
+        let result = ""
+        const detector = detect_references(text)
+
+        const ref1 = detector.next().value!
+        expect(ref1.text).toBe("1 Cor 9:18")
+        expect(ref1.index_from_prev_match).toBe(10)
+        result += text.slice(0, ref1.index_from_prev_match) + "X"
+        text = text.slice(ref1.index_from_prev_match + ref1.text.length)
+
+        const ref2 = detector.next().value!
+        expect(ref2.text).toBe("2 Cor 2:17")
+        expect(ref2.index_from_prev_match).toBe(2)
+        result += text.slice(0, ref2.index_from_prev_match) + "X"
+        text = text.slice(ref2.index_from_prev_match + ref2.text.length)
+
+        const ref3 = detector.next().value!
+        expect(ref3.text).toBe("2 Cor 11:7")
+        expect(ref3.index_from_prev_match).toBe(2)
+        result += text.slice(0, ref3.index_from_prev_match) + "X"
+        text = text.slice(ref3.index_from_prev_match + ref3.text.length)
+
+        expect(detector.next().value).toBe(null)
+        result += text  // Add whatever is left
+        expect(result).toBe("Examples (X, X, X)")
     })
 
     it("Detects relative references", ({expect}) => {
@@ -96,6 +125,11 @@ describe('detect_references', () => {
         relative("Gen 1:1,6:1", 'verse', 6, 1)
         relative("Gen 1:1-2,6:1", 'verse', 6, 1)
         relative("Gen 1:1-2:2,6:1", 'verse', 6, 1)
+    })
+
+    it("Doesn't steal numbers from subsequent refs", ({expect}) => {
+        const detector = detect_references("1 Cor 9:18,2 Cor 2:17 and 2 Cor 11:7,9 cor")
+        expect([...detector].map(m => m.text)).toEqual(["1 Cor 9:18", "2 Cor 2:17", "2 Cor 11:7", "9"])
     })
 
     it("Allows 0-2 spaces between segments", ({expect}) => {
