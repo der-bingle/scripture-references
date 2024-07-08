@@ -1,6 +1,6 @@
 {
     "name": "@gracious.tech/fetch-app",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "Configurable bible app powered by fetch(bible)",
     "files": [
         "dist"
