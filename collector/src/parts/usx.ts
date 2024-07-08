@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs'
 
 import xpath from 'xpath'
 import {DOMParser} from '@xmldom/xmldom'
-import {number_of_verses} from 'usx-to-json'
+import {last_verse} from '@gracious.tech/bible-references'
 
 import type {BookExtracts} from './types'
 
@@ -33,7 +33,7 @@ export function extract_meta(path:string):BookExtracts{
 
 
     // Missing verses object with every verse expected to exist
-    const missing_verses = Object.fromEntries(number_of_verses[book]!.map((ch_verses, ch_i) => {
+    const missing_verses = Object.fromEntries(last_verse[book]!.map((ch_verses, ch_i) => {
         const tmp_array = [...Array<unknown>(ch_verses)]
         const obj_verse_nums = Object.fromEntries(tmp_array.map((trash, v_i) => {
             return [v_i+1, null as null|[number, number]]

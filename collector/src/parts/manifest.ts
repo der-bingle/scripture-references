@@ -2,8 +2,6 @@
 import {join} from 'path'
 import {existsSync, writeFileSync} from 'fs'
 
-import {number_of_verses} from 'usx-to-json'
-
 import {book_names_english, books_ordered} from './bible.js'
 import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
@@ -24,7 +22,6 @@ export async function update_manifest(){
         language2to3: {},
         books_ordered,
         book_names_english,
-        last_verse: number_of_verses,
         licenses: LICENSES,
     }
 
