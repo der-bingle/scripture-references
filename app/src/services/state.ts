@@ -159,7 +159,8 @@ watch(() => state.trans, () => {
 watch([() => state.book, () => state.chapter, () => state.verse], () => {
     // NOTE Saving what search should be to reproduce the current view (not actual search value)
     // E.g. If user searched for "example" and then navigated to Gen 1:1, saved value is "gen1:1"
-    local_storage.setItem('search', `${state.book}${state.chapter}:${state.verse}`)
+    // TODO Temporarily not saving verse so doesn't highlight it when reload
+    local_storage.setItem('search', `${state.book}${state.chapter}`)
 })
 watch(() => state.dark, () => {
     local_storage.setItem('dark', String(state.dark))
