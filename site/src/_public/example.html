@@ -60,7 +60,7 @@
 
 // Import the fetch(bible) client
 // Normally you would import from '@gracious.tech/fetch-client' rather than a static file
-import {BibleClient} from './client.mjs'
+import {BibleClient, get_chapters} from './client.mjs'
 
 
 // Locate UI elements
@@ -125,7 +125,7 @@ function update_select_book(){
 
 // Method for populating the chapter <select> element
 function update_select_chapter(){
-    const chapters = collection.get_chapters(select_book.value)
+    const chapters = get_chapters(select_book.value)
     update_options(select_chapter, chapters.map(c => [c, c]))
 }
 

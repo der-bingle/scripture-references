@@ -12,42 +12,12 @@ This client helps to:
 
 You can also use this client to access your own self-hosted collection if you choose not to use the official one.
 
-## Supported environments
-
-You can use this client both client-side and server-side.
-
-### Browsers (ES2019+)
-
-It is recommended to use a bundler (like Vite or Webpack) and simply `import {BibleClient} from '@gracious.tech/fetch-client'`. This will use the published ESM form which supports tree-shaking.
-
-If you can't use a bundler for some reason, you can also:
-
- * Deploy `dist/bundled.mjs` and import it in a `<script type='module'>`
- * Deploy `dist/bundled.iife.js` and include it via a regular `<script src='...'>`
-    * It will create a `fetch_client` global variable, so you can access `fetch_client.BibleClient`
-
-### Node (18+)
-
-It is recommended to use ESM import/export syntax by setting `"type": "module"` in your `package.json`. You can then:
-
-`import {BibleClient} from '@gracious.tech/fetch-client'`
-
-If you need to still use the old `require()` syntax for other modules, you can still use the ESM form via a dynamic import:
-
-`import('@gracious.tech/fetch-client').then(({BibleClient}) => ...)`
-
-or you can require the bundled CJS form with:
-
-`const {BibleClient} = require('@gracious.tech/fetch-client')`
-
 
 ## Usage
 
 The standard way to use the client is to start with a `new BibleClient()` and then call `fetch_collection()`, which will return a promise for a `BibleCollection` which you can use to explore all the languages and translations available, and then call `fetch_book(translation, book)` and similar methods to get access to actual Bible content.
 
 Methods starting with `fetch_` will make a network request and return a promise, where as methods starting with `get_` do not and are synchronous. For methods that return a list (e.g. languages, translations) you can usually pass `{object: true}` in the options argument to have them return an object keyed by `id` instead.
-
-If your code editor supports Typescript you'll get helpful auto-suggestions that explain all the methods and arguments possible, or alternatively you can also explore the [auto-generated docs](api/classes/client.BibleClient.html).
 
 
 ### Example
@@ -83,6 +53,48 @@ console.log(book.get_chapter(1))
 <p><VPButton href='/access/client/example/' text="See more detailed example"></VPButton></p>
 
 
+## Documentation
+
+If your code editor supports Typescript you'll get helpful auto-suggestions that explain all the methods and arguments possible, or alternatively you can also explore the auto-generated docs. The most important classes being:
+
+ * [BibleClient](/access/client/api/classes/client.BibleClient)
+    * `fetch_collection()` -> [BibleCollection](/access/client/api/classes/collection.BibleCollection)
+        * `fetch_book(...)` -> [BibleBookHtml](/access/client/api/classes/book.BibleBookHtml)
+
+[All modules](/access/client/api/)
+
+The client also re-exports [PassageReference](https://github.com/gracious-tech/fetch/tree/master/references) which is useful for converting between string and object passage references (e.g. "Gen 1:1").
+
+
+## Supported environments
+
+You can use this client both client-side and server-side.
+
+### Browsers (ES2019+)
+
+It is recommended to use a bundler (like Vite or Webpack) and simply `import {BibleClient} from '@gracious.tech/fetch-client'`. This will use the published ESM form which supports tree-shaking.
+
+If you can't use a bundler for some reason, you can also:
+
+ * Deploy `dist/bundled.mjs` and import it in a `<script type='module'>`
+ * Deploy `dist/bundled.iife.js` and include it via a regular `<script src='...'>`
+    * It will create a `fetch_client` global variable, so you can access `fetch_client.BibleClient`
+
+### Node (18+)
+
+It is recommended to use ESM import/export syntax by setting `"type": "module"` in your `package.json`. You can then:
+
+`import {BibleClient} from '@gracious.tech/fetch-client'`
+
+If you need to still use the old `require()` syntax for other modules, you can still use the ESM form via a dynamic import:
+
+`import('@gracious.tech/fetch-client').then(({BibleClient}) => ...)`
+
+or you can require the bundled CJS form with:
+
+`const {BibleClient} = require('@gracious.tech/fetch-client')`
+
+
 ## Styles
 The client includes a functional stylesheet, meaning styles that are minimalistic and critical for correct display. If you don't include this in your project then, for example, footnotes etc. are going to appear inline and undistinguishable from actual scripture.
 
@@ -112,4 +124,4 @@ Variable                        | Default           | Description
 
 
 ## Design
-This client has zero dependencies, no differences between the browser and Node versions (no unused code), and is overall very small and fast. It only connects to the endpoints you specify so can be used completely independently of the official fetch(bible) service.
+This client has zero external dependencies, no differences between the browser and Node versions (no unused code), and is overall very small and fast. It only connects to the endpoints you specify so can be used completely independently of the official fetch(bible) service.
