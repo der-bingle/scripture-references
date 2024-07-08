@@ -1,6 +1,6 @@
 {
   "name": "@gracious.tech/fetch-enhancer",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Enhance webpages with fetch(bible) links and other tools.",
   "type": "module",
   "exports": {
@@ -31,7 +31,7 @@
   },
   "homepage": "https://fetch.bible/",
   "dependencies": {
-    "@gracious.tech/fetch-client": "^0.7.0"
+    "@gracious.tech/fetch-client": "^0.8.0"
   },
   "devDependencies": {
     "sass": "^1.63.4"

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Publish usx-to-json
+set -e
+cd "$(dirname "$(dirname "$0")")/converters/usx-to-json"
+
+../../.bin/build_converters
+npm publish --access=public
