@@ -101,6 +101,34 @@ describe('detect_references', () => {
         expect(result).toBe("Examples (X, X, X)")
     })
 
+    it("Provides accurate indexing from last match #3", ({expect}) => {
+        let text = "John 10:3-4, 11, 14-15; End"
+        let result = ""
+        const detector = detect_references(text)
+
+        const ref1 = detector.next().value!
+        expect(ref1.text).toBe("John 10:3-4")
+        expect(ref1.index_from_prev_match).toBe(0)
+        result += text.slice(0, ref1.index_from_prev_match) + "X"
+        text = text.slice(ref1.index_from_prev_match + ref1.text.length)
+
+        const ref2 = detector.next().value!
+        expect(ref2.text).toBe("11")
+        expect(ref2.index_from_prev_match).toBe(2)
+        result += text.slice(0, ref2.index_from_prev_match) + "X"
+        text = text.slice(ref2.index_from_prev_match + ref2.text.length)
+
+        const ref3 = detector.next().value!
+        expect(ref3.text).toBe("14-15")
+        expect(ref3.index_from_prev_match).toBe(2)
+        result += text.slice(0, ref3.index_from_prev_match) + "X"
+        text = text.slice(ref3.index_from_prev_match + ref3.text.length)
+
+        expect(detector.next().value).toBe(null)
+        result += text  // Add whatever is left
+        expect(result).toBe("X, X, X; End")
+    })
+
     it("Detects relative references", ({expect}) => {
 
         const relative = (text:string, type:string, start_chapter:number, start_verse:number) => {

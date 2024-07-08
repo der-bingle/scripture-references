@@ -7,7 +7,7 @@ import client_styles from '../client/dist/client.css'
 import enhancer_styles from './dist/styles.css'
 
 
-window.addEventListener('DOMContentLoaded', () => {
+function enhance(){
 
     // Attach styles
     for (const styles of [client_styles, enhancer_styles]){
@@ -18,4 +18,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Discover
     void new BibleEnhancer().discover_bible_references()
-})
+}
+
+
+// Execute immediately if DOM ready, otherwise wait for it
+if (document.readyState === 'loading'){
+    window.addEventListener('DOMContentLoaded', enhance)
+} else {
+    enhance()
+}

@@ -98,7 +98,7 @@ export function* detect_references(text:string,
                     index: add_match_real_index,
                     index_from_prev_match: add_match_real_index - end_of_prev_match,
                 }
-                end_of_prev_match = add_match_real_index + add_match[0].length
+                end_of_prev_match = add_match_real_index + add_match[1]!.length
 
                 // Move main regex up to where successful additional ranges regex is up to
                 // WARN Only if larger as lastIndex will reset to 0 at end of string
