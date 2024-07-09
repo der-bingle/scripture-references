@@ -32,9 +32,10 @@ details
 
 table
     tr
-        th(colspan='5') Showing {{ bibles.length }} translation{{ bibles.length === 1 ? '' : 's'}}
+        th(colspan='6') Showing {{ bibles.length }} translation{{ bibles.length === 1 ? '' : 's'}}
     tr
         th Name
+        th ID
         th Lang
         th Year
         th Books
@@ -43,6 +44,7 @@ table
         td
             a(:href='`${app}#trans=${bible.id}`' target='_blank')
                 | {{ bible.name_english || bible.name_local }}
+        td {{ bible.id }}
         td
             a(@click='language = bible.language') {{ bible.language }}
         td {{ bible.year }}
