@@ -101,6 +101,7 @@ const enhancer = new BibleEnhancer({
     translations: ['eng_bsb', 'grc_sr'],  // Set the translations to be used
     client: new BibleClient(),  // Provide a custom fetch(bible) client
     app_origin: 'https://app.fetch.bible',  // Use a custom fetch app
+    app_args: {hue: '120'},  // Pass args to embedded app (see app docs)
     history: false,  // Don't intercept browser "back" to hide app modal
     // Do something before enhancer pushes to browser history
     // E.g. Some SPAs need to store scroll position

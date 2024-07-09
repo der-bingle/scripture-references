@@ -6,6 +6,7 @@ import {BibleClient, PassageReference} from '@gracious.tech/fetch-client'
 interface ConstructorOptions {
     client?:BibleClient
     app_origin?:string
+    app_args?:Record<string, string>
     history?:boolean
     translations?:string[]
     always_detect_english?:boolean
@@ -17,6 +18,7 @@ export class BibleEnhancer {
 
     client:BibleClient
     _app_origin:string
+    _app_args:string
     _app_div:HTMLDivElement
     _app_iframe:HTMLIFrameElement
     _history:boolean
@@ -32,6 +34,7 @@ export class BibleEnhancer {
         // Set defaults
         this.client = options.client ?? new BibleClient()
         this._app_origin = options.app_origin ?? 'https://app.fetch.bible'
+        this._app_args = new URLSearchParams(options.app_args ?? {}).toString()
         this._history = options.history !== false
         this._translations = options.translations ?? []
         this._always_detect_english = options.always_detect_english !== false
@@ -41,7 +44,8 @@ export class BibleEnhancer {
         this._app_div = document.createElement('div')
         this._app_div.classList.add('fb-enhancer-app')
         this._app_iframe = document.createElement('iframe')
-        this._app_iframe.src = `${this._app_origin}#back=true&trans=${this._translations.join(',')}`
+        this._app_iframe.src =
+            `${this._app_origin}#back=true&trans=${this._translations.join(',')}&${this._app_args}`
         this._app_div.appendChild(this._app_iframe)
         document.body.appendChild(this._app_div)
         this._app_div.addEventListener('click', () => {
@@ -287,7 +291,7 @@ export class BibleEnhancer {
             const ref_a = document.createElement('a')
             const verses = match.ref.get_verses_string()
             ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
-                + `&search=${match.ref.book}${verses}`)
+                + `&search=${match.ref.book}${verses}&${this._app_args}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
             ref_a.textContent = match.text
