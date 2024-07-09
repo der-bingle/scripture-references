@@ -1,6 +1,6 @@
 {
   "name": "@gracious.tech/fetch-client",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Interact with a fetch(bible) collection in an API-like way",
   "type": "module",
   "exports": {
@@ -33,7 +33,7 @@
   },
   "homepage": "https://fetch.bible/",
   "dependencies": {
-    "@gracious.tech/bible-references": "^0.0.3"
+    "@gracious.tech/bible-references": "^0.0.4"
   },
   "devDependencies": {
     "sass": "^1.63.4"
