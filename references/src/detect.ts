@@ -59,21 +59,22 @@ export function* detect_references(text:string,
             }
             end_of_prev_match = match.index + match[0].length
 
-            // If immediately followed by a valid book name, skip check for additional ranges
-            // E.g. (Gen 1:1,2 Cor 1:1)
-            // WARN Sticky flag 'y' needed to ensure match is at start of lastIndex
-            const book_look_ahead = new RegExp(regex_book_check, 'uiy')
-            book_look_ahead.lastIndex = regex.lastIndex
-            const possible_book = book_look_ahead.exec(text)
-            if (possible_book && PassageReference.from_string(possible_book[1]!)){
-                continue
-            }
-
             // See if additional ranges immediately after this ref
             // WARN Sticky flag 'y' needed to ensure match is at start of lastIndex
             const add_regex = new RegExp(regex_additional_range, 'uiy')
             add_regex.lastIndex = regex.lastIndex  // Move up to where main regex is up to
             while (true){
+
+                // If followed by a valid book name, skip check for additional ranges
+                // E.g. (John 1:1,3, 3 John 1)
+                // WARN Sticky flag 'y' needed to ensure match is at start of lastIndex
+                const book_look_ahead = new RegExp(regex_book_check, 'uiy')
+                book_look_ahead.lastIndex = add_regex.lastIndex
+                const possible_book = book_look_ahead.exec(text)
+                if (possible_book && PassageReference.from_string(possible_book[1]!)){
+                    break
+                }
+
                 const add_match = add_regex.exec(text)
                 if (!add_match){
                     break

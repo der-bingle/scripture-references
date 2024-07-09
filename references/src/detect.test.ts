@@ -158,6 +158,13 @@ describe('detect_references', () => {
     it("Doesn't steal numbers from subsequent refs", ({expect}) => {
         const detector = detect_references("1 Cor 9:18,2 Cor 2:17 and 2 Cor 11:7,9 cor")
         expect([...detector].map(m => m.text)).toEqual(["1 Cor 9:18", "2 Cor 2:17", "2 Cor 11:7", "9"])
+
+        const detector2 = detect_references("John 1:1, 3, 3 John 1")
+        expect([...detector2].map(m => m.ref)).toMatchObject([
+            {book: 'jhn', start_chapter: 1, start_verse: 1, end_verse: 1},
+            {book: 'jhn', start_chapter: 1, start_verse: 3, end_verse: 3},
+            {book: '3jn', start_chapter: 1, start_verse: 1, end_verse: 1},
+        ])
     })
 
     it("Allows 0-2 spaces between segments", ({expect}) => {
