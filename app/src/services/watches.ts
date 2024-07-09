@@ -1,6 +1,6 @@
 // Watches that mix data sources
 
-import {nextTick, watch} from 'vue'
+import {watch} from 'vue'
 import {PassageReference} from '@gracious.tech/fetch-client'
 
 import {state} from './state'
@@ -9,8 +9,8 @@ import {post_message} from './post'
 import {wait} from './utils'
 
 
-export function apply_search(){
-    const match = content.collection.detect_references(state.search ?? '', state.trans).next().value
+export function apply_search(value:string){
+    const match = content.collection.detect_references(value, state.trans).next().value
     if (match){
         state.book = match.ref.book
         state.chapter = match.ref.start_chapter
@@ -148,11 +148,8 @@ export function enable_watches(){
                 state.trans = data['trans'].split(',') as [string, ...string[]]
             }
             if (typeof data['search'] === 'string'){
-                state.search = data['search']
-                // Trigger parsing and then reset so search toolbar doesn't appear
-                void nextTick(() => {
-                    state.search = null
-                })
+                // NOTE Not setting state.search as would show toolbar and trigger duplicate load
+                apply_search(data['search'])
             }
         }
     })
@@ -177,5 +174,5 @@ export function enable_watches(){
 
 
     // Try to navigate to verse when search changes
-    watch(() => state.search, apply_search)
+    watch(() => state.search, () => apply_search(state.search ?? ''))
 }

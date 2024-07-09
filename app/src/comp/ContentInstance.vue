@@ -199,11 +199,6 @@ const on_touch_cancel = () => {
 // Manual interaction with DOM of verses
 const update_dom = () => {
 
-    // Disconnect previous observer (if one)
-    if (observer){
-        observer.disconnect()
-    }
-
     // Discover verse elements once mounted so can scroll/detect them
     // NOTE Only adds if not yet defined (so skip ones in additional translations)
     verse_nodes = {}
@@ -258,9 +253,19 @@ const update_dom = () => {
 
 onMounted(() => {
     watch([() => state.content, () => state.content_verses], () => {
-        update_dom()
+        if (state.content || state.content_verses.length){
+            update_dom()
+        }
     }, {immediate: true, flush: 'post'})  // Trigger after DOM updated
 })
+
+
+watch([() => state.content, () => state.content_verses], () => {
+    // Disconnect previous observer before it overwrites newly set passage
+    if (observer){
+        observer.disconnect()
+    }
+}, {flush: 'sync'})  // Disconnect before Vue starts modifying any DOM
 
 
 watch(() => state.passage, passage => {
@@ -269,7 +274,7 @@ watch(() => state.passage, passage => {
         scroll_to_verse(passage.start_chapter, passage.start_verse)
     }
     highlight_passage()
-})
+}, {flush: 'post'})  // Don't try scroll until DOM ready
 
 
 watch(() => state.study, study => {
