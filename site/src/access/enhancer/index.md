@@ -84,7 +84,7 @@ It will automatically execute and transform all references it finds in the user'
 
 For your own personal use you can add the following as a bookmark in your browser. Clicking it will transform whatever page you are currently viewing.
 
-`javascript:var s=document.createElement('script');s.src='https://fetch.bible/enhance.js';document.head.appendChild(s)`
+`javascript:(()=>{var s=document.createElement('script');s.src='https://fetch.bible/enhance.js';document.head.appendChild(s)})()`
 
 :::
 
