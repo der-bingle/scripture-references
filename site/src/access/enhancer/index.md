@@ -78,6 +78,16 @@ Add the following to the `<head>` of your page:
 
 `<script type="module" crossorigin src="https://fetch.bible/enhance.js"></script>`
 
+It will automatically execute and transform all references it finds in the user's language, using the default translation for that language. English is always detected. To configure any settings, use the standard import method below.
+
+::: info TIP -- Transform other people's websites
+
+For your own personal use you can add the following as a bookmark in your browser. Clicking it will transform whatever page you are currently viewing.
+
+`javascript:var s=document.createElement('script');s.src='https://fetch.bible/enhance.js';document.head.appendChild(s)`
+
+:::
+
 
 ### Standard Usage
 
