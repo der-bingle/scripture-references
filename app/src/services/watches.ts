@@ -129,8 +129,11 @@ export function enable_watches(){
             if (typeof data['status'] === 'string'){
                 state.status = data['status']
             }
-            if (typeof data['color'] === 'string'){
-                state.color = data['color']
+            if (typeof data['hue'] === 'number'){
+                state.hue = data['hue']
+            }
+            if (typeof data['saturation'] === 'number'){
+                state.saturation = data['saturation']
             }
             if (typeof data['back'] === 'boolean' || typeof data['back'] === 'string'){
                 state.back = data['back']

@@ -5,7 +5,7 @@ import {createVuetify} from 'vuetify'
 import AppRoot from './comp/AppRoot.vue'
 import AppIcon from '@/comp/AppIcon.vue'
 import {enable_watches, apply_search} from '@/services/watches'
-import {state} from '@/services/state'
+import {state, safe_hsl} from '@/services/state'
 import {content} from '@/services/content'
 import {post_message} from '@/services/post'
 
@@ -34,13 +34,13 @@ app.use(createVuetify({
             dark: {
                 dark: true,
                 colors: {
-                    primary: state.color,
+                    primary: safe_hsl.value,
                 },
             },
             light: {
                 dark: false,
                 colors: {
-                    primary: state.color,
+                    primary: safe_hsl.value,
                 },
             },
         },

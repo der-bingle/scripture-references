@@ -442,10 +442,10 @@ const highlight_range = (passage:PassageReference, id:string) => {
 
 .content :deep(::highlight(passage))
     text-decoration-skip-ink: none  // Distracting and color faint enough to not clash with glyphs
-    text-decoration: solid underline #cc04 5px
+    text-decoration: solid underline rgb(var(--v-theme-primary), 0.25) 5px
 
 .content :deep(::highlight(study))
     text-decoration-skip-ink: none  // Distracting and color faint enough to not clash with glyphs
-    text-decoration: solid underline #c0c4 5px
+    text-decoration: solid underline rgb(var(--v-theme-primary), 0.7) 5px
 
 </style>

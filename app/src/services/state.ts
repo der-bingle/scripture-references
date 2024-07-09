@@ -4,6 +4,8 @@ import {reactive, computed, watch} from 'vue'
 import {IndividualVerse, BookCrossref, PassageReference, PassageArgs, BibleBookHtml}
     from '@gracious.tech/fetch-client'
 
+import {parse_int} from './utils.js'
+
 
 // LOCAL STORAGE
 
@@ -58,7 +60,8 @@ export const state = reactive({
 
     // Customise
     status: params.get('status') ?? '',
-    color: params.get('color') ?? '#c12bdb',
+    hue: parse_int(params.get('hue') ?? '290'),
+    saturation: parse_int(params.get('saturation') ?? '70'),
     back: (params.get('back') === 'true' || params.get('back')) ?? false,  // true|'url'|false
     button1_icon: params.get('button1_icon') ?? '',  // i.e. disabled
     button1_color: params.get('button1_color') ?? 'currentColor',
@@ -128,6 +131,14 @@ export const density = computed(() => {
 // Max-width for dialogs, so they don't look silly taking up whole screen
 export const dialog_max_width = computed(() => {
     return state.wide ? '800px' : ''
+})
+
+// Safe HSL color for theme
+export const safe_hsl = computed(() => {
+    // NOTE values is state are forced to be numbers but not restricted in amount yet
+    const safe_hue = parse_int(state.hue, 0, 360)
+    const safe_sat = parse_int(state.saturation, 20, 80)  // Very high/low harder to see
+    return `hsl(${safe_hue}, ${safe_sat}%, 50%)`
 })
 
 

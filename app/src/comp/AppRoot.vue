@@ -54,7 +54,7 @@ import SearchToolbar from './SearchToolbar.vue'
 import TransDialog from './TransDialog.vue'
 import SettingsDialog from './SettingsDialog.vue'
 import AboutDialog from './AboutDialog.vue'
-import {state} from '@/services/state'
+import {state, safe_hsl} from '@/services/state'
 import {chapter_display} from '@/services/computes'
 
 
@@ -93,10 +93,10 @@ const theme = useTheme()
 
 // Update Vuetify and bg whenever color config changes
 // NOTE Done here since `useTheme` can only be called within a setup fn
-watch(() => state.color, value => {
-    theme.themes.value['dark']!.colors.primary = value
-    theme.themes.value['light']!.colors.primary = value
-    self.document.body.parentElement!.style.backgroundColor = value
+watch([() => state.hue, () => state.saturation], () => {
+    theme.themes.value['dark']!.colors.primary = safe_hsl.value
+    theme.themes.value['light']!.colors.primary = safe_hsl.value
+    self.document.body.parentElement!.style.backgroundColor = safe_hsl.value
 }, {immediate: true})
 watch(() => state.dark, value => {
     theme.global.name.value = value ? 'dark' : 'light'
