@@ -16,8 +16,15 @@ function enhance(){
         document.head.append(style_element)
     }
 
+    // Find script element that included this script itself
+    const element:HTMLScriptElement|null =
+        document.querySelector('script[src="https://fetch.bible/enhance.js"]')
+
+    // If `data-trans` attribute on script element, use it to configure enhancer
+    const translations = element?.dataset['trans']?.split(',')
+
     // Discover
-    void new BibleEnhancer().discover_bible_references()
+    void new BibleEnhancer({translations}).discover_bible_references()
 }
 
 

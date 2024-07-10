@@ -78,13 +78,13 @@ Add the following to the `<head>` of your page:
 
 `<script type="module" crossorigin src="https://fetch.bible/enhance.js"></script>`
 
-It will automatically execute and transform all references it finds in the user's language, using the default translation for that language. English is always detected. To configure any settings, use the standard import method below.
+It will automatically execute and transform all references it finds in the user's language, using the default translation for that language. Add the following attribute to force it to use the given bibles `data-trans="eng_bsb,grc_sr"`. To configure any additional settings, use the standard import method below.
 
 ::: info TIP -- Transform other people's websites
 
-For your own personal use you can add the following as a bookmark in your browser. Clicking it will transform whatever page you are currently viewing.
+For your own personal use you can add the following as a bookmark in your browser. Clicking it will transform whatever page you are currently viewing. Specify what bibles you would like at the end of the bookmark like so:
 
-`javascript:(()=>{var s=document.createElement('script');s.src='https://fetch.bible/enhance.js';document.head.appendChild(s)})()`
+`javascript:(trans=>{var s=document.createElement('script');s.dataset.trans=trans;s.src='https://fetch.bible/enhance.js';document.head.appendChild(s)})("eng_bsb,grc_sr")`
 
 :::
 
