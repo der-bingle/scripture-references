@@ -18,7 +18,7 @@ function enhance(){
 
     // Find script element that included this script itself
     const element:HTMLScriptElement|null =
-        document.querySelector('script[src="https://fetch.bible/enhance.js"]')
+        document.querySelector('script[src="https://collection.fetch.bible/enhance.js"]')
 
     // If `data-trans` attribute on script element, use it to configure enhancer
     const translations = element?.dataset['trans']?.split(',')

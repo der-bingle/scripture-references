@@ -5,3 +5,5 @@ cd "$(realpath -m "$0/../..")/enhancer"
 
 ../.bin/build_enhancer
 npm publish --access=public
+
+echo "TODO Publish to collection.fetch.bible too"

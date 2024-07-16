@@ -5,7 +5,7 @@ export async function request(url:string):Promise<string>{
     // TODO Waiting on fetch types: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/60924
     /* eslint-disable */
     // @ts-ignore Node 18 does have fetch but types not updated yet
-    const resp = await fetch(url)
+    const resp = await fetch(url, {mode: 'cors'})
     if (resp.ok){
         return await resp.text()
     }

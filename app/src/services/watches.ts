@@ -35,7 +35,7 @@ export function enable_watches(){
                     const url = content.collection.get_book_url(trans, book.id, 'html')
                     void cache.match(url).then(resp => {
                         if (!resp){
-                            void fetch(url)
+                            void fetch(url, {mode: 'cors'})  // Don't actually read contents
                         }
                     })
                 }
@@ -83,11 +83,11 @@ export function enable_watches(){
         void content.client.fetch_crossref(state.book, 'small').then(crossref => {
             state.crossref = crossref
         })
-        void fetch(`${content.client._data_endpoint}notes/eng_tyndale/html/${state.book}.json`)
-            .then(async resp => {
-                type RespJson = {verses: Record<string, Record<string, string>>}
-                state.notes = (await resp.json() as RespJson)['verses']
-            })
+        const url = `${content.client._data_endpoint}notes/eng_tyndale/html/${state.book}.json`
+        void fetch(url, {mode: 'cors'}).then(async resp => {
+            type RespJson = {verses: Record<string, Record<string, string>>}
+            state.notes = (await resp.json() as RespJson)['verses']
+        })
         const orig_trans = new PassageReference(state.book).ot ? 'hbo_wlc' : 'grc_sr'
         // TODO Only need to check has book since hbo_wlc lacking some books due to parsing issues
         if (content.collection.has_book(orig_trans, state.book)){
