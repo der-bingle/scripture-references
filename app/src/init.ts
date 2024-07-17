@@ -67,8 +67,10 @@ void content.client.fetch_collection().then(collection => {
         : [content.collection.get_preferred_translation()]
 
     // Parse initial search
-    apply_search()
-    state.search = null
+    if (state.search){
+        apply_search(state.search)
+        state.search = null
+    }
 
     // Enable watches
     enable_watches()
