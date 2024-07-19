@@ -9,7 +9,7 @@ rm -rf dist
 
 
 # Build css
-npx sass --style=compressed src/styles.sass dist/styles.css
+npx sass --style=compressed --embed-sources src/styles.sass dist/styles.css
 
 
 # Common args

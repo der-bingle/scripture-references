@@ -16,7 +16,7 @@ rm -rf dist
 
 
 # Build css
-npx sass --style=compressed src/css/index.sass dist/client.css
+npx sass --style=compressed --embed-sources src/css/index.sass dist/client.css
 
 
 # Common args
