@@ -10,12 +10,15 @@ import {wait} from './utils'
 
 
 export function apply_search(value:string){
-    const match = content.collection.detect_references(value, state.trans).next().value
+    // First see if value is itself a reference
+    // Otherwise look for a ref in the whole string (TODO Won't match entire books)
+    const match = content.collection.string_to_reference(value, state.trans)
+        ?? content.collection.detect_references(value, state.trans).next().value?.ref
     if (match){
-        state.book = match.ref.book
-        state.chapter = match.ref.start_chapter
-        state.verse = match.ref.start_verse
-        state.passage = match.ref
+        state.book = match.book
+        state.chapter = match.start_chapter
+        state.verse = match.start_verse
+        state.passage = match
     }
 }
 
