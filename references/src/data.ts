@@ -85,7 +85,7 @@ export const book_names_english:Readonly<Record<string, string>> = Object.freeze
 // These could in theory abbreviate multiple books, and are only specified because of convention
 // See https://www.logos.com/bible-book-abbreviations
 // These are hard-coded so that they will result in a correct match if English default is kept
-export const special_english_abbrev_include:[string, string][] = [
+export const special_english_abbrev_include:readonly [string, string][] = Object.freeze([
     // [code, abbrev]
     ['num', "nm"],
     ['ezr', "ez"],
@@ -97,11 +97,11 @@ export const special_english_abbrev_include:[string, string][] = [
     ['jas', "jm"],
     ['jud', "jud"],
     ['jud', "jd"],
-]
+])
 
 
 // Abbreviations that should be ignored for being too vague
 // Words are only added if (1) common and (2) could actually match a book
 // E.g. "So. 1" is ok but not "So 1 cat"
-export const special_english_abbrev_exclude:string[] =
-    ["is", "so", "at", "am", "me", "he", "hi", "at"]
+export const special_english_abbrev_exclude:readonly string[] =
+    Object.freeze(["is", "so", "at", "am", "me", "he", "hi", "at"])
