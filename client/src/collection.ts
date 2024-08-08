@@ -1,6 +1,6 @@
 
 import {book_names_english, books_ordered, PassageReference, detect_references,
-} from '@gracious.tech/bible-references'
+    special_english_abbrev_include} from '@gracious.tech/bible-references'
 
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
@@ -496,8 +496,8 @@ export class BibleCollection {
         return promise
     }
 
-    // @internal Get list of book names for given translations
-    _book_names_list(translation:string|string[]=[], always_detect_english=true){
+    // @internal Auto-prepare args for from_string/detect_references based on translation
+    _from_string_args(translation:string|string[]=[], always_detect_english=true){
 
         // Key by name so can support multiple names for single book and ensure no duplicate names
         const name_to_code:Record<string, string> = {}
@@ -517,16 +517,41 @@ export class BibleCollection {
             for (const [code, name] of Object.entries(book_names_english)){
                 name_to_code[name] = code
             }
+            for (const [code, name] of special_english_abbrev_include){
+                name_to_code[name] = code
+            }
         }
 
         // Return list reversed (code -> name) as expected by references module
-        return Object.entries(name_to_code).map(([name, code]) => [code, name] as [string, string])
+        const book_names =
+            Object.entries(name_to_code).map(([name, code]) => [code, name] as [string, string])
+
+        // Languages with Chinese-like characters
+        const chinese_like = [
+            'zho',  // Chinese macrolanguage group
+            'lzh', 'gan', 'hak', 'czh', 'cjy', 'cmn', 'mnp', 'cdo',  // Part of 'zho' group
+            'nan', 'czo', 'cnp', 'cpx', 'csp', 'wuu', 'hsn', 'yue',  // Part of 'zho' group
+            'jpn',  // Japanese
+            'kor',  // Korean
+        ]
+
+        // Detect language as whatever first translation given has
+        const lang = translations[0]!.split('_')[0]!
+
+        // Set args based on whether a Chinese script or not
+        const exclude_book_names:string[]|undefined = lang === 'eng' ? undefined : []
+        const min_chars:number = chinese_like.includes(lang) ? 1 : 2
+        const match_from_start = !chinese_like.includes(lang)
+
+        return [book_names, exclude_book_names, min_chars, match_from_start,
+        ] as [[string, string][], string[], number, boolean]
     }
 
     // Detect bible references in a block of text using book names of given translation(s)
     // A generator is returned and can be passed updated text each time it yields a result
     detect_references(text:string, translation:string|string[]=[], always_detect_english=true){
-        return detect_references(text, this._book_names_list(translation, always_detect_english))
+        return detect_references(text,
+            ...this._from_string_args(translation, always_detect_english))
     }
 
     // Parse a single bible reference string into a PassageReference object (validating it)
@@ -534,7 +559,7 @@ export class BibleCollection {
     string_to_reference(text:string, translation:string|string[]=[],
             always_detect_english=true){
         return PassageReference.from_string(text,
-            this._book_names_list(translation, always_detect_english))
+            ...this._from_string_args(translation, always_detect_english))
     }
 
     // Render a PassageReference object as a string using the given translation's book names
