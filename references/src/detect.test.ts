@@ -2,6 +2,7 @@
 import {describe, it} from 'vitest'
 
 import {detect_references} from './detect.js'
+import {special_english_abbrev_exclude} from './data.js'
 
 
 describe('detect_references', () => {
@@ -173,5 +174,30 @@ describe('detect_references', () => {
         expect(detect_references("Tit  1  :  1  -  2  :  2").next().value?.ref.toString())
             .toBe("Titus 1:1-2:2")
         expect(detect_references("Tit   1:1-2:2").next().value).toBe(null)
+    })
+
+    const common_2letter_words = ["to", "of", "in", "is", "it", "no", "on", "so", "as", "at",
+        "we", "if", "be", "by", "or", "up", "an", "am", "do", "my", "me", "us", "to", "he",
+        "hi", "of", "oh", "on", "at", "by"]
+
+    for (const word of common_2letter_words){
+        it(`Doesn't match two letter word "${word}"`, ({expect}) => {
+            expect(detect_references(`${word} 1 Cor 9`).next().value?.text).toBe("1 Cor 9")
+        })
+    }
+
+    for (const word of special_english_abbrev_exclude){
+        it(`Does match "${word}."`, ({expect}) => {
+            expect(detect_references(`${word}. 1`).next().value?.text).not.toBe(null)
+        })
+    }
+
+    it("Detects Chinese references", ({expect}) => {
+        expect(detect_references("有持续的权威（罗马书5：14）。所有人类", {rom: "罗马书"})
+            .next().value?.ref)
+            .toMatchObject({book: 'rom', start_chapter: 5, start_verse: 14})
+        expect(detect_references("有持续的权威（伯5：14）。所有人类", {job: "約伯記"}, [], 1, false)
+            .next().value?.ref)
+            .toMatchObject({book: 'job', start_chapter: 5, start_verse: 14})
     })
 })

@@ -1,6 +1,7 @@
 
 import {parse_int} from './utils.js'
-import {books_ordered, book_names_english} from './data.js'
+import {books_ordered, book_names_english, special_english_abbrev_include,
+    special_english_abbrev_exclude} from './data.js'
 import {last_verse} from './last_verse.js'
 
 
@@ -13,6 +14,8 @@ export interface PassageArgs {
 }
 
 export type ReferenceType = 'book'|'chapter'|'verse'|'range_verses'|'range_chapters'|'range_multi'
+
+export type BookNamesArg = Record<string, string>|[string, string][]
 
 
 // Parse verses reference string into an object (but does not validate numbers)
@@ -61,7 +64,8 @@ export function _verses_str_to_obj(ref:string){
 // Get book USX code from the book name or an abbreviation of it
 // This should be language neutral (though some English special cases are included)
 // `book_names` is an array so that multiple names for same book can be provided
-export function _detect_book(input:string, book_names:[string, string][]):string|null{
+export function _detect_book(input:string, book_names:[string, string][],
+        exclude_book_names:string[]=[], match_from_start=true):string|null{
 
     // Clean util to be used for both input and book names
     const clean = (string:string) => {
@@ -75,8 +79,18 @@ export function _detect_book(input:string, book_names:[string, string][]):string
 
     // Clean the input
     input = clean(input)
+    if (!input){
+        return null  // So know have at least 1 char
+    }
+
+    // Ignore if excluded
+    exclude_book_names = exclude_book_names.map(name => clean(name))
+    if (exclude_book_names.includes(input)){
+        return null
+    }
 
     // If a direct match to a code, just return it
+    // This allows passing a book code when the human name is not available
     if (books_ordered.includes(input)){
         return input
     }
@@ -85,39 +99,37 @@ export function _detect_book(input:string, book_names:[string, string][]):string
     const normalised = book_names.map(([code, name]) => ([code, clean(name)] as [string, string]))
 
     // See if input matches or abbreviates any book name
-    const matches = normalised.filter(([code, name]) => name.startsWith(input))
+    const matches:[string, string][] = []
+    for (const [code, name] of normalised){
+        if (input === name){
+            return code  // Return straight away if an exact match (even if could prefix multiple)
+        } else if (name.startsWith(input)){
+            matches.push([code, name])
+        }
+    }
 
     // Only return if unique match
     if (matches.length === 1){
         return matches[0]![0]
+    } else if (matches.length){
+        return null  // Multiple matches so input must be too vague
     }
 
     // Try fuzzy regex, since vowels are often removed in abbreviations
-    const fuzzy = normalised.filter(([code, name]) => {
-        const input_with_gaps = input.split('').join('.{0,4}')
-        return new RegExp(`^${input_with_gaps}.*`).test(name)
-    })
-    if (fuzzy.length === 1){
-        return fuzzy[0]![0]
+    // NOTE Constructed regex should be safe as only digits and letters are allowed in input
+    let input_regex_str = input.split('').join('.{0,4}')
+    if (match_from_start){
+        if (['1', '2', '3'].includes(input[0]!)){
+            // Must match first two chars from start if first char is a number
+            input_regex_str = '^' + input[0]! + input.slice(1).split('').join('.{0,4}')
+        } else {
+            input_regex_str = '^' + input_regex_str
+        }
     }
-
-    // Handle English special cases
-    // These could in theory abbreviate multiple books, and are only specified because of convention
-    // See https://www.logos.com/bible-book-abbreviations
-    const special_cases:Record<string, string> = {
-        nm: 'num',
-        ez: 'ezr',
-        mc: 'mic',
-        hb: 'hab',
-        jn: 'jhn',
-        phil: 'php',
-        pm: 'phm',
-        jm: 'jas',
-        jud: 'jud',
-        jd: 'jud',
-    }
-    if (input in special_cases){
-        return special_cases[input]!
+    const input_regex = new RegExp(input_regex_str)
+    const fuzzy_matches = normalised.filter(([code, name]) => input_regex.test(name))
+    if (fuzzy_matches.length === 1){
+        return fuzzy_matches[0]![0]
     }
 
     return null
@@ -268,13 +280,16 @@ export class PassageReference {
 
     // Parse passage reference string
     // book_names can be a list if a single book has multiple names [["gen", "Genesis"], ...]
-    static from_string(reference:string, book_names?:Record<string, string>|[string, string][])
-            :PassageReference|null{
+    static from_string(reference:string, book_names?:BookNamesArg, exclude_book_names?:string[],
+            min_chars=2, match_from_start=true):PassageReference|null{
 
         // Default to English book names if none given
         // NOTE Don't always include in case creates false positives in some languages
         if (!book_names){
-            book_names = book_names_english
+            book_names = [...Object.entries(book_names_english), ...special_english_abbrev_include]
+            if (!exclude_book_names){
+                exclude_book_names = special_english_abbrev_exclude
+            }
         }
 
         // Conform book_names to a list
@@ -289,8 +304,16 @@ export class PassageReference {
             verses_start = reference.length
         }
 
+        // Fail if book string is less than min chars
+        // Check before cleaning the value so that "So. 1" works but "So 1" doesn't (if min were 3)
+        const book_str = reference.slice(0, verses_start).trim()
+        if (book_str.length < min_chars){
+            return null
+        }
+
         // If book can be parsed, ref is valid even if verse range can't be parsed
-        const book_code = _detect_book(reference.slice(0, verses_start), book_names_list)
+        const book_code = _detect_book(book_str, book_names_list, exclude_book_names,
+            match_from_start)
         if (!book_code){
             return null
         }

@@ -2,7 +2,7 @@
 import {describe, it} from 'vitest'
 
 import {PassageReference, _detect_book, _verses_str_to_obj} from './passage.js'
-import {book_names_english} from './data.js'
+import {book_names_english, special_english_abbrev_include} from './data.js'
 
 
 function simple(start_chapter:number, start_verse:number, end_chapter?:number, end_verse?:number){
@@ -100,7 +100,7 @@ describe('_verses_str_to_obj', () => {
 
 describe('_detect_book', () => {
 
-    const book_names = Object.entries(book_names_english)
+    const book_names = [...Object.entries(book_names_english), ...special_english_abbrev_include]
 
     for (const [code, name] of book_names){
         it(`Identifies "${name}" as '${code}'`, ({expect}) => {
@@ -124,9 +124,18 @@ describe('_detect_book', () => {
         expect(_detect_book('j', book_names)).toEqual(null)
     })
 
+    it("Requires second char at start if first char is number", ({expect}) => {
+        expect(_detect_book('1am', book_names)).toEqual(null)
+        expect(_detect_book('1sam', book_names)).toEqual('1sa')
+    })
+
     it("Still parses some kinds of ambiguous references", ({expect}) => {
         // Phil could be Philemon or Philippians but is generally understood to be the later
         expect(_detect_book("Phil", book_names)).toEqual('php')
+    })
+
+    it("Detects abbreviations within words for languages that require it", ({expect}) => {
+        expect(_detect_book("伯", [['job', "約伯記"]], undefined, false)).toBe('job')
     })
 })
 
@@ -269,6 +278,12 @@ describe('from_string', () => {
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
         expect(PassageReference.from_string("Jude 2-3"))
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
+    })
+
+    it("Does not detect single letter English names", ({expect}) => {
+        // NOTE O for Obadiah seems to be the only unique one
+        expect(PassageReference.from_string("O 1")).toBe(null)
+        expect(PassageReference.from_string("O. 1")?.book).toBe('oba')
     })
 
 })

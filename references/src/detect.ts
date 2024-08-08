@@ -1,5 +1,5 @@
 
-import {PassageReference} from './passage.js'
+import {PassageReference, BookNamesArg} from './passage.js'
 
 
 export interface PassageReferenceMatch {
@@ -14,25 +14,39 @@ export interface PassageReferenceMatch {
 // NOTE Allow two spaces but no more, to be forgiving but not match weird text
 const regex_verse_sep = '[:：\\.]'
 const regex_book_num_prefix = '(?:(?:[123]|I{1,3}) ? ?)?'
-const regex_book_name = '\\p{Letter}[\\p{Letter}\\p{Dash} ]{0,16}\\p{Letter}\\.? ? ?'
+const regex_book_name_tmpl = '\\p{Letter}[\\p{Letter}\\p{Dash} ]{MIN_MID,16}END_LETTER\\.? ? ?'
 const regex_integer_with_opt_sep =
     '\\d{1,3}[abc]?(?: ? ?' + regex_verse_sep + ' ? ?\\d{1,3}[abc]?)?'
 const regex_verse_range = regex_integer_with_opt_sep + '(?: ? ?\\p{Dash} ? ?'
     + regex_integer_with_opt_sep + ')?'
 const regex_trailing = '(?![\\d\\p{Letter}@#$%])'  // Doesn't make sense to be followed by these
-const regex_complete = regex_book_num_prefix + regex_book_name + regex_verse_range + regex_trailing
 
 const regex_between_ranges = ' ? ?[,;] ? ?'
 const regex_additional_range = regex_between_ranges + '(' + regex_verse_range + ')' + regex_trailing
 
-const regex_book_check = regex_between_ranges + '(' + regex_book_num_prefix + regex_book_name + ')'
-
 
 // Detect the text and position of passage references in a block of text
 // Whole books aren't detected (e.g. Philemon) only references with a range (e.g. Philemon 1)
-export function* detect_references(text:string,
-        book_names?:Record<string, string>|[string, string][])
+export function* detect_references(text:string, book_names?:BookNamesArg,
+        exclude_book_names?:string[], min_chars=2, match_from_start=true)
         :Generator<PassageReferenceMatch, null, undefined>{
+
+    // Shortcut for calling from_string
+    const from_string = (value:string) => {
+        return PassageReference.from_string(value, book_names, exclude_book_names, min_chars,
+            match_from_start)
+    }
+
+    // Generate regexs with dynamic value based on min_chars for book name
+    // MIN_MID is -2 as first and last char already specified
+    // END_LETTER is not present if min_chars is 1
+    const regex_book_name = regex_book_name_tmpl
+        .replace('MIN_MID', String(Math.max(0, min_chars - 2)))
+        .replace('END_LETTER', min_chars > 1 ? '\\p{Letter}' : '')
+    const regex_complete =
+        regex_book_num_prefix + regex_book_name + regex_verse_range + regex_trailing
+    const regex_book_check =
+        regex_between_ranges + '(' + regex_book_num_prefix + regex_book_name + ')'
 
     // Create regex (will manually manipulate lastIndex property of it)
     const regex = new RegExp(regex_complete, 'uig')
@@ -49,7 +63,7 @@ export function* detect_references(text:string,
         }
 
         // Confirm match is actually a valid ref
-        const ref = PassageReference.from_string(match[0], book_names)
+        const ref = from_string(match[0])
         if (ref && ref.args_valid){
             yield {
                 ref,
@@ -71,7 +85,7 @@ export function* detect_references(text:string,
                 const book_look_ahead = new RegExp(regex_book_check, 'uiy')
                 book_look_ahead.lastIndex = add_regex.lastIndex
                 const possible_book = book_look_ahead.exec(text)
-                if (possible_book && PassageReference.from_string(possible_book[1]!)){
+                if (possible_book && from_string(possible_book[1]!)){
                     break
                 }
 
@@ -89,7 +103,7 @@ export function* detect_references(text:string,
                 if (!has_verse_sep && ['verse', 'range_verses', 'range_multi'].includes(ref.type)){
                     prefix += `${ref.end_chapter}:`
                 }
-                const add_ref = PassageReference.from_string(prefix + add_match[1]!, book_names)
+                const add_ref = from_string(prefix + add_match[1]!)
                 if (!add_ref || !add_ref.args_valid){
                     break
                 }

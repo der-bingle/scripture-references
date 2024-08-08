@@ -33,7 +33,7 @@
   },
   "homepage": "https://fetch.bible/",
   "dependencies": {
-    "@gracious.tech/bible-references": "^0.0.4"
+    "@gracious.tech/bible-references": "^0.1.0"
   },
   "devDependencies": {
     "sass": "^1.63.4"

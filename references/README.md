@@ -36,6 +36,12 @@ for (const match of detect_references("Multiple refs like Gen 2:3 or John 3:16 a
     console.log(match.text)  // "Gen 2:3", "John 3:16", "Matt 10:8"
 }
 
+// Detection can be configured to suit different languages
+const exclude_book_names = []  // E.g. To prevent "so 1 is" matching as "Song of Songs 1" add "so"
+const min_chars = 1  // Default is 2 but Chinese can abbreviate books down to a single character
+const match_from_start = false  // Default is true but Chinese can abbreviate using a middle char
+detect_references("伯5：14", {job: "約伯記"}, exclude_book_names, min_chars, match_from_start)
+
 ```
 
 Bible book codes are the [same as USX](https://ubsicap.github.io/usx/vocabularies.html#usx-vocab-bookcode) but lowercase.
