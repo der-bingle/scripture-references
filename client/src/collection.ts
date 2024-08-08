@@ -1,6 +1,7 @@
 
 import {book_names_english, books_ordered, PassageReference, detect_references,
-    special_english_abbrev_include} from '@gracious.tech/bible-references'
+    english_abbrev_include, english_abbrev_exclude,
+} from '@gracious.tech/bible-references'
 
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
@@ -517,7 +518,7 @@ export class BibleCollection {
             for (const [code, name] of Object.entries(book_names_english)){
                 name_to_code[name] = code
             }
-            for (const [code, name] of special_english_abbrev_include){
+            for (const [code, name] of english_abbrev_include){
                 name_to_code[name] = code
             }
         }
@@ -539,7 +540,8 @@ export class BibleCollection {
         const lang = translations[0]!.split('_')[0]!
 
         // Set args based on whether a Chinese script or not
-        const exclude_book_names:string[]|undefined = lang === 'eng' ? undefined : []
+        const exclude_book_names:string[]|undefined =
+            lang === 'eng' ? [...english_abbrev_exclude] : []
         const min_chars:number = chinese_like.includes(lang) ? 1 : 2
         const match_from_start = !chinese_like.includes(lang)
 

@@ -2,7 +2,7 @@
 import {describe, it} from 'vitest'
 
 import {PassageReference, _detect_book, _verses_str_to_obj} from './passage.js'
-import {book_names_english, special_english_abbrev_include} from './data.js'
+import {book_names_english, english_abbrev_include} from './data.js'
 
 
 function simple(start_chapter:number, start_verse:number, end_chapter?:number, end_verse?:number){
@@ -100,7 +100,7 @@ describe('_verses_str_to_obj', () => {
 
 describe('_detect_book', () => {
 
-    const book_names = [...Object.entries(book_names_english), ...special_english_abbrev_include]
+    const book_names = [...Object.entries(book_names_english), ...english_abbrev_include]
 
     for (const [code, name] of book_names){
         it(`Identifies "${name}" as '${code}'`, ({expect}) => {

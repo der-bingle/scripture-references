@@ -1,7 +1,7 @@
 
 import {parse_int} from './utils.js'
-import {books_ordered, book_names_english, special_english_abbrev_include,
-    special_english_abbrev_exclude} from './data.js'
+import {books_ordered, book_names_english, english_abbrev_include,
+    english_abbrev_exclude} from './data.js'
 import {last_verse} from './last_verse.js'
 
 
@@ -286,9 +286,9 @@ export class PassageReference {
         // Default to English book names if none given
         // NOTE Don't always include in case creates false positives in some languages
         if (!book_names){
-            book_names = [...Object.entries(book_names_english), ...special_english_abbrev_include]
+            book_names = [...Object.entries(book_names_english), ...english_abbrev_include]
             if (!exclude_book_names){
-                exclude_book_names = special_english_abbrev_exclude
+                exclude_book_names = [...english_abbrev_exclude]
             }
         }
 

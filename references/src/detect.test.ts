@@ -2,7 +2,7 @@
 import {describe, it} from 'vitest'
 
 import {detect_references} from './detect.js'
-import {special_english_abbrev_exclude} from './data.js'
+import {english_abbrev_exclude} from './data.js'
 
 
 describe('detect_references', () => {
@@ -186,7 +186,7 @@ describe('detect_references', () => {
         })
     }
 
-    for (const word of special_english_abbrev_exclude){
+    for (const word of english_abbrev_exclude){
         it(`Does match "${word}."`, ({expect}) => {
             expect(detect_references(`${word}. 1`).next().value?.text).not.toBe(null)
         })
