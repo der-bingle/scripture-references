@@ -537,7 +537,7 @@ export class BibleCollection {
         ]
 
         // Detect language as whatever first translation given has
-        const lang = translations[0]!.split('_')[0]!
+        const lang = translations[0]?.split('_')[0] ?? 'eng'
 
         // Set args based on whether a Chinese script or not
         const exclude_book_names:string[]|undefined =
