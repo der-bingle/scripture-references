@@ -31,7 +31,7 @@
   },
   "homepage": "https://fetch.bible/",
   "dependencies": {
-    "@gracious.tech/fetch-client": "^0.8.9"
+    "@gracious.tech/fetch-client": "^0.9.0"
   },
   "devDependencies": {
     "sass": "^1.63.4"
