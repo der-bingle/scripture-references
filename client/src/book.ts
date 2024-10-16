@@ -210,6 +210,24 @@ export class BibleBookHtml {
                 }
             })
     }
+
+    // Get HTML as an array of individual verses by passing a PassageReference object
+    get_list_from_ref(ref:PassageReference):IndividualVerse<string>[]{
+
+        // PassageReference objects will have exact numbers except for `book` and `chapter`
+        let end_chapter:number|undefined = ref.end_chapter
+        let end_verse:number|undefined = ref.end_verse
+        if (ref.type === 'book'){
+            // `get_list()` defaults to going to end of book when no end given
+            end_chapter = undefined
+            end_verse = undefined
+        } else if (ref.type === 'chapter'){
+            // `get_list()` accepts 0 for end_verse to finish at end of previous chapter
+            end_chapter += 1
+            end_verse = 0
+        }
+        return this.get_list(ref.start_chapter, ref.start_verse, end_chapter, end_verse)
+    }
 }
 
 
