@@ -104,4 +104,4 @@ export const english_abbrev_include:readonly [string, string][] = Object.freeze(
 // Words are only added if (1) common and (2) could actually match a book
 // E.g. "So. 1" is ok but not "So 1 cat"
 export const english_abbrev_exclude:readonly string[] =
-    Object.freeze(["is", "so", "at", "am", "me", "he", "hi", "at"])
+    Object.freeze(["is", "so", "at", "am", "me", "he", "hi"])
