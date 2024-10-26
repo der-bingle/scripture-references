@@ -6,4 +6,6 @@ cd "$(realpath -m "$0/../..")/enhancer"
 ../.bin/build_enhancer
 npm publish --access=public
 
-echo "TODO Publish to collection.fetch.bible too"
+# Publish self-executing version to collection.fetch.bible too
+aws s3 cp dist/execute.js s3://collection-fetch-bible/enhance.js
+aws cloudfront create-invalidation --distribution-id E3K5SZPCAYX1I4 --paths "/enhance.js"
