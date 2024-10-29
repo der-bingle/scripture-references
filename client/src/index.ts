@@ -46,6 +46,7 @@ export type {
     UsageConfig,
     UsageOptions,
     RuntimeLicense,
+    RuntimeCopyright,
     RuntimeTranslation,
     RuntimeManifest,
 } from './types.js'

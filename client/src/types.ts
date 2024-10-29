@@ -24,8 +24,12 @@ export interface RuntimeLicense {
     url:string
 }
 
+export type RuntimeCopyright = Omit<MetaCopyright, 'licenses'> & {
+    licenses:RuntimeLicense[]
+}
+
 export type RuntimeTranslation = Omit<DistTranslation, 'copyright'> & {
-    copyright:Omit<MetaCopyright, 'licenses'> & {licenses:RuntimeLicense[]}
+    copyright:RuntimeCopyright
 }
 
 export type RuntimeManifest = Omit<DistManifest, 'translations'> & {

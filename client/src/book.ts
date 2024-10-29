@@ -3,7 +3,7 @@ import {PassageReference} from '@gracious.tech/bible-references'
 
 import {escape_html, num_to_letters} from './utils.js'
 
-import type {RuntimeLicense, RuntimeTranslation} from './types'
+import type {RuntimeLicense, RuntimeCopyright} from './types'
 import type {BibleJsonHtml, BibleJsonTxt, TxtContent} from './shared_types'
 
 
@@ -53,23 +53,26 @@ function validate_ref(start_chapter:number, start_verse:number, end_chapter:numb
 export class BibleBookHtml {
 
     // @internal
-    _translation:RuntimeTranslation
+    _copyright:RuntimeCopyright|undefined
     // @internal
     _html:BibleJsonHtml
 
     // @internal
-    constructor(translation:RuntimeTranslation, json:string){
-        this._translation = translation
+    constructor(json:string, copyright?:RuntimeCopyright){
+        this._copyright = copyright
         this._html = JSON.parse(json) as BibleJsonHtml
     }
 
     // Get appropriate text for attribution (defaults to first license, optionally provide one)
     get_attribution(license?:RuntimeLicense):string{
-        if (!license){
-            license = this._translation.copyright.licenses[0]!  // Always at least one
+        if (!this._copyright){
+            return ''  // Copyright not provided when creating instance (only by manual use)
         }
-        const url = this._translation.copyright.attribution_url
-        const owner = escape_html(this._translation.copyright.attribution)
+        if (!license){
+            license = this._copyright.licenses[0]!  // Always at least one
+        }
+        const url = this._copyright.attribution_url
+        const owner = escape_html(this._copyright.attribution)
         return `
             <p class="fb-attribution">
                 <a href="${url}" target="_blank">${owner}</a>
@@ -235,13 +238,13 @@ export class BibleBookHtml {
 export class BibleBookUsx {
 
     // @internal
-    _translation:RuntimeTranslation
+    _copyright:RuntimeCopyright|undefined
     // @internal
     _usx:string
 
     // @internal
-    constructor(translation:RuntimeTranslation, usx:string){
-        this._translation = translation
+    constructor(usx:string, copyright?:RuntimeCopyright){
+        this._copyright = copyright
         this._usx = usx
     }
 
@@ -256,13 +259,13 @@ export class BibleBookUsx {
 export class BibleBookUsfm {
 
     // @internal
-    _translation:RuntimeTranslation
+    _copyright:RuntimeCopyright|undefined
     // @internal
     _usfm:string
 
     // @internal
-    constructor(translation:RuntimeTranslation, usfm:string){
-        this._translation = translation
+    constructor(usfm:string, copyright?:RuntimeCopyright){
+        this._copyright = copyright
         this._usfm = usfm
     }
 
@@ -307,22 +310,25 @@ function txt_array_to_markdown(contents:TxtContent[], headings=true, notes=true)
 export class BibleBookTxt {
 
     // @internal
-    _translation:RuntimeTranslation
+    _copyright:RuntimeCopyright|undefined
     // @internal
     _txt:BibleJsonTxt
 
     // @internal
-    constructor(translation:RuntimeTranslation, txt:string){
-        this._translation = translation
+    constructor(txt:string, copyright?:RuntimeCopyright){
+        this._copyright = copyright
         this._txt = JSON.parse(txt) as BibleJsonTxt
     }
 
     // Get appropriate text for attribution (defaults to first license, optionally provide one)
     get_attribution(license?:RuntimeLicense):string{
-        if (!license){
-            license = this._translation.copyright.licenses[0]!  // Always at least one
+        if (!this._copyright){
+            return ''  // Copyright not provided when creating instance (only by manual use)
         }
-        return `\n\n\n\n[${license.name} - ${this._translation.copyright.attribution}]`
+        if (!license){
+            license = this._copyright.licenses[0]!  // Always at least one
+        }
+        return `\n\n\n\n[${license.name} - ${this._copyright.attribution}]`
     }
 
     // @internal

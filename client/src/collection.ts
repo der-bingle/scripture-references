@@ -483,7 +483,7 @@ export class BibleCollection {
                 usfm: BibleBookUsfm,
                 txt: BibleBookTxt,
             }[format]
-            return new format_class(this._manifest.translations[translation]!, contents)
+            return new format_class(contents, this._manifest.translations[translation]!.copyright)
         })
 
         // Cache request promise if desired
