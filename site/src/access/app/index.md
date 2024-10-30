@@ -28,15 +28,18 @@ _Also see the [web enhancer](/access/enhancer/)_
  * Show multiple translations (both landscape and portrait)
  * Private (no tracking of individuals)
 
-__Coming soon:__
-
- * Customise font and size
- * Search
- * Audio
-
 
 ## Usage
-You can use the app in the following ways:
+
+### Novice use
+Create a blank page on your website and add the following code to make the app fill the page:
+
+```html
+<iframe src="https://app.fetch.bible" style="position:fixed;width:100vw;height:100vh;top:0;left:0;border:none;"></iframe>
+```
+
+
+### Professional use
  1. Embed it as an iframe
     * `<iframe src='https://app.fetch.bible'>`
  1. Load it in a webview in a native app
