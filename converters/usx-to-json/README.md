@@ -13,6 +13,8 @@ When used to generate plain text, this module will return an array of strings fo
 
 ```json
 {
+    "book": "luk",
+    "name": "Luke",
     "contents": [
         [],  // Chapter 0 has 0 verses
         [  // Chapter 1
@@ -56,6 +58,8 @@ When used to generate HTML, this module will return a tuple of strings for each 
 
 ```json
 {
+    "book": "luk",
+    "name": "Luke",
     "contents": [
         [],  // Chapter 0 has 0 verses
         [  // Chapter 1

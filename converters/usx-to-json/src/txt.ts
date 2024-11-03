@@ -1,5 +1,5 @@
 
-import {get_num_verses} from './common.js'
+import {parse_usx} from './common.js'
 import {ignored_elements, ignored_para_styles, ignored_char_styles, ignored_note_styles,
     headings_major, headings_regular, headings_minor, non_para_para} from './elements.js'
 
@@ -17,12 +17,8 @@ interface ParserState {
 
 export function usx_to_json_txt(xml:string, parser=DOMParser):BibleJsonTxt{
 
-    // Parse XML
-    const doc = new parser().parseFromString(xml, 'application/xml')
-    const usx_element = doc.documentElement as Element
-
-    // Detect book and expected number of verses
-    const num_verses = get_num_verses(usx_element)
+    // Parse USX
+    const {usx_element, num_verses, book_code, book_name} = parse_usx(xml, parser)
 
     // Prepare state tracking
     const state:ParserState = {
@@ -130,7 +126,11 @@ export function usx_to_json_txt(xml:string, parser=DOMParser):BibleJsonTxt{
         state.prev_para_type = non_para_para.includes(style) ? 'break' : 'para'
     }
 
-    return {contents: state.contents}
+    return {
+        book: book_code,
+        name: book_name,
+        contents: state.contents,
+    }
 }
 
 

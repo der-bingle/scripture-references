@@ -138,6 +138,8 @@ export interface DistNotesManifest {
 
 
 export interface BibleJsonHtml {
+    book:string
+    name:string
     contents: string[][][]
 }
 
@@ -155,6 +157,8 @@ export interface TxtNote {
 export type TxtContent = string|TxtHeading|TxtNote
 
 export interface BibleJsonTxt {
+    book:string
+    name:string
     contents: TxtContent[][][]
 }
 

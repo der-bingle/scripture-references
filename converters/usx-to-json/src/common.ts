@@ -2,8 +2,12 @@
 import {last_verse} from '@gracious.tech/bible-references'
 
 
-// Detect book and expected number of verses
-export function get_num_verses(usx_element:Element){
+// Create parser for USX and return required elements for traversing doc
+export function parse_usx(xml:string, parser:typeof DOMParser){
+
+    // Create parser
+    const doc = new parser().parseFromString(xml, 'application/xml')
+    const usx_element = doc.documentElement as Element
 
     // Confirm was given a USX doc
     if (!usx_element || usx_element.nodeName !== 'usx') {
@@ -20,5 +24,19 @@ export function get_num_verses(usx_element:Element){
         throw Error(`Book code invalid: ${book_code!}`)
     }
 
-    return last_verse[book_code]!
+    // Detect name of book
+    // WARN Keep consistent with collector/src/parts/usx.ts
+    const name_element = usx_element.querySelector(':root > para[@style="toc2"]')
+        ?? usx_element.querySelector(':root > para[@style="h"]')
+        ?? usx_element.querySelector(':root > para[@style="toc1"]')
+        ?? book_element
+
+    // Return elements
+    return {
+        doc,
+        usx_element,
+        book_code,
+        book_name: name_element.nodeValue ?? "Unknown",
+        num_verses: last_verse[book_code]!,
+    }
 }

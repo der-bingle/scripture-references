@@ -24,6 +24,7 @@ export function extract_meta(path:string):BookExtracts{
     const doc = new DOMParser().parseFromString(readFileSync(path, 'utf-8'))
 
     // Extract local for book
+    // WARN Keep consistent with converters/usx-to-json/src/common.ts
     type Xout = Element|undefined
     meta.name =
         (xpath.select('(//para[@style="toc2"]/text())[1]', doc)[0] as Xout)?.nodeValue
