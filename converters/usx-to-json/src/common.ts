@@ -36,7 +36,7 @@ export function parse_usx(xml:string, parser:typeof DOMParser){
         doc,
         usx_element,
         book_code,
-        book_name: name_element.nodeValue ?? "Unknown",
+        book_name: name_element.textContent ?? "Unknown",
         num_verses: last_verse[book_code]!,
     }
 }
