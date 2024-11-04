@@ -26,9 +26,9 @@ export function parse_usx(xml:string, parser:typeof DOMParser){
 
     // Detect name of book
     // WARN Keep consistent with collector/src/parts/usx.ts
-    const name_element = usx_element.querySelector(':root > para[@style="toc2"]')
-        ?? usx_element.querySelector(':root > para[@style="h"]')
-        ?? usx_element.querySelector(':root > para[@style="toc1"]')
+    const name_element = usx_element.querySelector(':root > para[style="toc2"]')
+        ?? usx_element.querySelector(':root > para[style="h"]')
+        ?? usx_element.querySelector(':root > para[style="toc1"]')
         ?? book_element
 
     // Return elements
