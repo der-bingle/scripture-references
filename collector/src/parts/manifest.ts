@@ -3,6 +3,7 @@ import {join} from 'path'
 import {existsSync, writeFileSync} from 'fs'
 
 import {book_names_english, books_ordered} from './bible.js'
+import {languages_by_total_speakers} from '../data/languages.js'
 import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
 import {read_json, read_dir} from './utils.js'
@@ -20,6 +21,7 @@ export async function update_manifest(){
         translations: {},
         languages: {},
         language2to3: {},
+        languages_most_spoken: [],
         books_ordered,
         book_names_english,
         licenses: LICENSES,
@@ -99,6 +101,8 @@ export async function update_manifest(){
         .filter(([code]) => included_languages.has(code)))
     manifest.language2to3 = Object.fromEntries(Object.entries(language_data.data.language2to3)
         .filter(([, three]) => included_languages.has(three)))
+    manifest.languages_most_spoken =
+        languages_by_total_speakers.filter(l => included_languages.has(l))
 
     // Save the manifest to dist dir
     writeFileSync(join('dist', 'bibles', 'manifest.json'), JSON.stringify(manifest))

@@ -114,6 +114,7 @@ export interface DistManifest {
     translations:Record<string, DistTranslation>
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
+    languages_most_spoken:string[]
     licenses:Record<string, MetaStandardLicense>
 }
 
