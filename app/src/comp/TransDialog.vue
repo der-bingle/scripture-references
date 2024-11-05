@@ -35,7 +35,7 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
                     @click='languages_show_all = true')
                 app-icon(name='expand_more')
                 | &nbsp;
-                | More
+                | + {{ languages.length - languages_filtered.length }}
         v-list(v-else)
             v-list-item(v-for='trans of translations' :key='trans.id' color='primary'
                     :active='trans.id === selected_trans.id' density='compact'
@@ -56,8 +56,8 @@ import {content} from '@/services/content'
 
 // Contants
 const languages = content.collection.get_languages()
-// NOTE First 50 languages covers 69% of world (even more those technically literate)
-const languages_by_pop = content.collection.get_languages({sort_by: 'population'}).slice(0, 50)
+// NOTE Just show 10 initially as scanning too many wastes time since not initially in ABC order
+const languages_by_pop = content.collection.get_languages({sort_by: 'population'}).slice(0, 10)
 
 
 // State
