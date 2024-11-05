@@ -25,7 +25,7 @@ type ObjF<T> = Omit<T, 'object'> & {object?:false}
 export interface GetLanguagesOptions {
     object?:boolean
     exclude_old?:boolean
-    sort_by?:'local'|'english'|'population'
+    sort_by?:'local'|'english'|'population'|'population_L1'
     search?:string
 }
 
@@ -116,6 +116,9 @@ export class BibleCollection {
             licenses: manifests[0][1].licenses,  // Still useful even if resolved within transl.s
             languages: {},
             language2to3: {},
+            // NOTE If first manifest is sparse then may not include all possible codes
+            //      But this is a non-essential array just used to slightly improve sorting
+            languages_most_spoken: manifests[0][1].languages_most_spoken,
             translations: {},
         }
 
@@ -242,9 +245,24 @@ export class BibleCollection {
 
         // Sort list and return it
         if (!search){
-            if (sort_by === 'population'){
+            if (sort_by === 'population_L1'){
                 list.sort((a, b) => {
                     return (b.pop ?? -1) - (a.pop ?? -1)
+                })
+            } else if (sort_by === 'population'){
+                // Sorting by total speakers (L1+L2) so need to consult extra array
+                const item_to_pop = (item:typeof list[number]) => {
+                    const most_spoken_i = this._manifest.languages_most_spoken.indexOf(item.code)
+                    if (most_spoken_i !== -1){
+                        // First in most spoken list needs largest number
+                        // They all need to exceed 1 billion too, to override standard pop data
+                        const list_len = this._manifest.languages_most_spoken.length
+                        return (list_len - most_spoken_i) * 9999999999  // 10 billion - 1
+                    }
+                    return item.pop ?? -1  // Fallback on L1-only pop data
+                }
+                list.sort((a, b) => {
+                    return item_to_pop(b) - item_to_pop(a)
                 })
             } else {
                 list.sort((a, b) => {
