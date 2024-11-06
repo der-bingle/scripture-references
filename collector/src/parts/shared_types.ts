@@ -101,8 +101,6 @@ export interface DistManifestItem {
 
 
 export interface DistTranslation extends DistManifestItem {
-    audio:unknown[]
-    video:unknown[]
     recommended:boolean|null
     books:Record<string, string>  // Books that are available and their names
     // {book:{c:{v:[c, v]}}}

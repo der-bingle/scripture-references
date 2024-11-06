@@ -47,8 +47,6 @@ export interface CommonSourceMeta {
 
 
 export interface TranslationSourceMeta extends CommonSourceMeta {
-    audio:unknown[]
-    video:unknown[]
     // Recommended is used to further customise the exclude_obsolete filter and default translation
     // They are usually based on year, but this can manually account for other factors
     // Set to false to consider even a modern translation obsolete

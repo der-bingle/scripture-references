@@ -14,20 +14,6 @@ table
         td {{ per(item.count) }}
 
 
-//- TODO When audio/video implemented
-h2 Media available
-table
-    tr
-        th Media
-        th Translations
-    tr
-        td Audio available
-        td 0%
-    tr
-        td Video available
-        td 0%
-
-
 h2 Licenses
 table
     tr

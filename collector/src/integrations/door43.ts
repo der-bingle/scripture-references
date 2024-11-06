@@ -169,8 +169,6 @@ async function _discover(subject:'Bible'|'Aligned_Bible', discover_specific_id?:
                     attribution_url: `https://git.door43.org/Door43-Catalog/${door43_id}`,
                     licenses: license ? [{license, url: license_url}] : [],
                 },
-                audio: [],
-                video: [],
                 source: {
                     service: 'door43',
                     id: door43_id,

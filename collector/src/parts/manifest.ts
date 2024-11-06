@@ -82,8 +82,6 @@ export async function update_manifest(){
             name: meta.name,
             year: meta.year as number,  // Verified to exist above
             direction: meta.direction,
-            audio: meta.audio,
-            video: meta.video,
             copyright: meta.copyright,
             recommended: meta.recommended,
             books: book_names,

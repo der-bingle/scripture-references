@@ -133,8 +133,6 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 attribution: row['Copyright'],
                 attribution_url: ebible_url,
             },
-            audio: [],
-            video: [],
             source: {
                 service: 'ebible',
                 id: ebible_id,
