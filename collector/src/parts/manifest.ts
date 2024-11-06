@@ -70,11 +70,6 @@ export async function update_manifest(){
             return [book, extracts[book]?.name || book_names_english[book]!]
         }))
 
-        // Get missing verses
-        const missing_verses = Object.fromEntries(html_books.map(book => {
-            return [book, extracts[book]?.missing_verses ?? {}]
-        }))
-
         // Put it all together
         // NOTE Not including meta data that client doesn't need (users can still check git repo)
         manifest.translations[trans] = {
@@ -85,7 +80,6 @@ export async function update_manifest(){
             copyright: meta.copyright,
             recommended: meta.recommended,
             books: book_names,
-            missing_verses,
         }
 
         // Record the language as being included

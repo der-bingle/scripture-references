@@ -103,8 +103,6 @@ export interface DistManifestItem {
 export interface DistTranslation extends DistManifestItem {
     recommended:boolean|null
     books:Record<string, string>  // Books that are available and their names
-    // {book:{c:{v:[c, v]}}}
-    missing_verses:Record<string, Record<number, Record<number, [number, number]>>>
 }
 
 

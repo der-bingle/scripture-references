@@ -31,7 +31,6 @@ export interface TranslationSource {
 export interface BookExtracts {
     name:string|null
     sections:MetaBookSection[]
-    missing_verses:Record<number, Record<number, [number, number]|null>>
     chapter_headings:Record<number, string|null>  // Null if a section provides a better heading
 }
 
