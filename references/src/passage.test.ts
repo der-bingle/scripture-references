@@ -2,7 +2,7 @@
 import {describe, it} from 'vitest'
 
 import {PassageReference, _detect_book, _verses_str_to_obj} from './passage.js'
-import {book_names_english, english_abbrev_include} from './data.js'
+import {book_names_english, book_abbrev_english, english_abbrev_include} from './data.js'
 
 
 function simple(start_chapter:number, start_verse:number, end_chapter?:number, end_verse?:number){
@@ -304,6 +304,10 @@ describe('toString', () => {
             .toBe('Titus 1-2')
         expect(new PassageReference({book: 'tit', start_chapter: 1, start_verse: 1, end_chapter: 2,
             end_verse: 1}).toString()).toBe('Titus 1:1-2:1')
+    })
+
+    it("Uses abbreviation when passed the hardcoded data", ({expect}) => {
+        expect(new PassageReference('ezk').toString(book_abbrev_english)).toBe('Ezek')
     })
 
 })

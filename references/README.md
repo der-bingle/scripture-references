@@ -7,12 +7,13 @@ It's designed for use with [fetch(bible)](https://fetch.bible) but can be used i
 
 ```js
 
-import {PassageReference, detect_references} from '@gracious.tech/bible-references'
+import {PassageReference, detect_references, book_abbrev_english}
+    from '@gracious.tech/bible-references'
 
 // Simple args
 const ref1 = new PassageReference('jhn', 3, 16)
 
-// Complex args
+// Complex args that can specify a range of verses
 const ref2 = new PassageReference({
     book: 'jhn',
     start_chapter: 3,
@@ -21,15 +22,16 @@ const ref2 = new PassageReference({
     end_verse: 17,
 })
 
-// Parse string
+// Parse a string (defaults to detecting English only)
 const ref3 = PassageReference.from_string("John 3:16-17")
 
-// i18n
+// Provide book names arg to detect any language
 const ref4 = PassageReference.from_string("Giăng 3.16-17", {jhn: "Giăng"})
 
 // Convert to string
-const ref1_str = `See ${ref1}`  // See John 3:16
-const ref4_str = ref4.toString({jhn: "Giăng"}, '.')  // "Giăng 3.16-17"
+console.log(`See ${ref1}`)  // Defaults to English ("See John 3:16")
+console.log(ref4.toString({jhn: "Giăng"}, '.'))  // Provide i18n args ("Giăng 3.16-17")
+console.log(new PassageReference('ezk').toString(book_abbrev_english))  // Abbrev. names ("Ezek")
 
 // Detecting references in a block of text
 for (const match of detect_references("Multiple refs like Gen 2:3 or John 3:16 and Matt 10:8")){
