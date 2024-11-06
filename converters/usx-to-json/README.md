@@ -13,8 +13,12 @@ When used to generate plain text, this module will return an array of strings fo
 
 ```json
 {
-    "book": "luk",
-    "name": "Luke",
+    "book": "1co",
+    "name": {
+        "normal": "1 Corinthians",
+        "long": "First Epistle to the Corinthians",
+        "abbrev": "1 Cor",
+    },
     "contents": [
         [],  // Chapter 0 has 0 verses
         [  // Chapter 1
@@ -58,8 +62,12 @@ When used to generate HTML, this module will return a tuple of strings for each 
 
 ```json
 {
-    "book": "luk",
-    "name": "Luke",
+    "book": "1co",
+    "name": {
+        "normal": "1 Corinthians",
+        "long": "First Epistle to the Corinthians",
+        "abbrev": "1 Cor",
+    },
     "contents": [
         [],  // Chapter 0 has 0 verses
         [  // Chapter 1
