@@ -324,7 +324,8 @@ export class PassageReference {
 
         // Interpret single digits as verses for single chapter books
         const single_chapter = ['2jn', '3jn', 'jud', 'oba', 'phm'].includes(book_code)
-        if (single_chapter && verses.start_verse === undefined && verses.end_verse === undefined){
+        if (single_chapter && verses.start_chapter
+                && verses.start_verse === undefined && verses.end_verse === undefined){
             verses = _verses_str_to_obj('1:' + verses_str)
         }
 

@@ -310,6 +310,17 @@ describe('toString', () => {
         expect(new PassageReference('ezk').toString(book_abbrev_english)).toBe('Ezek')
     })
 
+    it("Restores original valid string", ({expect}) => {
+        expect(PassageReference.from_string('Titus')!.toString()).toBe('Titus')
+        expect(PassageReference.from_string('Titus 1')!.toString()).toBe('Titus 1')
+        expect(PassageReference.from_string('Titus 1:1')!.toString()).toBe('Titus 1:1')
+        expect(PassageReference.from_string('Titus 1:1-2')!.toString()).toBe('Titus 1:1-2')
+        expect(PassageReference.from_string('Titus 1:1-2:2')!.toString()).toBe('Titus 1:1-2:2')
+        expect(PassageReference.from_string('Titus 1-2')!.toString()).toBe('Titus 1-2')
+        // Also test Jude since had bug with single chapter books earlier
+        expect(PassageReference.from_string('Jude')!.toString()).toBe('Jude')
+    })
+
 })
 
 
