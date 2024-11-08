@@ -38,7 +38,6 @@ export interface BookExtracts {
 export interface CommonSourceMeta {
     name:MetaTranslationName
     year:number|null
-    version:string
     language:string
     direction:'ltr'|'rtl'
     copyright:MetaCopyright
