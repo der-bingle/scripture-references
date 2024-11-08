@@ -140,7 +140,8 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 url: `https://ebible.org/Scriptures/${ebible_id}_usfm.zip`,
                 updated: row['UpdateDate'],
             },
-            recommended: null,
+            literalness: null,
+            tags: [],
             reviewed: false,
         }
 

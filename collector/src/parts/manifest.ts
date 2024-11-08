@@ -78,8 +78,9 @@ export async function update_manifest(){
             year: meta.year as number,  // Verified to exist above
             direction: meta.direction,
             copyright: meta.copyright,
-            recommended: meta.recommended,
             books: book_names,
+            literalness: meta.literalness,
+            tags: meta.tags,
         }
 
         // Record the language as being included

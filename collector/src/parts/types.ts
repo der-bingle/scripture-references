@@ -1,7 +1,8 @@
 
 // Types specific to collector
 
-import type {MetaTranslationName, MetaCopyright, MetaBookSection} from './shared_types'
+import type {MetaTranslationName, MetaCopyright, MetaBookSection, TranslationLiteralness,
+    TranslationTag} from './shared_types'
 
 
 export interface CollectionConfig {
@@ -45,11 +46,8 @@ export interface CommonSourceMeta {
 
 
 export interface TranslationSourceMeta extends CommonSourceMeta {
-    // Recommended is used to further customise the exclude_obsolete filter and default translation
-    // They are usually based on year, but this can manually account for other factors
-    // Set to false to consider even a modern translation obsolete
-    // Set to true to consider a translation the best available even if others newer
-    recommended:boolean|null  // Only one per language should be true
+    literalness:TranslationLiteralness
+    tags:TranslationTag[]
     source:TranslationSource
     reviewed:boolean
 }

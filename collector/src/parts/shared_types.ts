@@ -100,8 +100,20 @@ export interface DistManifestItem {
 }
 
 
+// 1-unnatural 2-literal 3-balanced 4-dynamic 5-paraphrase
+export type TranslationLiteralness = 1|2|3|4|5|null
+/* Tags:
+    recommended: Only one per language, the best default translation for most people
+    archaic: Uses old language (even if a relatively new version)
+    questionable: Substantial criticism or concerning origins
+    niche: Only useful for academic study or for people with a certain ideology
+*/
+export type TranslationTag = 'recommended'|'archaic'|'questionable'|'niche'
+
+
 export interface DistTranslation extends DistManifestItem {
-    recommended:boolean|null
+    literalness:TranslationLiteralness
+    tags:TranslationTag[]
     books:Record<string, string>  // Books that are available and their names
 }
 

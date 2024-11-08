@@ -7,7 +7,7 @@ import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} fro
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
 
-import type {DistManifest, OneOrMore} from './shared_types'
+import type {DistManifest, OneOrMore, TranslationLiteralness, TranslationTag} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
 
@@ -41,6 +41,7 @@ export interface GetTranslationsOptions {
     object?:boolean
     sort_by_year?:boolean
     usage?:UsageOptions
+    // Basic filtering using combination of factors (manually filter for more fine-tuned results)
     exclude_obsolete?:boolean
     exclude_incomplete?:boolean
 }
@@ -57,6 +58,8 @@ export interface GetTranslationsItem {
     attribution:string
     attribution_url:string
     licenses:RuntimeLicense[]
+    tags:TranslationTag[]
+    liternalness:TranslationLiteralness
 }
 
 export interface GetBooksOptions {
@@ -325,7 +328,9 @@ export class BibleCollection {
                 attribution_url: trans.copyright.attribution_url,
                 licenses: deep_copy(
                     filter_licenses(trans.copyright.licenses, {...this._usage, ...usage})),
-            }
+                liternalness: trans.literalness,
+                tags: [...trans.tags],
+            } as GetTranslationsItem
         }).filter(trans => trans.licenses.length)
 
         // Optionally limit to single language
@@ -334,13 +339,21 @@ export class BibleCollection {
         }
 
         // Optionally exclude obsolete translations (as long as better alternative exists)
+        // For each test, only apply if 1 translation remains (else try other tests)
         if (exclude_obsolete){
-            const decent = list.filter(item => {
-                const recommended = this._manifest.translations[item.id]!.recommended
-                return recommended === null ? item.year >= this._modern_year : recommended
-            })
-            if (decent.length){
-                list = decent  // Only filter out obsolete if at least one translation will remain
+
+            // First filter out very old translations
+            const modern = list.filter(item => item.year >= this._modern_year)
+            if (modern.length){
+                list = modern
+            }
+
+            // Then try filter out obsolete-like tags
+            for (const tag of ['archaic', 'questionable', 'niche'] as TranslationTag[]){
+                const reduced_list = list.filter(item => !item.tags.includes(tag))
+                if (reduced_list.length){
+                    list = reduced_list
+                }
             }
         }
 
@@ -380,17 +393,18 @@ export class BibleCollection {
             if (data.language === language){
 
                 // If recommended, don't bother checking any others
-                if (data.recommended){
+                if (data.tags.includes('recommended')){
                     return id
                 }
 
                 // Consider as a candidate until something better comes up
+                // NOTE Not considering tags as if any tagged then one would be recommended already
                 const full = Object.keys(data.books).length === books_ordered.length
                 if (
                     !candidate  // Something better than nothing
                     || (!candidate_full && full)  // Full translation better than partial
                     // Otherwise only consider if more modern
-                    || (full && data.year > candidate_year && data.recommended !== false)
+                    || (full && data.year > candidate_year)
                 ){
                     candidate = id
                     candidate_year = data.year

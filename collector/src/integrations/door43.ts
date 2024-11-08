@@ -176,7 +176,8 @@ async function _discover(subject:'Bible'|'Aligned_Bible', discover_specific_id?:
                     url: format['url'],
                     updated: format['modified'].split('T')[0]!,
                 },
-                recommended: null,
+                literalness: null,
+                tags: [],
                 reviewed: false,
             }
 
