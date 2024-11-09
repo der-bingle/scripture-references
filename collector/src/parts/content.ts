@@ -220,7 +220,8 @@ async function _update_dist_single(id:string){
 
             // Convert to HTML if doesn't exist yet
             if (!fs.existsSync(dst_html)){
-                const html = usx_to_json_html(fs.readFileSync(src, {encoding: 'utf8'}), false, parser)
+                const html = usx_to_json_html(
+                    fs.readFileSync(src, {encoding: 'utf8'}), false, parser)
                 fs.writeFileSync(dst_html, JSON.stringify(html))
             }
         } catch (error){
