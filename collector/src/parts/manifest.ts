@@ -57,18 +57,9 @@ export async function update_manifest(){
             continue
         }
 
-        // Load data extracted from books
-        const extracts_path = join('sources', 'bibles', trans, 'extracts.json')
-        if (!existsSync(extracts_path)){
-            console.error(`IGNORING ${trans} (no extracts)`)
-            continue
-        }
-        const extracts = read_json<Record<string, BookExtracts>>(extracts_path)
-
-        // Get book names
-        const book_names = Object.fromEntries(html_books.map(book => {
-            return [book, extracts[book]?.name || book_names_english[book]!]
-        }))
+        // Determine what books are included
+        const books_ot = books_ordered.slice(0, 39).filter(b => html_books.includes(b))
+        const books_nt = books_ordered.slice(39).filter(b => html_books.includes(b))
 
         // Put it all together
         // NOTE Not including meta data that client doesn't need (users can still check git repo)
@@ -78,9 +69,11 @@ export async function update_manifest(){
             year: meta.year as number,  // Verified to exist above
             direction: meta.direction,
             copyright: meta.copyright,
-            books: book_names,
             literalness: meta.literalness,
             tags: meta.tags,
+            // Record as `true` if whole testament to reduce data size
+            books_ot: books_ot.length === 39 ? true : books_ot,
+            books_nt: books_nt.length === 27 ? true : books_nt,
         }
 
         // Record the language as being included

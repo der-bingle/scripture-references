@@ -114,7 +114,8 @@ export type TranslationTag = 'recommended'|'archaic'|'questionable'|'niche'
 export interface DistTranslation extends DistManifestItem {
     literalness:TranslationLiteralness
     tags:TranslationTag[]
-    books:Record<string, string>  // Books that are available and their names
+    books_ot:true|string[]
+    books_nt:true|string[]
 }
 
 

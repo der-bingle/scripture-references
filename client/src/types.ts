@@ -30,6 +30,8 @@ export type RuntimeCopyright = Omit<MetaCopyright, 'licenses'> & {
 
 export type RuntimeTranslation = Omit<DistTranslation, 'copyright'> & {
     copyright:RuntimeCopyright
+    books_ot_list:string[]
+    books_nt_list:string[]
 }
 
 export type RuntimeManifest = Omit<DistManifest, 'translations'> & {

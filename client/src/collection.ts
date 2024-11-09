@@ -71,9 +71,9 @@ export interface GetBooksOptions {
 
 export interface GetBooksItem {
     id:string
-    name:string
-    name_local:string  // WARN May be empty string
     name_english:string
+    ot:boolean
+    nt:boolean
     available:boolean
 }
 
@@ -160,9 +160,17 @@ export class BibleCollection {
                 }
                 languages.add(trans_data.language)
 
+                // Work out exactly what books are included (interpret `true` for whole testament)
+                const ot = trans_data.books_ot === true
+                    ? books_ordered.slice(0, 39) : trans_data.books_ot
+                const nt = trans_data.books_nt === true
+                    ? books_ordered.slice(39) : trans_data.books_nt
+
                 // Add the translation to the combined collection
                 this._manifest.translations[trans] = {
                     ...trans_data,
+                    books_ot_list: ot,
+                    books_nt_list: nt,
                     copyright: {
                         ...trans_data.copyright,
                         licenses,
@@ -219,7 +227,9 @@ export class BibleCollection {
 
     // Check if a book exists within a translation
     has_book(translation:string, book:string):boolean{
-        return this._manifest.translations[translation]?.books[book] !== undefined
+        this._ensure_trans_exists(translation)
+        const trans_meta = this._manifest.translations[translation]!
+        return trans_meta.books_ot_list.includes(book) || trans_meta.books_nt_list.includes(book)
     }
 
     // Get available languages as either a list or an object
@@ -360,8 +370,8 @@ export class BibleCollection {
         // Optionally exclude incomplete translations
         if (exclude_incomplete){
             list = list.filter(item => {
-                const count = Object.keys(this._manifest.translations[item.id]!.books).length
-                return count === books_ordered.length
+                const trans_meta = this._manifest.translations[item.id]!
+                return trans_meta.books_ot === true && trans_meta.books_nt === true
             })
         }
 
@@ -399,7 +409,7 @@ export class BibleCollection {
 
                 // Consider as a candidate until something better comes up
                 // NOTE Not considering tags as if any tagged then one would be recommended already
-                const full = Object.keys(data.books).length === books_ordered.length
+                const full = data.books_ot === true && data.books_nt === true
                 if (
                     !candidate  // Something better than nothing
                     || (!candidate_full && full)  // Full translation better than partial
@@ -426,23 +436,25 @@ export class BibleCollection {
             GetBooksItem[]|Record<string, GetBooksItem>{
 
         // Get book names from translation (or standard English if no translation given)
-        let available = book_names_english
+        let available = books_ordered
         if (translation){
             this._ensure_trans_exists(translation)
-            available = this._manifest.translations[translation]!.books
+            const trans_meta = this._manifest.translations[translation]!
+            available = [...trans_meta.books_ot_list, ...trans_meta.books_nt_list]
         }
 
         // Create a list of the available books in traditional order
         const slice = testament ? (testament === 'ot' ? [0, 39] : [39]) : []
         const list = books_ordered.slice(...slice)
-            .filter(id => whole || id in available)
+            .filter(id => whole || available.includes(id))
             .map(id => {
+                const ot = books_ordered.indexOf(id) < 39
                 return {
                     id,
-                    name: available[id] ?? book_names_english[id]!,
-                    name_local: available[id] ?? '',
                     name_english: book_names_english[id]!,
-                    available: !!translation && id in available,
+                    ot,
+                    nt: !ot,
+                    available: !!translation && available.includes(id),
                 }
             })
 
@@ -453,7 +465,7 @@ export class BibleCollection {
 
         // Optionally sort by name instead of traditional order
         if (sort_by_name){
-            list.sort((a, b) => a.name.localeCompare(b.name))
+            list.sort((a, b) => a.name_english.localeCompare(b.name_english))
         }
 
         return list
@@ -477,13 +489,14 @@ export class BibleCollection {
         }
 
         // Look through books adding to either `available` or `missing`
-        const trans_books = this._manifest.translations[translation]!.books
+        const trans_meta = this._manifest.translations[translation]!
+        const trans_books = [...trans_meta.books_ot_list, ...trans_meta.books_nt_list]
         let testament:'ot'|'nt' = 'ot'
         for (const book of books_ordered){
             if (book === 'mat'){
                 testament = 'nt'  // Switch testament when reach Matthew (books ordered)
             }
-            const status = book in trans_books ? 'available' : 'missing'
+            const status = trans_books.includes(book) ? 'available' : 'missing'
             data[testament][status].push(book)
         }
 
