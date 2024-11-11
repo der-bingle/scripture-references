@@ -223,10 +223,8 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>){
 function add_content(state:ParserState, content:TxtContent, may_belong_to_next_verse=false):void{
 
     // Strip any newlines that might be present in the HTML but not intended to be a line break
-    if (typeof content === 'string'){
-        content = content.replaceAll('\n', '')
-    } else {
-        content.contents = content.contents.replaceAll('\n', '')
+    if (typeof content !== 'string'){
+        content.contents = single_space(content.contents)
     }
 
     // Decide whether to add to unknown_owner or actual verse
@@ -245,4 +243,10 @@ function add_or_join(array:TxtContent[], item:TxtContent){
     } else {
         array.push(item)
     }
+}
+
+
+// Ensure words are separated by a single space only
+function single_space(text:string){
+    return text.replaceAll('\n', ' ').replaceAll(/\s{2,}/g, ' ').trim()
 }
