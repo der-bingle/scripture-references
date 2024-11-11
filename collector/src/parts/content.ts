@@ -9,10 +9,12 @@ import {JSDOM} from 'jsdom'
 import * as door43 from '../integrations/door43.js'
 import * as ebible from '../integrations/ebible.js'
 import {generic_update_sources} from '../integrations/generic.js'
-import {extract_meta} from './usx.js'
 import {update_manifest} from './manifest.js'
 import {concurrent, PKG_PATH, read_json, read_dir} from './utils.js'
-import type {TranslationSourceMeta, BookExtracts} from './types'
+import {extract_sections, generate_chapter_headings} from './sections.js'
+
+import type {TranslationSourceMeta} from './types'
+import type {BibleJsonTxt, DistTranslationExtra} from './shared_types'
 
 
 export async function update_source(trans_id?:string){
@@ -109,23 +111,6 @@ async function _convert_to_usx(trans:string, format:'usx1-2'|'usfm'){
 }
 
 
-async function _create_extracts(src_dir:string, usx_dir:string):Promise<void>{
-    // Extract meta data from USX files and save to sources dir
-    const extracts_path = join(src_dir, 'extracts.json')
-
-    if (fs.existsSync(extracts_path)){
-        return  // Already exists
-    }
-
-    const extracts:Record<string, BookExtracts> = {}
-    for (const file of read_dir(usx_dir)){
-        const book = file.split('.')[0]!
-        extracts[book] = extract_meta(join(usx_dir, `${book}.usx`))
-    }
-    fs.writeFileSync(extracts_path, JSON.stringify(extracts, undefined, 4))
-}
-
-
 export async function update_dist(trans_id?:string){
     // Update distributed HTML/USX files from sources
 
@@ -198,15 +183,12 @@ async function _update_dist_single(id:string){
         throw new Error("Conversion to USFM is waiting on https://github.com/usfm-bible/tcdocs")
     }
 
-    // Extract meta data from the USX files
-    await _create_extracts(src_dir, usx_dir)
-
     // Convert USX to HTML and plain text
     const parser = new JSDOM().window.DOMParser
     for (const file of read_dir(usx_dir)){
 
         // Determine paths
-        const book = file.split('.')[0]!.toLowerCase()
+        const book = file.split('.')[0]!
         const src = join(usx_dir, `${book}.usx`)
         const dst_html = join(dist_dir, 'html', `${book}.json`)
         const dst_txt = join(dist_dir, 'txt', `${book}.json`)
@@ -229,4 +211,21 @@ async function _update_dist_single(id:string){
             console.error(error)
         }
     }
+
+    // Extract names/headings for all books into single file for translation
+    const trans_extra:DistTranslationExtra = {book_names: {}, chapter_headings: {}, sections: {}}
+    for (const filename of read_dir(join(dist_dir, 'txt'))){
+
+        // Determine paths and read data from txt format output
+        const book = filename.split('.')[0]!
+        const file_path = join(dist_dir, 'txt', filename)
+        const json_txt = JSON.parse(fs.readFileSync(file_path, {encoding: 'utf8'})) as BibleJsonTxt
+
+        // Extract extra data required
+        trans_extra.book_names[book] = json_txt.name
+        trans_extra.sections[book] = extract_sections(json_txt)
+        trans_extra.chapter_headings[book] =
+            generate_chapter_headings(json_txt, trans_extra.sections[book]!)
+    }
+    fs.writeFileSync(join(dist_dir, 'extra.json'), JSON.stringify(trans_extra))
 }

@@ -8,7 +8,7 @@ import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
 import {read_json, read_dir} from './utils.js'
 import type {DistManifest} from './shared_types'
-import type {BookExtracts, TranslationSourceMeta} from './types'
+import type {TranslationSourceMeta} from './types'
 import {_missing_meta} from './reporting.js'
 
 

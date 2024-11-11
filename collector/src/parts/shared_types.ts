@@ -78,14 +78,6 @@ export interface MetaCopyright {
     licenses:{license: string|MetaRestrictions, url:string}[]
 }
 
-export interface MetaBookSection {
-    start_chapter:number
-    start_verse:number
-    end_chapter:number
-    end_verse:number
-    heading:string
-}
-
 
 // DIST
 
@@ -124,13 +116,25 @@ export interface DistManifest {
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
     languages_most_spoken:string[]
+    books_ordered:string[]
+    book_names_english:Record<string, string>
     licenses:Record<string, MetaStandardLicense>
 }
 
 
+export interface BookSection {
+    start_chapter:number
+    start_verse:number
+    end_chapter:number
+    end_verse:number
+    heading:string
+}
+
+
 export interface DistTranslationExtra {
-    sections:Record<string, MetaBookSection[]>
+    book_names:Record<string, BookNames>
     chapter_headings:Record<string, Record<number, string>>
+    sections:Record<string, BookSection[]>
 }
 
 

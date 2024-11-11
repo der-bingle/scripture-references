@@ -29,13 +29,6 @@ export interface TranslationSource {
 }
 
 
-export interface BookExtracts {
-    name:string|null
-    sections:MetaBookSection[]
-    chapter_headings:Record<number, string|null>  // Null if a section provides a better heading
-}
-
-
 export interface CommonSourceMeta {
     name:MetaTranslationName
     year:number|null
