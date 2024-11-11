@@ -112,6 +112,8 @@ Class               | Effect
 `.no-headings`   | Hides section headings
 `.no-notes`      | Hides translation notes
 `.no-red-letter` | Disables coloring words of Jesus in red (for translations that support it)
+`.no-select`     | Disables ability to select verse numbers/headings/etc when copy/pasting
+`.no-initial-indent` | Reduces all indented text by 1 level (useful when entire book is poetry)
 
 The `.fetch-bible` class also has some variables you can customise:
 

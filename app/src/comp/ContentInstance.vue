@@ -56,6 +56,7 @@ const fetch_classes = computed(() => {
         'no-verses': !state.show_verses,
         'no-notes': !state.show_notes,
         'no-red-letter': !state.show_redletter,
+        'no-select': true,
         [`size-${state.font_size}`]: true,
     }
 })
