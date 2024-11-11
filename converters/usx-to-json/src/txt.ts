@@ -142,7 +142,8 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>){
     for (let index = 0; index < nodes.length; index++){
         const node = nodes[index]!
 
-        // If first node and not a verse element, then reset unknown_owner
+        // If first node is not a verse element, then any headings/etc being held in unknown_owner
+        //     belong to current verse and not the next one
         if (index === 0 && node.nodeName !== 'verse'){
             state.contents[state.chapter]![state.verse]!.push(...state.unknown_owner)
             state.unknown_owner = []
