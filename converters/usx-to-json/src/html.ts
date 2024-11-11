@@ -129,6 +129,16 @@ export function usx_to_json_html(xml:string, alignment=true, parser=DOMParser): 
         state.para_open = ''
     }
 
+    // Verify no content ended up in chapter 0 or a verse 0, as they should never be used
+    if (state.contents[0]!.length > 0){
+        throw new Error(`Content exists before chapter 1 marker`)
+    }
+    for (let ch = 1; ch < state.contents.length; ch++){
+        if (state.contents[ch]![0]!.join('')){
+            throw new Error(`Content exists before verse 1 marker for chapter ${ch}`)
+        }
+    }
+
     return {
         book: book_code,
         name: book_name,
@@ -152,7 +162,8 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
 
         // If first node is not a verse element, then any headings/etc being held in unknown_owner
         //     belong to current verse and not the next one
-        if (index === 0 && node.nodeName !== 'verse'){
+        // NOTE Verifying verse != 0 important so superscriptions in psalms prepended to verse 1
+        if (index === 0 && node.nodeName !== 'verse' && state.verse){
             state.contents[state.chapter]![state.verse]![1] += state.unknown_owner
             state.unknown_owner = ''
         }
@@ -274,7 +285,8 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
 
 function add_html(state:ParserState, content:string, may_belong_to_next_verse=false):void{
     // Add HTML to current verse, possibly buffering if may belong to next verse
-    if (state.unknown_owner || may_belong_to_next_verse){
+    // NOTE Verifying verse != 0 important so superscriptions in psalms prepended to verse 1
+    if (state.unknown_owner || may_belong_to_next_verse || !state.verse){
         state.unknown_owner += content
     } else {
         state.contents[state.chapter]![state.verse]![1] += content

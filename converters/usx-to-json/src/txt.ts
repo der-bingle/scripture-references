@@ -128,6 +128,16 @@ export function usx_to_json_txt(xml:string, parser=DOMParser):BibleJsonTxt{
         state.prev_para_type = non_para_para.includes(style) ? 'break' : 'para'
     }
 
+    // Verify no content ended up in chapter 0 or a verse 0, as they should never be used
+    if (state.contents[0]!.length > 0){
+        throw new Error(`Content exists before chapter 1 marker`)
+    }
+    for (let ch = 1; ch < state.contents.length; ch++){
+        if (state.contents[ch]![0]!.length){
+            throw new Error(`Content exists before verse 1 marker for chapter ${ch}`)
+        }
+    }
+
     return {
         book: book_code,
         name: book_name,
