@@ -236,7 +236,7 @@ export class BibleEnhancer {
             // Get ref text from URL as link text may be relative and not include book etc.
             const search = new URLSearchParams((link as HTMLLinkElement).href.split('#')[1])
                 .get('search') ?? ''
-            const ref = collection.string_to_reference(search)  // No names as will detect code
+            const ref = PassageReference.from_string(search)  // No names as just detecting code
             if (ref){
                 void this.enhance_element(link as HTMLElement, ref)
             }
