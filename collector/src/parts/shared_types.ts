@@ -127,13 +127,13 @@ export interface BookSection {
     start_verse:number
     end_chapter:number
     end_verse:number
-    heading:string
+    heading:string|null  // null if same as chapter heading (to reduce data transfer required)
 }
 
 
 export interface DistTranslationExtra {
     book_names:Record<string, BookNames>
-    chapter_headings:Record<string, Record<number, string>>
+    chapter_headings:Record<string, string[]>
     sections:Record<string, BookSection[]>
 }
 

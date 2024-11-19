@@ -224,6 +224,7 @@ async function _update_dist_single(id:string){
         // Extract extra data required
         trans_extra.book_names[book] = json_txt.name
         trans_extra.sections[book] = extract_sections(json_txt)
+        // WARN Below also sets any chapter start sections to null to reduce data transfer
         trans_extra.chapter_headings[book] =
             generate_chapter_headings(json_txt, trans_extra.sections[book]!)
     }

@@ -80,12 +80,14 @@ export function generate_chapter_headings(json_txt:BibleJsonTxt, sections:BookSe
 
         // If section starts directly at first verse of a chapter, take its heading
         if (section.start_verse === 1){
-            chapters[section.start_chapter] = section.heading
+            chapters[section.start_chapter] = section.heading!
+            // WARN Removing heading from section object to reduce data transfer
+            section.heading = null
 
         // If section spans multiple chapters, use its heading for next chapter (but not later ones)
         // NOTE This section is gauranteed not to start at v1 of its start chapter due to above
         } else if (section.end_chapter !== section.start_chapter){
-            chapters[section.start_chapter + 1] = section.heading
+            chapters[section.start_chapter + 1] = section.heading!
         }
     }
 
