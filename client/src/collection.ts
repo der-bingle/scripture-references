@@ -33,9 +33,10 @@ export interface GetLanguagesOptions {
 
 export interface GetLanguagesItem {
     code:string
-    local:string
-    english:string
-    pop:number|null
+    name_local:string
+    name_english:string
+    name_bilingual:string
+    population:number|null
 }
 
 export interface GetTranslationsOptions {
@@ -90,6 +91,8 @@ export interface GetBooksItem {
     name_local_abbrev:string
     // Local long name of book (may be empty string)
     name_local_long:string
+    // Local name of book with the English name in brackets when it differs
+    name_bilingual:string
 }
 
 export interface GetCompletionReturn {
@@ -258,16 +261,25 @@ export class BibleCollection {
             GetLanguagesItem[]|Record<string, GetLanguagesItem>{
 
         // Start with list and dereference internal objects so manifest can't be modified
-        let list = Object.entries(this._manifest.languages).map(([code, data]) => ({...data, code}))
+        let list = Object.entries(this._manifest.languages).map(([code, data]) => {
+            return {
+                code,
+                name_local: data.local,
+                name_english: data.english,
+                name_bilingual:
+                    data.english === data.local ? data.local : `${data.local} (${data.english})`,
+                population: data.pop,
+            }
+        })
 
         // Optionally exclude non-living languages
         if (exclude_old){
-            list = list.filter(item => item.pop !== null)
+            list = list.filter(item => item.population !== null)
         }
 
         // Optionally apply search
         if (search !== undefined){
-            list = fuzzy_search(search, list, c => c.local + ' ' + c.english)
+            list = fuzzy_search(search, list, c => c.name_local + ' ' + c.name_english)
         }
 
         // Return object if desired
@@ -279,7 +291,7 @@ export class BibleCollection {
         if (!search){
             if (sort_by === 'population_L1'){
                 list.sort((a, b) => {
-                    return (b.pop ?? -1) - (a.pop ?? -1)
+                    return (b.population ?? -1) - (a.population ?? -1)
                 })
             } else if (sort_by === 'population'){
                 // Sorting by total speakers (L1+L2) so need to consult extra array
@@ -291,14 +303,15 @@ export class BibleCollection {
                         const list_len = this._manifest.languages_most_spoken.length
                         return (list_len - most_spoken_i) * 9999999999  // 10 billion - 1
                     }
-                    return item.pop ?? -1  // Fallback on L1-only pop data
+                    return item.population ?? -1  // Fallback on L1-only pop data
                 }
                 list.sort((a, b) => {
                     return item_to_pop(b) - item_to_pop(a)
                 })
             } else {
                 list.sort((a, b) => {
-                    const name_key = sort_by === 'english' ? 'english' : 'local'  // Local default
+                    // Defaults to sorting by local name
+                    const name_key = sort_by === 'english' ? 'name_english' : 'name_local'
                     return a[name_key].localeCompare(b[name_key])
                 })
             }
@@ -476,15 +489,21 @@ export class BibleCollection {
             .filter(id => whole || available.includes(id))
             .map(id => {
                 const ot = books_ordered.indexOf(id) < 39
+                const local_name = local[id]?.normal
+                let bilingual = book_names_english[id]!
+                if (local_name && bilingual.toLowerCase() !== local_name.toLowerCase()){
+                    bilingual = `${local_name} (${bilingual})`
+                }
                 return {
                     id,
-                    name: local[id]?.normal || book_names_english[id]!,
+                    name: local_name || book_names_english[id]!,
                     name_abbrev: local[id]?.abbrev || book_abbrev_english[id]!,
                     name_english: book_names_english[id]!,
                     name_english_abbrev: book_abbrev_english[id]!,
-                    name_local: local[id]?.normal ?? '',
+                    name_local: local_name ?? '',
                     name_local_abbrev: local[id]?.abbrev ?? '',
                     name_local_long: local[id]?.long ?? '',
+                    name_bilingual: bilingual,
                     ot,
                     nt: !ot,
                     available: !!translation && available.includes(id),
