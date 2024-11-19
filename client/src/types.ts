@@ -34,6 +34,7 @@ export type RuntimeTranslation = Omit<DistTranslation, 'copyright'> & {
     books_nt_list:string[]
 }
 
-export type RuntimeManifest = Omit<DistManifest, 'translations'> & {
+export type RuntimeManifest =
+        Omit<DistManifest, 'translations'|'books_ordered'|'book_names_english'> & {
     translations:Record<string, RuntimeTranslation>
 }
