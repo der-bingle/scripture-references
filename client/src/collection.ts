@@ -1,6 +1,6 @@
 
 import {book_names_english, books_ordered, PassageReference, detect_references,
-    english_abbrev_include, english_abbrev_exclude,
+    english_abbrev_include, english_abbrev_exclude, book_abbrev_english,
 } from '@gracious.tech/bible-references'
 
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
@@ -71,10 +71,11 @@ export interface GetBooksOptions {
 
 export interface GetBooksItem {
     id:string
-    name_english:string
     ot:boolean
     nt:boolean
     available:boolean
+    name_english:string
+    name_english_abbrev:string
 }
 
 export interface GetCompletionReturn {
@@ -452,6 +453,7 @@ export class BibleCollection {
                 return {
                     id,
                     name_english: book_names_english[id]!,
+                    name_english_abbrev: book_abbrev_english[id]!,
                     ot,
                     nt: !ot,
                     available: !!translation && available.includes(id),
