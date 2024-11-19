@@ -6,8 +6,10 @@ import {book_names_english, books_ordered, PassageReference, detect_references,
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
+import {TranslationExtra} from './translation.js'
 
-import type {DistManifest, OneOrMore, TranslationLiteralness, TranslationTag} from './shared_types'
+import type {BookNames, DistManifest, DistTranslationExtra, OneOrMore, TranslationLiteralness,
+    TranslationTag} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
 
@@ -74,8 +76,20 @@ export interface GetBooksItem {
     ot:boolean
     nt:boolean
     available:boolean
+    // Local name of book (falls back to English)
+    name:string
+    // Local abbreviation of book (falls back to English)
+    name_abbrev:string
+    // English name of book (always exists)
     name_english:string
+    // English abbreviation of book (always exists)
     name_english_abbrev:string
+    // Local name of book (may be empty string)
+    name_local:string
+    // Local abbreviation of book (may be empty string)
+    name_local_abbrev:string
+    // Local long name of book (may be empty string)
+    name_local_long:string
 }
 
 export interface GetCompletionReturn {
@@ -99,6 +113,10 @@ export class BibleCollection {
     _remember_fetches:boolean
     // @internal
     _fetch_book_cache:Record<string, Promise<BibleBook>> = {}
+    // @internal
+    _fetch_extras_cache:Record<string, Promise<TranslationExtra>> = {}
+    // @internal
+    _local_book_names:Record<string, Record<string, BookNames>> = {}
     // @internal
     _manifest:RuntimeManifest
     // @internal
@@ -428,20 +446,28 @@ export class BibleCollection {
         return candidate ?? Object.keys(this._manifest.translations)[0]!
     }
 
-    // Get which books are available for a translation
-    // If no translation is given, all books will be listed but marked as unavailable
+    // Get which books are available for a translation.
+    // If no translation is given, all books will be listed but marked as unavailable.
+    // If `fetch_translation_extras()` has already been called for the translation then local name
+    // data will also be available (otherwise only English book names will be available).
     get_books(translation:string|undefined,
         options:ObjT<GetBooksOptions>):Record<string, GetBooksItem>
     get_books(translation?:string, options?:ObjF<GetBooksOptions>):GetBooksItem[]
     get_books(translation?:string, {object, sort_by_name, testament, whole}:GetBooksOptions={}):
             GetBooksItem[]|Record<string, GetBooksItem>{
 
-        // Get book names from translation (or standard English if no translation given)
+        // Determine what books are available if given a translation (otherwise list all)
         let available = books_ordered
         if (translation){
             this._ensure_trans_exists(translation)
             const trans_meta = this._manifest.translations[translation]!
             available = [...trans_meta.books_ot_list, ...trans_meta.books_nt_list]
+        }
+
+        // Get local book names if available
+        let local:Record<string, BookNames> = {}
+        if (translation && translation in this._local_book_names){
+            local = this._local_book_names[translation]!
         }
 
         // Create a list of the available books in traditional order
@@ -452,8 +478,13 @@ export class BibleCollection {
                 const ot = books_ordered.indexOf(id) < 39
                 return {
                     id,
+                    name: local[id]?.normal || book_names_english[id]!,
+                    name_abbrev: local[id]?.abbrev || book_abbrev_english[id]!,
                     name_english: book_names_english[id]!,
                     name_english_abbrev: book_abbrev_english[id]!,
+                    name_local: local[id]?.normal ?? '',
+                    name_local_abbrev: local[id]?.abbrev ?? '',
+                    name_local_long: local[id]?.long ?? '',
                     ot,
                     nt: !ot,
                     available: !!translation && available.includes(id),
@@ -541,6 +572,39 @@ export class BibleCollection {
                 delete this._fetch_book_cache[key]
             })
         }
+        return promise
+    }
+
+    // Make request for extra metadata for a translation (such as book names and section headings).
+    // This will also auto-provide local book names for future calls of `get_books()`.
+    async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
+
+        // Check args valid
+        this._ensure_trans_exists(translation)
+
+        // Don't fetch if already have a result or request pending
+        if (translation in this._fetch_extras_cache){
+            return this._fetch_extras_cache[translation]!
+        }
+
+        // Fetch data
+        const url = `${this._endpoints[translation]!}bibles/${translation}/extra.json`
+        const promise = request(url).then(contents => {
+            const data = JSON.parse(contents) as DistTranslationExtra
+            // Extract local book names when done (regardless of `remember_fetches` setting)
+            this._local_book_names[translation] = data.book_names
+            return new TranslationExtra(data)
+        })
+
+        // Cache request promise if desired
+        if (this._remember_fetches){
+            this._fetch_extras_cache[translation] = promise
+            // Clear if unsuccessful so can retry if desired
+            promise.catch(() => {
+                delete this._fetch_book_cache[translation]
+            })
+        }
+
         return promise
     }
 

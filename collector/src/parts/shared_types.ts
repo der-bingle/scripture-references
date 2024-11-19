@@ -151,6 +151,7 @@ export interface DistNotesManifest {
 // FORMATS
 
 export interface BookNames {
+    // WARN All of these may be an empty string if the data isn't available
     normal:string
     long:string
     abbrev:string
