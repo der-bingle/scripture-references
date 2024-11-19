@@ -27,10 +27,7 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
         v-list(v-if='show_languages' ref='lang_list_comp')
             v-list-item(v-for='lang of languages_filtered' :key='lang.code' density='compact'
                     @click='change_lang(lang.code)')
-                v-list-item-title
-                    | {{ lang.local }}
-                    |
-                    template(v-if='lang.local !== lang.english') ({{ lang.english }})
+                v-list-item-title {{ lang.bilingual }}
             v-btn(v-if='!languages_search && !languages_show_all' variant='text' color='primary'
                     @click='languages_show_all = true')
                 app-icon(name='expand_more')
@@ -73,7 +70,7 @@ const lang_list_comp = ref<{$el: HTMLElement}>()
 const chosen_translations = computed(() => state.trans.map(id => content.translations[id]!))
 const selected_trans = computed(() => chosen_translations.value[selected_trans_index.value]!)
 const displayed_language_name = computed(() => {
-    return content.languages[displayed_language.value]!.local
+    return content.languages[displayed_language.value]!.name_local
 })
 const translations = computed(() => {
     return content.collection.get_translations({language: displayed_language.value})

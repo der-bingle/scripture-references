@@ -15,10 +15,10 @@ table
         th Population
         th Bibles
     tr(v-for='lang of languages_top20')
-        td {{ lang.local }}
-        td {{ lang.english }}
+        td {{ lang.name_local }}
+        td {{ lang.name_english }}
         td {{ lang.code }}
-        td {{ lang.pop || "None" }}
+        td {{ lang.population || "None" }}
         td
             a(:href='`../bibles/#${lang.code}`') {{ lang.count }}
 p Also see which languages are <a href='/content/need/'>still without a shareable translation</a>
@@ -34,10 +34,10 @@ table
         th Population
         th Bibles
     tr(v-for='lang of languages')
-        td {{ lang.local }}
-        td {{ lang.english }}
+        td {{ lang.name_local }}
+        td {{ lang.name_english }}
         td {{ lang.code }}
-        td {{ lang.pop || "None" }}
+        td {{ lang.population || "None" }}
         td
             a(:href='`../bibles/#${lang.code}`') {{ lang.count }}
 
@@ -54,11 +54,11 @@ import {collection} from './collection'
 
 // Generate list of languages
 const languages = collection.get_languages().map(lang => {
-    const mil = Math.round((lang.pop ?? 0) / 1000000)
+    const mil = Math.round((lang.population ?? 0) / 1000000)
     return {
         ...lang,
         count: collection.get_translations({language: lang.code}).length,
-        pop: lang.pop === null ? "None" : (mil ? `${mil.toLocaleString()} million` : '< 1 million'),
+        pop: lang.population === null ? "None" : (mil ? `${mil.toLocaleString()} million` : '< 1 million'),
         mil,
     }
 })

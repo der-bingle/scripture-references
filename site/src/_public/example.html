@@ -91,10 +91,7 @@ async function update_content(){
 function update_select_language(){
     const languages = collection.get_languages()
     update_options(select_language, languages.map(language => {
-        return [
-            language.code,
-            `${language.local} (${language.english})`,
-        ]
+        return [language.code, language.bilingual]
     }))
     // Default to English
     select_language.value = 'eng'
@@ -118,7 +115,7 @@ function update_select_translation(){
 function update_select_book(){
     const books = collection.get_books(select_translation.value)
     update_options(select_book, books.map(book => {
-        return [book.id, `${book.name_local} (${book.name_english})`]
+        return [book.id, book.name]
     }))
 }
 

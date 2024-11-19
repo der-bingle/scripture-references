@@ -38,6 +38,9 @@ const translations = collection.get_translations()
 // Get the id of the first translation available
 const translation_id = translations[0].id
 
+// Load local book names for the translation
+await collection.fetch_translation_extras(translation_id)
+
 // Get what books are available for the translation
 // (may be whole Bible or may only be e.g. NT)
 const books = collection.get_books(translation_id)
