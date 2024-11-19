@@ -95,8 +95,9 @@ export function _detect_book(input:string, book_names:[string, string][],
         return input
     }
 
-    // Normalise book names
+    // Normalise book names and ensure no empty strings
     const normalised = book_names.map(([code, name]) => ([code, clean(name)] as [string, string]))
+        .filter(([code, name]) => name)
 
     // See if input matches or abbreviates any book name
     const matches:[string, string][] = []
@@ -345,8 +346,8 @@ export class PassageReference {
 
     // Get name for book (defaults to English when book names not provided)
     get_book_string(book_names:Record<string, string>={}):string{
-        const names = {...book_names_english, ...book_names}
-        return names[this.book]!
+        // WARN A value may be undefined or empty string
+        return book_names[this.book] || book_names_english[this.book]!
     }
 
     // Get string representation of verses
