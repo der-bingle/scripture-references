@@ -1,5 +1,5 @@
 
-import {book_abbrev_english, book_names_english, last_verse} from '@gracious.tech/bible-references'
+import {last_verse} from '@gracious.tech/bible-references'
 
 
 // Create parser for USX and return required elements for traversing doc
@@ -33,13 +33,9 @@ export function parse_usx(xml:string, parser:typeof DOMParser){
     const para_toc3 = get_text('toc3')  // Abbreviation
 
     // Ensure a value exists for every name type
-    const name_normal = para_h || para_toc2 || para_toc1 || book_names_english[book_code]!
+    const name_normal = para_h || para_toc2 || para_toc1 || ''
     const name_long = para_toc1 || para_toc2 || name_normal
-    let name_abbrev = para_toc3 || name_normal.slice(0, 6)
-    if (name_normal === book_names_english[book_code]){
-        // Defaulted to English name so use proper English abbreviation
-        name_abbrev = book_abbrev_english[book_code]!
-    }
+    const name_abbrev = para_toc3 || name_normal.slice(0, 6)
 
     // Return elements
     return {
