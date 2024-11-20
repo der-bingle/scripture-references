@@ -630,32 +630,29 @@ export class BibleCollection {
     // @internal Auto-prepare args for from_string/detect_references based on translation
     _from_string_args(translation:string|string[]=[], always_detect_english=true){
 
-        // Key by name so can support multiple names for single book and ensure no duplicate names
-        const name_to_code:Record<string, string> = {}
-
-        // Give first translations priority (JS orders keys by first assigned)
+        // Get book names and abbreviations for translations (if available)
+        const book_names:[string, string][] = []
         const translations = typeof translation === 'string' ? [translation] : translation
         for (const trans of translations){
-            this._ensure_trans_exists(trans)
-            const books = this._manifest.translations[trans]!.books
-            for (const [code, name] of Object.entries(books)){
-                name_to_code[name] = code  // Reassigning shouldn't affect order of keys
+            for (const [code, name_types] of Object.entries(this._local_book_names[trans] ?? {})){
+                if (name_types.normal){
+                    book_names.push([code, name_types.normal])
+                }
+                if (name_types.abbrev){
+                    book_names.push([code, name_types.abbrev])
+                }
             }
         }
 
         // Optionally add English last so is lowest priority
         if (always_detect_english){
             for (const [code, name] of Object.entries(book_names_english)){
-                name_to_code[name] = code
+                book_names.push([code, name])
             }
             for (const [code, name] of english_abbrev_include){
-                name_to_code[name] = code
+                book_names.push([code, name])
             }
         }
-
-        // Return list reversed (code -> name) as expected by references module
-        const book_names =
-            Object.entries(name_to_code).map(([name, code]) => [code, name] as [string, string])
 
         // Languages with Chinese-like characters
         const chinese_like = [
@@ -679,27 +676,40 @@ export class BibleCollection {
         ] as [[string, string][], string[], number, boolean]
     }
 
-    // Detect bible references in a block of text using book names of given translation(s)
-    // A generator is returned and can be passed updated text each time it yields a result
+    // Detect bible references in a block of text using book names of given translation(s).
+    // A generator is returned and can be passed updated text each time it yields a result.
+    // You must have first awaited a call to `fetch_translation_extras()` to be able to parse
+    //     non-English references.
     detect_references(text:string, translation:string|string[]=[], always_detect_english=true){
         return detect_references(text,
             ...this._from_string_args(translation, always_detect_english))
     }
 
-    // Parse a single bible reference string into a PassageReference object (validating it)
-    // Supports only single passages (for e.g. Matt 10:6,8 use `detect_references`)
-    string_to_reference(text:string, translation:string|string[]=[],
-            always_detect_english=true){
+    // Parse a single bible reference string into a PassageReference object (validating it).
+    // Supports only single passages (for e.g. Matt 10:6,8 use `detect_references`).
+    // You must have first awaited a call to `fetch_translation_extras()` to be able to parse
+    //     non-English references.
+    string_to_reference(text:string, translation:string|string[]=[], always_detect_english=true){
         return PassageReference.from_string(text,
             ...this._from_string_args(translation, always_detect_english))
     }
 
-    // Render a PassageReference object as a string using the given translation's book names
-    reference_to_string(reference:PassageReference, translation?:string){
-        let book_names = book_names_english
+    // Render a PassageReference object as a string using the given translation's book names.
+    // You must have first awaited a call to `fetch_translation_extras()` for the translation,
+    // or English will be used by default.
+    reference_to_string(reference:PassageReference, translation?:string, abbreviate?:boolean){
+
+        // Start with English names as `toString()` default will not account for `abbreviate` option
+        const book_names = {... abbreviate ? book_abbrev_english : book_names_english}
+
+        // Overwrite English defaults with translation's names if they are available
         if (translation){
-            this._ensure_trans_exists(translation)
-            book_names = this._manifest.translations[translation]!.books
+            const name_prop = abbreviate ? 'abbrev' : 'normal'
+            for (const [book, props] of Object.entries(this._local_book_names[translation] ?? {})){
+                if (props[name_prop]){
+                    book_names[book] = props[name_prop]
+                }
+            }
         }
         return reference.toString(book_names)
     }
