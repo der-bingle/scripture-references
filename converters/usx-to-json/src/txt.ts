@@ -117,7 +117,7 @@ export function usx_to_json_txt(xml:string, parser=DOMParser):BibleJsonTxt{
         // Detect minor headings
         // NOTE Also classifying original superscriptions in psalms (`d`) as a minor heading
         //      Since most users wouldn't want them quoted as part of first verse
-        if (headings_minor.includes(style) || style === 'd'){
+        if (headings_minor.includes(style) || (book_code === 'psa' && style === 'd')){
             add_content(state, {type: 'heading', contents: child.textContent!, level: 3}, true)
             continue
         }
