@@ -32,7 +32,7 @@ describe('get_dir_entries', () => {
         expect(bsb!.name).toEqual('eng_bsb')
         expect(bsb!.isDirectory).toBe(true)
         expect(bsb!.fileSize).toEqual(undefined)
-        expect(bsb!.dirSize).toEqual(4)
+        expect(bsb!.dirSize).toEqual(5)
     })
 
     it('should return a correct file entry', ({expect}) => {
