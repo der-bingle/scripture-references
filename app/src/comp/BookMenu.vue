@@ -38,11 +38,16 @@ const chapter = computed(() => state.chapter)
 
 
 // Get lists of OT and NT books
+// NOTE Get book name from state object or it may be outdated if extras not fetched yet
 const ot_books = computed(() => {
-    return content.collection.get_books(state.trans[0], {testament: 'ot', whole: true})
+    return content.collection.get_books(state.trans[0], {testament: 'ot', whole: true}).map(b => {
+        return {id: b.id, available: b.available, name: state.book_names[b.id]}
+    })
 })
 const nt_books = computed(() => {
-    return content.collection.get_books(state.trans[0], {testament: 'nt', whole: true})
+    return content.collection.get_books(state.trans[0], {testament: 'nt', whole: true}).map(b => {
+        return {id: b.id, available: b.available, name: state.book_names[b.id]}
+    })
 })
 
 

@@ -136,7 +136,7 @@ onUnmounted(() => {
     setTimeout(() => {
         // Only trigger DOM update if actually changed something
         if (state.trans.join(' ') !== edited_trans.join(' ')){
-        state.trans = [...edited_trans] as [string, ...string[]]
+            state.trans = [...edited_trans] as [string, ...string[]]
         }
     }, 10)
 })

@@ -1,8 +1,8 @@
 
 import {reactive, computed, watch} from 'vue'
 
-import {IndividualVerse, BookCrossref, PassageReference, PassageArgs, BibleBookHtml}
-    from '@gracious.tech/fetch-client'
+import {IndividualVerse, BookCrossref, PassageReference, PassageArgs, BibleBookHtml,
+    book_names_english} from '@gracious.tech/fetch-client'
 
 import {parse_int} from './utils.js'
 
@@ -91,6 +91,7 @@ export const state = reactive({
     offline: false,
     content: '',
     content_verses: [] as IndividualVerse<string>[][],
+    book_names: {...book_names_english} as Record<string, string>,
     show_select_chapter: false,
     show_trans_dialog: false,
     show_style_dialog: false,

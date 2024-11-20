@@ -25,12 +25,16 @@ export function apply_search(value:string){
 
 export function enable_watches(){
 
-    // Cache entire translation whenever it changes
+    // Translation-related
     watch(() => state.trans, async () => {
 
-        // Avoid delaying render of whatever triggered this
-        await wait(3000)
+        // Update displayed book names
+        await content.collection.fetch_translation_extras(state.trans[0])
+        state.book_names = Object.fromEntries(
+            content.collection.get_books(state.trans[0], {whole: true}).map(b => ([b.id, b.name])))
 
+        // Cache entire translation whenever it changes
+        await wait(3000)  // Avoid delaying render of whatever triggered this
         // Trigger SW cache by fetching assets (and ignoring response)
         void self.caches.open('fetch-collection').then(cache => {
             for (const trans of state.trans){
@@ -90,7 +94,7 @@ export function enable_watches(){
         void fetch(url, {mode: 'cors'}).then(async resp => {
             type RespJson = {verses: Record<string, Record<string, string>>}
             if (resp.ok){
-            state.notes = (await resp.json() as RespJson)['verses']
+                state.notes = (await resp.json() as RespJson)['verses']
             }
         })
         const orig_trans = new PassageReference(state.book).ot ? 'hbo_wlc' : 'grc_sr'

@@ -26,7 +26,6 @@ import {computed, watch, ref, nextTick} from 'vue'
 import {PassageReference} from '@gracious.tech/fetch-client'
 
 import {change_book, state} from '@/services/state'
-import {book_names} from '@/services/computes'
 
 
 const verse_label = computed(() => {
@@ -34,7 +33,7 @@ const verse_label = computed(() => {
         return ''
     }
     const [book, chapter, verse] = state.study
-    return new PassageReference(book, chapter, verse).toString(book_names.value)
+    return new PassageReference(book, chapter, verse).toString(state.book_names)
 })
 
 
@@ -49,7 +48,7 @@ watch(() => state.study, () => {
     crossrefs.value = state.crossref.get_refs(state.study[1], state.study[2]).map(crossref => {
         const ref = new PassageReference(crossref)
         return {
-            label: ref.toString(book_names.value),
+            label: ref.toString(state.book_names),
             view(){
                 change_book(crossref)
             },

@@ -8,16 +8,9 @@ import {content} from '@/services/content'
 import {state} from '@/services/state'
 
 
-// Displayable text for books of currently selected translation
-export const book_names = computed(() => {
-    return Object.fromEntries(content.collection.get_books(state.trans[0], {whole: true})
-        .map(book => ([book.id, book.name])))
-})
-
-
 // Displayable text for currently selected book
 export const current_book_name = computed(() => {
-    return book_names.value[state.book]!
+    return state.book_names[state.book]!
 })
 
 
