@@ -27,7 +27,7 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
         v-list(v-if='show_languages' ref='lang_list_comp')
             v-list-item(v-for='lang of languages_filtered' :key='lang.code' density='compact'
                     @click='change_lang(lang.code)')
-                v-list-item-title {{ lang.bilingual }}
+                v-list-item-title {{ lang.name_bilingual }}
             v-btn(v-if='!languages_search && !languages_show_all' variant='text' color='primary'
                     @click='languages_show_all = true')
                 app-icon(name='expand_circle_down')
