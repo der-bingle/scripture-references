@@ -1,7 +1,7 @@
 
 // Types specific to collector
 
-import type {MetaTranslationName, MetaCopyright, MetaBookSection, TranslationLiteralness,
+import type {MetaTranslationName, MetaCopyright, TranslationLiteralness,
     TranslationTag} from './shared_types'
 
 

@@ -2,7 +2,7 @@
 
 import http from 'node:http'
 import fs from 'node:fs'
-import {normalize, join} from 'node:path'
+import {join} from 'node:path'
 
 import {type_from_path} from './utils.js'
 import {generate_index_content} from './indexes.js'
