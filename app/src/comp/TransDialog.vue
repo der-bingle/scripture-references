@@ -134,7 +134,10 @@ onUnmounted(() => {
     // Always apply changes, however the dialog is closed
     // NOTE Slight delay so dialog animation closes instead of lagging
     setTimeout(() => {
+        // Only trigger DOM update if actually changed something
+        if (state.trans.join(' ') !== edited_trans.join(' ')){
         state.trans = [...edited_trans] as [string, ...string[]]
+        }
     }, 10)
 })
 
