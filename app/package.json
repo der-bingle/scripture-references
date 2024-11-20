@@ -21,7 +21,7 @@
     "homepage": "https://fetch.bible/",
     "devDependencies": {
         "@gracious.tech/fetch-client": "^0.9.0",
-        "@material-symbols/svg-400": "^0.8.0",
+        "@material-symbols/svg-400": "^0.27.0",
         "@types/pug": "^2.0.6",
         "@vitejs/plugin-vue": "^4.2.3",
         "@volar/vue-language-plugin-pug": "^1.6.5",
@@ -32,6 +32,6 @@
         "vite-plugin-vuetify": "^1.0.2",
         "vite-svg-loader": "^4.0.0",
         "vue": "^3.3.4",
-        "vuetify": "^3.3.3"
+        "vuetify": "^3.7.4"
     }
 }
