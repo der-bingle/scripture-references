@@ -129,12 +129,14 @@ export function usx_to_json_txt(xml:string, parser=DOMParser):BibleJsonTxt{
     }
 
     // Verify no content ended up in chapter 0 or a verse 0, as they should never be used
-    if (state.contents[0]!.length > 0){
-        throw new Error(`Content exists before chapter 1 marker`)
+    if (state.contents[0]!.length){
+        state.contents[0] = []
+        console.warn(`Content exists before chapter 1 marker (${book_code})`)
     }
     for (let ch = 1; ch < state.contents.length; ch++){
         if (state.contents[ch]![0]!.length){
-            throw new Error(`Content exists before verse 1 marker for chapter ${ch}`)
+            state.contents[ch]![0] = []
+            console.warn(`Content exists before verse 1 marker for chapter ${ch} (${book_code})`)
         }
     }
 
