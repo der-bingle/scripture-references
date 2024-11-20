@@ -89,11 +89,14 @@ export function enable_watches(){
         const url = `${content.client._data_endpoint}notes/eng_tyndale/html/${state.book}.json`
         void fetch(url, {mode: 'cors'}).then(async resp => {
             type RespJson = {verses: Record<string, Record<string, string>>}
+            if (resp.ok){
             state.notes = (await resp.json() as RespJson)['verses']
+            }
         })
         const orig_trans = new PassageReference(state.book).ot ? 'hbo_wlc' : 'grc_sr'
         // TODO Only need to check has book since hbo_wlc lacking some books due to parsing issues
-        if (content.collection.has_book(orig_trans, state.book)){
+        if (content.collection.has_translation(orig_trans)
+                && content.collection.has_book(orig_trans, state.book)){
             void content.collection.fetch_book(orig_trans, state.book).then(book => {
                 state.original = book
             })
