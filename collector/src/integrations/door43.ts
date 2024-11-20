@@ -77,14 +77,15 @@ export async function discover(discover_specific_id?:string):Promise<void>{
     // Discover new translations
     const stats_bible = await _discover('Bible', discover_specific_id)
     const stats_aligned = await _discover('Aligned_Bible', discover_specific_id)
+    const stats_hebrew = await _discover('Hebrew_Old_Testament', discover_specific_id)
 
     // Report stats
-    console.info(`New: ${stats_bible.added + stats_aligned.added}`)
-    console.info(`Existing: ${stats_bible.exists + stats_aligned.exists}`)
+    console.info(`New: ${stats_bible.added + stats_aligned.added + stats_hebrew.added}`)
+    console.info(`Existing: ${stats_bible.exists + stats_aligned.exists + stats_hebrew.exists}`)
 }
 
 
-async function _discover(subject:'Bible'|'Aligned_Bible', discover_specific_id?:string)
+async function _discover(subject:string, discover_specific_id?:string)
         :Promise<{added:number, exists:number}>{
     // Discover new translations for a "subject"
     // Door43 has two subjects for bibles and others for translation notes, stories, etc.
