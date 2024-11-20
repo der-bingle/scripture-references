@@ -6,13 +6,16 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
 
     v-card(height='100%')
 
-        v-tabs(v-model='selected_trans_index' background-color='primary')
-            //- eslint-disable-next-line vue/valid-v-for
-            v-tab(v-for='item of chosen_translations') {{ item.name_abbrev }}
-            v-btn.add(v-if='state.trans.length < 3' icon variant='text' @click='add_trans')
+        v-tabs(v-model='selected_trans_index' color='primary')
+            v-tab(v-for='(item, i) of chosen_translations' :key='item.id + i')
+                | {{ item.name_abbrev }}
+                v-btn(v-if='chosen_translations.length > 1' icon variant='text' color='#888f'
+                        @click.stop='remove_trans(i)')
+                    app-icon(name='close_small')
+            v-btn.add(v-if='edited_trans.length < 3' icon variant='text' @click='add_trans')
                 app-icon(name='add_circle')
-            v-btn.close(icon variant='text' @click='state.show_trans_dialog = false')
-                app-icon(name='close')
+            v-btn.close(icon variant='text' @click='confirm_changes')
+                app-icon(name='check')
 
         div.subbar
             v-text-field.search(v-if='show_languages' v-model='languages_search' variant='outlined'
@@ -20,9 +23,6 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
             v-btn(v-else color='primary' variant='text' @click='show_languages = true')
                 app-icon(name='arrow_back' style='margin-right: 12px')
                 | {{ displayed_language_name }}
-            v-btn(v-if='chosen_translations.length > 1' icon color='error' variant='text'
-                    @click='remove_trans')
-                app-icon(name='delete')
 
         v-list(v-if='show_languages' ref='lang_list_comp')
             v-list-item(v-for='lang of languages_filtered' :key='lang.code' density='compact'
@@ -30,13 +30,13 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
                 v-list-item-title {{ lang.bilingual }}
             v-btn(v-if='!languages_search && !languages_show_all' variant='text' color='primary'
                     @click='languages_show_all = true')
-                app-icon(name='expand_more')
+                app-icon(name='expand_circle_down')
                 | &nbsp;
                 | + {{ languages.length - languages_filtered.length }}
         v-list(v-else)
             v-list-item(v-for='trans of translations' :key='trans.id' color='primary'
                     :active='trans.id === selected_trans.id' density='compact'
-                    @click='change_trans(trans.id)')
+                    @click='confirm_trans(trans.id)')
                 v-list-item-title
                     | {{ trans.name_abbrev }} &mdash; {{ trans.name_local || trans.name_english }}
 
@@ -45,7 +45,7 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
 
 <script lang='ts' setup>
 
-import {computed, ref, watch} from 'vue'
+import {computed, onUnmounted, reactive, ref, watch} from 'vue'
 
 import {state, langs, dialog_max_width} from '@/services/state'
 import {content} from '@/services/content'
@@ -58,6 +58,8 @@ const languages_by_pop = content.collection.get_languages({sort_by: 'population'
 
 
 // State
+// NOTE Don't apply changes until dialog closed to prevent laggy UI
+const edited_trans = reactive([...state.trans] as [string, ...string[]])
 const selected_trans_index = ref(0)
 const show_languages = ref(false)
 const displayed_language = ref(langs.value[0])
@@ -67,7 +69,7 @@ const lang_list_comp = ref<{$el: HTMLElement}>()
 
 
 // Computes
-const chosen_translations = computed(() => state.trans.map(id => content.translations[id]!))
+const chosen_translations = computed(() => edited_trans.map(id => content.translations[id]!))
 const selected_trans = computed(() => chosen_translations.value[selected_trans_index.value]!)
 const displayed_language_name = computed(() => {
     return content.languages[displayed_language.value]!.name_local
@@ -99,27 +101,42 @@ watch(languages_show_all, () => {
 const change_lang = (code:string) => {
     displayed_language.value = code
     if (translations.value.length === 1){
-        change_trans(translations.value[0]!.id)
+        confirm_trans(translations.value[0]!.id)
     }
     show_languages.value = false
 }
 
-const change_trans = (id:string) => {
-    state.trans[selected_trans_index.value] = id
-    state.show_trans_dialog = false
+const confirm_trans = (id:string) => {
+    edited_trans[selected_trans_index.value] = id
+    confirm_changes()
 }
 
 const add_trans = () => {
-    state.trans.push(state.trans[state.trans.length-1]!)
-    selected_trans_index.value = state.trans.length - 1
+    edited_trans.push(edited_trans[edited_trans.length-1]!)
+    selected_trans_index.value = edited_trans.length - 1
 }
 
-const remove_trans = () => {
-    state.trans.splice(selected_trans_index.value, 1)
-    if (selected_trans_index.value >= state.trans.length){
-        selected_trans_index.value = state.trans.length - 1
+const remove_trans = (i:number) => {
+    edited_trans.splice(i, 1)
+    if (selected_trans_index.value >= edited_trans.length){
+        selected_trans_index.value = edited_trans.length - 1
     }
 }
+
+
+const confirm_changes = () => {
+    // Closing dialog always applies changes
+    state.show_trans_dialog = false
+}
+
+
+onUnmounted(() => {
+    // Always apply changes, however the dialog is closed
+    // NOTE Slight delay so dialog animation closes instead of lagging
+    setTimeout(() => {
+        state.trans = [...edited_trans] as [string, ...string[]]
+    }, 10)
+})
 
 
 </script>
@@ -141,5 +158,11 @@ const remove_trans = () => {
 
 .v-tabs
     min-height: var(--v-tabs-height)  // Safari bug fix
+
+.v-tab
+    padding-right: 0
+
+    .v-btn--icon
+        margin-left: 48px
 
 </style>
