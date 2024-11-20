@@ -263,6 +263,15 @@ export class BibleEnhancer {
             return NodeFilter.FILTER_REJECT
         })
 
+        // Load book names for each translation before discovering references
+        // NOTE Repeat calls ok since will cache results
+        for (const trans of this._translations){
+            // NOTE Skip for English to speed up execution since already have English names
+            if (!collection.has_translation(trans) || trans.startsWith('eng_')){
+                continue
+            }
+            await collection.fetch_translation_extras(trans)
+        }
 
         // Get all relevant text nodes in advance (as modifying DOM will interrupt walk)
         const nodes:[Text, Generator<PassageReferenceMatch, null>, PassageReferenceMatch][] = []

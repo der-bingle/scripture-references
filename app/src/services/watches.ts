@@ -29,9 +29,19 @@ export function enable_watches(){
     watch(() => state.trans, async () => {
 
         // Update displayed book names
-        await content.collection.fetch_translation_extras(state.trans[0])
+        // NOTE Don't bother with English translations since already have English names
+        if (!state.trans[0].startsWith('eng_')){
+            await content.collection.fetch_translation_extras(state.trans[0])
+        }
         state.book_names = Object.fromEntries(
             content.collection.get_books(state.trans[0], {whole: true}).map(b => ([b.id, b.name])))
+
+        // Also fetch book names for any other translations as can help things like searchbar
+        for (const trans of state.trans.slice(1)){
+            if (!trans.startsWith('eng_')){
+                void content.collection.fetch_translation_extras(trans)
+            }
+        }
 
         // Cache entire translation whenever it changes
         await wait(3000)  // Avoid delaying render of whatever triggered this
