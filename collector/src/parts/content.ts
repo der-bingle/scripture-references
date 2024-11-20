@@ -8,6 +8,7 @@ import {JSDOM} from 'jsdom'
 
 import * as door43 from '../integrations/door43.js'
 import * as ebible from '../integrations/ebible.js'
+import {pre_usx_to_json} from '../integrations/patches.js'
 import {generic_update_sources} from '../integrations/generic.js'
 import {update_manifest} from './manifest.js'
 import {concurrent, PKG_PATH, read_json, read_dir} from './utils.js'
@@ -193,22 +194,30 @@ async function _update_dist_single(id:string){
         const dst_html = join(dist_dir, 'html', `${book}.json`)
         const dst_txt = join(dist_dir, 'txt', `${book}.json`)
 
-        try {
-            // Convert to plain text if doesn't exist yet
-            if (!fs.existsSync(dst_txt)){
-                const txt = usx_to_json_txt(fs.readFileSync(src, {encoding: 'utf8'}), parser)
-                fs.writeFileSync(dst_txt, JSON.stringify(txt))
-            }
+        // Apply patches
+        let usx_str = fs.readFileSync(src, {encoding: 'utf8'})
+        usx_str = pre_usx_to_json(id, book, usx_str)
 
-            // Convert to HTML if doesn't exist yet
-            if (!fs.existsSync(dst_html)){
-                const html = usx_to_json_html(
-                    fs.readFileSync(src, {encoding: 'utf8'}), false, parser)
-                fs.writeFileSync(dst_html, JSON.stringify(html))
+        // Convert to plain text if doesn't exist yet
+        if (!fs.existsSync(dst_txt)){
+            try {
+                const txt = usx_to_json_txt(usx_str, parser)
+                fs.writeFileSync(dst_txt, JSON.stringify(txt))
+            } catch (error){
+                console.warn(`INVALID BOOK: failed to convert '${book}' to txt for ${id}`)
+                console.error(error)
             }
-        } catch (error){
-            console.warn(`INVALID BOOK ${book} for ${id}`)
-            console.error(error)
+        }
+
+        // Convert to HTML if doesn't exist yet
+        if (!fs.existsSync(dst_html)){
+            try {
+                const html = usx_to_json_html(usx_str, false, parser)
+                fs.writeFileSync(dst_html, JSON.stringify(html))
+            } catch (error){
+                console.warn(`INVALID BOOK: failed to convert '${book}' to html for ${id}`)
+                console.error(error)
+            }
         }
     }
 
