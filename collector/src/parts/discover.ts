@@ -19,10 +19,13 @@ export async function discover_translations(service:string, discover_specific_id
     if (!service || service === 'dbl'){
         await dbl.discover(discover_specific_id)
     }
-    if (!service || service === 'door43'){
-        await door43.discover(discover_specific_id)
-    }
     if (!service || service === 'ebible'){
         await ebible.discover(discover_specific_id)
+    }
+
+    // Only check door43 if specifically requested
+    // TODO Parse their unusual USFM format and confirm quality/readiness of translations
+    if (service === 'door43'){
+        await door43.discover(discover_specific_id)
     }
 }
