@@ -53,25 +53,24 @@ export async function discover(discover_specific_id?:string):Promise<void>{
     // Do concurrently since each involves a network request
     await concurrent(rows.map(row => async () => {
 
-        // Warn if invalid language
+        // Determine ids
         const ebible_id = row['translationId']
         const lang_code = language_data.normalise(row['languageCode'])
-        if (!lang_code){
-            console.error(`IGNORED ${ebible_id} (unknown language)`)
-            ignored.push(ebible_id)
-            return
-        } else if (IGNORE.includes(ebible_id)){
-            ignored.push(ebible_id)
-            return
-        }
-
-        // Determine ids
         const trans_abbr = row['FCBHID'].slice(3).toLowerCase()
-        const trans_id = `${lang_code}_${trans_abbr}`
+        const trans_id = `${lang_code ?? ''}_${trans_abbr}`
         const log_ids = `${trans_id}/${ebible_id}`
 
         // Skip if only want to discover a single translation
         if (discover_specific_id && trans_id !== discover_specific_id){
+            return
+        }
+
+        // Ignore if invalid language or in ignored list
+        if (!lang_code){
+            console.error(`INVALID ${log_ids} (unknown language)`)
+            ignored.push(ebible_id)
+            return
+        } else if (IGNORE.includes(ebible_id)){
             ignored.push(ebible_id)
             return
         }
@@ -100,7 +99,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             if (license in LICENSES){
                 license_url = `https://creativecommons.org/licenses/${cc_url[1]!}/${cc_url[2]!}/`
             } else {
-                console.error(`Failed to detect CC license: ${license}`)
+                console.warn(`Failed to detect CC license "${license}" (${log_ids})`)
                 license = null
             }
         } else if (/public domain/i.test(page_resp) && !/not public domain/i.test(page_resp)){
@@ -110,9 +109,9 @@ export async function discover(discover_specific_id?:string):Promise<void>{
         // Ignore if no USFM source (almost always because license is restrictive)
         if (!page_resp.includes('usfm.zip')){
             if (license){
-                console.error(`IGNORED ${log_ids} (no USFM even though unrestricted license?)`)
+                console.error(`INVALID ${log_ids} (no USFM even though unrestricted license?)`)
             } else {
-                console.warn(`IGNORED ${log_ids} (probably restricted)`)
+                console.warn(`INVALID ${log_ids} (probably restricted)`)
             }
             ignored.push(ebible_id)
             return
