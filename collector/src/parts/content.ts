@@ -59,7 +59,7 @@ export async function update_source(trans_id?:string){
 }
 
 
-async function _convert_to_usx(trans:string, format:'usx1-2'|'usfm'){
+async function _convert_to_usx(trans:string, format:'usx1-2'|'usfm', force:boolean){
     // Convert translation's source files to USX3 using Bible Multi Converter
 
     // Determine parts of cmd
@@ -74,8 +74,8 @@ async function _convert_to_usx(trans:string, format:'usx1-2'|'usfm'){
     const bmc = join(PKG_PATH, 'bmc', 'BibleMultiConverter.jar')
 
     // Skip if already converted
-    if (fs.existsSync(dist_dir)
-            && read_dir(src_dir).length === read_dir(dist_dir).length){
+    if (fs.existsSync(dist_dir) && read_dir(src_dir).length === read_dir(dist_dir).length
+            && !force){
         return
     }
 
@@ -115,6 +115,9 @@ async function _convert_to_usx(trans:string, format:'usx1-2'|'usfm'){
 export async function update_dist(trans_id?:string){
     // Update distributed HTML/USX files from sources
 
+    // Force recreate distributables if updating a specific translation
+    const force = !!trans_id
+
     // Process translations concurrently (only 4 since waiting on processor, not network)
     // NOTE While not multi-threaded itself, conversions done externally... so effectively so
     await concurrent(read_dir(join('sources', 'bibles')).map(id => async () => {
@@ -125,7 +128,7 @@ export async function update_dist(trans_id?:string){
 
         // Update assets for the translation
         try {
-            await _update_dist_single(id)
+            await _update_dist_single(id, force)
         } catch (error){
             console.error(`FAILED update dist assets for: ${id}`)
             console.error(error instanceof Error ? error.stack : error)
@@ -137,7 +140,7 @@ export async function update_dist(trans_id?:string){
 }
 
 
-async function _update_dist_single(id:string){
+async function _update_dist_single(id:string, force:boolean){
     // Update distributable files for given translation
     // NOTE This should only have one external process running (concurrency done at higher level)
 
@@ -172,7 +175,7 @@ async function _update_dist_single(id:string){
             fs.copyFileSync(join(format_dir, file), join(usx_dir, file))
         }
     } else {
-        await _convert_to_usx(id, meta.source.format)
+        await _convert_to_usx(id, meta.source.format, force)
     }
 
     // If already USFM just copy, otherwise convert
@@ -199,7 +202,7 @@ async function _update_dist_single(id:string){
         usx_str = pre_usx_to_json(id, book, usx_str)
 
         // Convert to plain text if doesn't exist yet
-        if (!fs.existsSync(dst_txt)){
+        if (!fs.existsSync(dst_txt) || force){
             try {
                 const txt = usx_to_json_txt(usx_str, parser)
                 fs.writeFileSync(dst_txt, JSON.stringify(txt))
@@ -210,7 +213,7 @@ async function _update_dist_single(id:string){
         }
 
         // Convert to HTML if doesn't exist yet
-        if (!fs.existsSync(dst_html)){
+        if (!fs.existsSync(dst_html) || force){
             try {
                 const html = usx_to_json_html(usx_str, false, parser)
                 fs.writeFileSync(dst_html, JSON.stringify(html))
