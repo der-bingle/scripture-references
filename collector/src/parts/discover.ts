@@ -16,13 +16,13 @@ export async function discover_translations(service:string, discover_specific_id
 
     // Consult one or more services
     // NOTE Order is from most->least likely to have original sources
+    if (!service || service === 'dbl'){
+        await dbl.discover(discover_specific_id)
+    }
     if (!service || service === 'door43'){
         await door43.discover(discover_specific_id)
     }
     if (!service || service === 'ebible'){
         await ebible.discover(discover_specific_id)
-    }
-    if (!service || service === 'dbl'){
-        await dbl.discover(discover_specific_id)
     }
 }

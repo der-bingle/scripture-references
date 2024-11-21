@@ -45,8 +45,9 @@ export async function discover(discover_specific_id?:string):Promise<void>{
     const language_data = get_language_data()
 
     // Track changes
-    const added = []
-    const exists = []
+    const added:string[] = []
+    const exists:string[] = []
+    const ignored:string[] = []
 
     // Add each translation in the CSV file
     // Do concurrently since each involves a network request
@@ -57,9 +58,10 @@ export async function discover(discover_specific_id?:string):Promise<void>{
         const lang_code = language_data.normalise(row['languageCode'])
         if (!lang_code){
             console.error(`IGNORED ${ebible_id} (unknown language)`)
+            ignored.push(ebible_id)
             return
         } else if (IGNORE.includes(ebible_id)){
-            console.error(`IGNORED ${ebible_id} (in ignore list)`)
+            ignored.push(ebible_id)
             return
         }
 
@@ -70,6 +72,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
 
         // Skip if only want to discover a single translation
         if (discover_specific_id && trans_id !== discover_specific_id){
+            ignored.push(ebible_id)
             return
         }
 
@@ -111,6 +114,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             } else {
                 console.warn(`IGNORED ${log_ids} (probably restricted)`)
             }
+            ignored.push(ebible_id)
             return
         }
 
@@ -152,8 +156,10 @@ export async function discover(discover_specific_id?:string):Promise<void>{
     }))
 
     // Report stats
-    console.info(`New: ${added.length}`)
-    console.info(`Existing: ${exists.length}`)
+    console.info(`EBIBLE new: ${added.length}`)
+    console.info(`EBIBLE existing: ${exists.length}`)
+    console.info(`EBIBLE ignored: ${ignored.length}`)
+    console.info(`EBIBLE total: ${added.length + exists.length + ignored.length}`)
 }
 
 
