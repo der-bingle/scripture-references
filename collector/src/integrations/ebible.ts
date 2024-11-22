@@ -124,8 +124,9 @@ export async function discover(discover_specific_id?:string):Promise<void>{
         const meta:TranslationSourceMeta = {
             name: {
                 local: title_is_english ? '' : row['title'],
-                abbrev: trans_abbr.toUpperCase(),  // WARN Often in English (should be native)
+                local_abbrev: '',
                 english: title_is_english ? row['title'] : '',
+                english_abbrev: trans_abbr.toUpperCase(),
             },
             language: lang_code,
             year: detect_year(row['title'], row['shortTitle'], row['translationId'],
@@ -142,6 +143,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 format: 'usfm',
                 url: `https://ebible.org/Scriptures/${ebible_id}_usfm.zip`,
                 updated: row['UpdateDate'],
+                revision: 0,  // Unused
             },
             literalness: null,
             tags: [],

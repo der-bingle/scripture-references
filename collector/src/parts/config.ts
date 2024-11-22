@@ -8,9 +8,6 @@ import {mkdir_exist} from './utils.js'
 // Template for config file
 const TEMPLATE = `
 integrations:
-    dbl:
-        token:
-        key:
     aws:
         bucket:
         region:

@@ -7,10 +7,6 @@ import type {MetaTranslationName, MetaCopyright, TranslationLiteralness,
 
 export interface CollectionConfig {
     integrations: {
-        dbl: {
-            token:string,
-            key:string,
-        },
         aws: {
             bucket:string,
             region:string,
@@ -22,9 +18,10 @@ export interface CollectionConfig {
 
 export interface TranslationSource {
     service:'ebible'|'dbl'|'door43'|'manual'
-    format:'usfm'|'usx1-2'|'usx3+'
+    format:'usfm'|'usx'
     updated:string  // yyyy-mm-dd
-    id:string|null
+    revision:number  // 0 if not used
+    id:string
     url:string|null
 }
 

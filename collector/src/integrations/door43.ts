@@ -157,9 +157,9 @@ async function _discover(subject:string, discover_specific_id?:string)
             const translation:TranslationSourceMeta = {
                 name: {
                     local: '',
-                    // WARN Shouldn't be in English but is
-                    abbrev: `${language['language']}-${resource['identifier']}`.toUpperCase(),
+                    local_abbrev: '',
                     english: resource['title'],
+                    english_abbrev: resource['identifier'].toUpperCase(),
                 },
                 language: lang_code,
                 year,
@@ -176,6 +176,7 @@ async function _discover(subject:string, discover_specific_id?:string)
                     format: 'usfm',
                     url: format['url'],
                     updated: format['modified'].split('T')[0]!,
+                    revision: 0,  // Unused
                 },
                 literalness: null,
                 tags: [],
