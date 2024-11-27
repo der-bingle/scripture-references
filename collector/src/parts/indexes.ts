@@ -165,7 +165,7 @@ interface UpdateIndexesReturn {
 }
 
 /**
- * Using the provided values, we tell S3 with index files need to be updated.
+ * Using the provided values, we tell S3 which index files need to be updated.
  *
  * @param modified The files that have been modified
  * @param removed The files that have been removed
