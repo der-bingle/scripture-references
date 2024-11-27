@@ -59,37 +59,43 @@ export async function update_source(trans_id?:string){
 }
 
 
-async function _convert_to_usx(trans:string, format:'usx1-2'|'usfm', force:boolean){
-    // Convert translation's source files to USX3 using Bible Multi Converter
-
-    // Determine parts of cmd
-    const src_dir = join('sources', 'bibles', trans, format)
-    const dist_dir = join('dist', 'bibles', trans, 'usx')
-    const bmc_format = {
-        'usx1-2': 'USX',
-        'usfm': 'USFM',
-        'sword': 'SWORD',  // TODO Not properly implemented yet (not needed yet either)
-    }[format]
-    const tool = ['usfm', 'usx1-2'].includes(format) ? 'ParatextConverter' : ''
-    const bmc = join(PKG_PATH, 'bmc', 'BibleMultiConverter.jar')
+async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx'|'usfm'){
+    // Convert translation's source files to an equivalent distributable format (USFM or USX)
 
     // Skip if already converted
-    if (fs.existsSync(dist_dir) && read_dir(src_dir).length === read_dir(dist_dir).length
-            && !force){
+    const src_dir = join('sources', 'bibles', trans, from)
+    const dist_dir = join('dist', 'bibles', trans, to)
+    if (read_dir(src_dir).length === read_dir(dist_dir).length){
         return
     }
 
-    // Work around BMC bug by removing any /fig tags
-    // See https://github.com/schierlm/BibleMultiConverter/issues/68
-    if (format === 'usfm'){
-        for (let usfm_file of read_dir(src_dir)){
-            usfm_file = join(src_dir, usfm_file)
-            fs.writeFileSync(
-                usfm_file,
-                fs.readFileSync(usfm_file, {encoding: 'utf-8'}).replace(/\\fig .*\\fig\*/g, ''),
-            )
+    // If converting USX? -> USX3 then sniff the version to know if can copy or need to convert
+    let source_is_usx3 = false
+    if (from === to && to === 'usx'){
+        const first_file = read_dir(src_dir)[0]
+        if (first_file){
+            const contents = fs.readFileSync(join(src_dir, first_file), {encoding: 'utf8'})
+            const usx_version = /<usx version="([\d.]+)">/.exec(contents)
+            source_is_usx3 = parseFloat(usx_version?.[1] ?? '0') >= 3
         }
     }
+
+    // If converting to same format, simply copy the files
+    // WARN USFM1-2 is valid USFM3, but USX1-2 must be converted to USX3 which requires end markers
+    if (from === to && (from === 'usfm' || source_is_usx3)){
+        for (const file of read_dir(src_dir)){
+            fs.copyFileSync(join(src_dir, file), join(dist_dir, file))
+        }
+        return
+    }
+
+    // Determine parts of cmd
+    const bmc_format = {
+        'usx': 'USX',
+        'usfm': 'USFM',
+    }[from]
+    const tool = ['usfm', 'usx'].includes(from) ? 'ParatextConverter' : ''
+    const bmc = join(PKG_PATH, 'bmc', 'BibleMultiConverter.jar')
 
     // Execute command
 
@@ -147,7 +153,6 @@ async function _update_dist_single(id:string, force:boolean){
     // Determine paths
     const src_dir = join('sources', 'bibles', id)
     const dist_dir = join('dist', 'bibles', id)
-    const usx_dir = join(dist_dir, 'usx')
 
     // Ignore if not a dir (e.g. sources/.DS_Store)
     if (!fs.statSync(src_dir).isDirectory()){
@@ -164,30 +169,27 @@ async function _update_dist_single(id:string, force:boolean){
         return
     }
 
+    // Wipe dist dirs if forcing fresh conversion
+    if (force){
+        fs.rmSync(dist_dir, {force: true, recursive: true})
+    }
+
     // Ensure dist dirs exist
     for (const format of ['usx', 'usfm', 'html', 'txt']){
         fs.mkdirSync(join(dist_dir, format), {recursive: true})
     }
 
-    // If already USX3+ just copy, otherwise convert
-    if (meta.source.format === 'usx3+'){
-        for (const file of read_dir(format_dir)){
-            fs.copyFileSync(join(format_dir, file), join(usx_dir, file))
-        }
-    } else {
-        await _convert_to_usx(id, meta.source.format, force)
-    }
+    // Convert source to USX3 (if needed)
+    await _source_to_distributable(id, meta.source.format, 'usx')
 
-    // If already USFM just copy, otherwise convert
-    if (meta.source.format === 'usfm'){
-        for (const file of read_dir(format_dir)){
-            fs.copyFileSync(join(format_dir, file), join(dist_dir, 'usfm', file))
-        }
-    } else {
-        throw new Error("Conversion to USFM is waiting on https://github.com/usfm-bible/tcdocs")
-    }
+    // TODO Convert versification if needed
 
-    // Convert USX to HTML and plain text
+    // Convert source to USFM3 (if needed)
+    // TODO Convert from distributable USX3 if did change versification
+    await _source_to_distributable(id, meta.source.format, 'usfm')
+
+    // Convert distributable USX to HTML and plain text
+    const usx_dir = join(dist_dir, 'usx')
     const parser = new JSDOM().window.DOMParser
     for (const file of read_dir(usx_dir)){
 
@@ -202,7 +204,7 @@ async function _update_dist_single(id:string, force:boolean){
         usx_str = pre_usx_to_json(id, book, usx_str)
 
         // Convert to plain text if doesn't exist yet
-        if (!fs.existsSync(dst_txt) || force){
+        if (!fs.existsSync(dst_txt)){
             try {
                 const txt = usx_to_json_txt(usx_str, parser)
                 fs.writeFileSync(dst_txt, JSON.stringify(txt))
@@ -213,7 +215,7 @@ async function _update_dist_single(id:string, force:boolean){
         }
 
         // Convert to HTML if doesn't exist yet
-        if (!fs.existsSync(dst_html) || force){
+        if (!fs.existsSync(dst_html)){
             try {
                 const html = usx_to_json_html(usx_str, false, parser)
                 fs.writeFileSync(dst_html, JSON.stringify(html))
