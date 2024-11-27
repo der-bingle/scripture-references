@@ -1,9 +1,9 @@
 
 import {join} from 'path'
-import {writeFileSync, existsSync, mkdirSync} from 'fs'
+import {existsSync, mkdirSync} from 'fs'
 
 import {LICENSES} from '../parts/license.js'
-import {request} from '../parts/utils.js'
+import {request, write_json} from '../parts/utils.js'
 import {get_language_data} from '../parts/languages.js'
 import type {TranslationSourceMeta} from '../parts/types'
 
@@ -185,7 +185,7 @@ async function _discover(subject:string, discover_specific_id?:string)
 
             // Save meta file
             mkdirSync(trans_dir, {recursive: true})
-            writeFileSync(meta_file, JSON.stringify(translation, undefined, 4))
+            write_json(meta_file, translation, true)
             added.push(door43_id)
         }
     }

@@ -1,12 +1,12 @@
 
 import {join} from 'path'
-import {existsSync, writeFileSync} from 'fs'
+import {existsSync} from 'fs'
 
 import {book_names_english, books_ordered} from './bible.js'
 import {languages_by_total_speakers} from '../data/languages.js'
 import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
-import {read_json, read_dir} from './utils.js'
+import {read_json, read_dir, write_json} from './utils.js'
 import type {DistManifest} from './shared_types'
 import type {TranslationSourceMeta} from './types'
 import {_missing_meta} from './reporting.js'
@@ -91,5 +91,5 @@ export async function update_manifest(){
         languages_by_total_speakers.filter(l => included_languages.has(l))
 
     // Save the manifest to dist dir
-    writeFileSync(join('dist', 'bibles', 'manifest.json'), JSON.stringify(manifest))
+    write_json(join('dist', 'bibles', 'manifest.json'), manifest)
 }

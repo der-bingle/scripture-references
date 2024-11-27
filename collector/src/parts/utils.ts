@@ -1,5 +1,6 @@
 
-import {Dirent, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync} from 'fs'
+import {Dirent, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync,
+} from 'fs'
 import {dirname, join} from 'path'
 
 /**
@@ -187,6 +188,12 @@ export function read_files_deep(directory:string):string[]{
 export function read_json<T>(path:string):T{
     // Read a JSON file and cast as given type
     return JSON.parse(readFileSync(path, 'utf-8')) as T
+}
+
+
+export function write_json(path:string, data:unknown, indented=false){
+    // Write stringified JSON data to a file
+    writeFileSync(path, JSON.stringify(data, undefined, indented ? 4 : 0))
 }
 
 

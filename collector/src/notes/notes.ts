@@ -1,11 +1,10 @@
 
 import {join} from 'node:path'
-import {writeFileSync} from 'node:fs'
 
 import {convert as html_to_text} from 'html-to-text'
 
 import * as tyndale from '../integrations/tyndale.js'
-import {clean_dir, mkdir_exist, read_dir, read_json} from '../parts/utils.js'
+import {clean_dir, mkdir_exist, read_dir, read_json, write_json} from '../parts/utils.js'
 
 import type {StudyNotes} from '../integrations/tyndale.js'
 import type {NotesSourceMeta} from '../parts/types.js'
@@ -37,10 +36,9 @@ export function notes_process(){
             mkdir_exist(html_dir)
             mkdir_exist(txt_dir)
             for (const book of Object.keys(notes)){
-                writeFileSync(join(html_dir, `${book}.json`), JSON.stringify(notes[book]))
+                write_json(join(html_dir, `${book}.json`), notes[book])
                 // Also write plain text version
-                writeFileSync(join(txt_dir, `${book}.json`),
-                    JSON.stringify(notes_to_txt(notes[book]!)))
+                write_json(join(txt_dir, `${book}.json`), notes_to_txt(notes[book]!))
             }
 
             // Load meta from file
@@ -55,7 +53,7 @@ export function notes_process(){
     }
 
     // Save the notes manifest
-    writeFileSync(join('dist', 'notes', 'manifest.json'), JSON.stringify(manifest))
+    write_json(join('dist', 'notes', 'manifest.json'), manifest)
 }
 
 

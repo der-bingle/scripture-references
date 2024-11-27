@@ -11,7 +11,7 @@ import * as ebible from '../integrations/ebible.js'
 import {pre_usx_to_json} from '../integrations/patches.js'
 import {generic_update_sources} from '../integrations/generic.js'
 import {update_manifest} from './manifest.js'
-import {concurrent, PKG_PATH, read_json, read_dir} from './utils.js'
+import {concurrent, PKG_PATH, read_json, read_dir, write_json} from './utils.js'
 import {extract_sections, generate_chapter_headings} from './sections.js'
 
 import type {TranslationSourceMeta} from './types'
@@ -207,7 +207,7 @@ async function _update_dist_single(id:string, force:boolean){
         if (!fs.existsSync(dst_txt)){
             try {
                 const txt = usx_to_json_txt(usx_str, parser)
-                fs.writeFileSync(dst_txt, JSON.stringify(txt))
+                write_json(dst_txt, txt)
             } catch (error){
                 console.warn(`INVALID BOOK: failed to convert '${book}' to txt for ${id}`)
                 console.error(error)
@@ -218,7 +218,7 @@ async function _update_dist_single(id:string, force:boolean){
         if (!fs.existsSync(dst_html)){
             try {
                 const html = usx_to_json_html(usx_str, false, parser)
-                fs.writeFileSync(dst_html, JSON.stringify(html))
+                write_json(dst_html, html)
             } catch (error){
                 console.warn(`INVALID BOOK: failed to convert '${book}' to html for ${id}`)
                 console.error(error)
@@ -242,5 +242,5 @@ async function _update_dist_single(id:string, force:boolean){
         trans_extra.chapter_headings[book] =
             generate_chapter_headings(json_txt, trans_extra.sections[book]!)
     }
-    fs.writeFileSync(join(dist_dir, 'extra.json'), JSON.stringify(trans_extra))
+    write_json(join(dist_dir, 'extra.json'), trans_extra)
 }

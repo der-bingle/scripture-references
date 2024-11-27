@@ -1,8 +1,8 @@
 
 import {join} from 'path'
-import {existsSync, writeFileSync} from 'fs'
+import {existsSync} from 'fs'
 
-import {PKG_PATH, read_json, request} from './utils.js'
+import {PKG_PATH, read_json, request, write_json} from './utils.js'
 import {MetaLanguage} from './shared_types.js'
 
 
@@ -80,7 +80,7 @@ export async function gen_language_data(){
     }
 
     // Save to file
-    writeFileSync('languages.json', JSON.stringify(data, undefined, 4))
+    write_json('languages.json', data, true)
 }
 
 

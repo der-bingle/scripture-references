@@ -1,10 +1,9 @@
 
 import {join} from 'node:path'
-import {writeFileSync} from 'node:fs'
 
 import {books_ordered} from '../parts/bible.js'
 import {download_data} from '../integrations/openbible.js'
-import {mkdir_exist} from '../parts/utils.js'
+import {mkdir_exist, write_json} from '../parts/utils.js'
 
 import type {BookCrossReferences} from '../integrations/openbible'
 import type {CrossrefData, CrossrefRange, CrossrefSingle} from '../parts/shared_types'
@@ -26,12 +25,9 @@ export async function crossref_process(){
 
     for (const book of books_ordered){
         const book_refs = data[book] ?? {}
-        writeFileSync(join(dir_small, `${book}.json`),
-            JSON.stringify(filter_refs_by_relevance(book_refs, 1)))
-        writeFileSync(join(dir_medium, `${book}.json`),
-            JSON.stringify(filter_refs_by_relevance(book_refs, 2)))
-        writeFileSync(join(dir_large, `${book}.json`),
-            JSON.stringify(filter_refs_by_relevance(book_refs, 3)))
+        write_json(join(dir_small, `${book}.json`), filter_refs_by_relevance(book_refs, 1))
+        write_json(join(dir_medium, `${book}.json`), filter_refs_by_relevance(book_refs, 2))
+        write_json(join(dir_large, `${book}.json`), filter_refs_by_relevance(book_refs, 3))
     }
 }
 

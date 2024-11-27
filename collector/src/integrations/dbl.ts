@@ -1,8 +1,8 @@
 
 import {join} from 'node:path'
-import {existsSync, mkdirSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync} from 'node:fs'
 
-import {request, concurrent} from '../parts/utils.js'
+import {request, concurrent, write_json} from '../parts/utils.js'
 import {LICENSES} from '../parts/license.js'
 import {get_language_data} from '../parts/languages.js'
 
@@ -171,7 +171,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
 
         // Save meta file
         mkdirSync(trans_dir, {recursive: true})
-        writeFileSync(meta_file, JSON.stringify(meta, undefined, 4))
+        write_json(meta_file, meta, true)
         num_added += 1
     }))
 
