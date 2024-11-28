@@ -14,9 +14,9 @@ mkdir collection
 # Build collection from scratch
 .bin/collector setup
 .bin/collector discover ebible eng_bsb
-.bin/collector discover ebible vie_vcb
+.bin/collector discover dbl vie_ovcb
 .bin/collector download eng_bsb
-.bin/collector download vie_vcb
+.bin/collector download vie_ovcb
 .bin/collector process
 .bin/collector notes-process
 .bin/collector data-crossref
