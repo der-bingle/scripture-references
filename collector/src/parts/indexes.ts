@@ -14,13 +14,12 @@ import {
  * @param directory             The path to generate an index content for
  * @param exclude_breadcrumbs   An array of folders in the directory that should not be included
  *                              in the breadcrumbs
+ * @param whitelist             Only include given names
  *
  * @returns The html content
  */
-export function generate_index_content(
-        directory:string,
-        exclude_breadcrumbs: string[] = [],
-): string {
+export function generate_index_content(directory:string, exclude_breadcrumbs:string[]=[],
+        whitelist?:string[]):string {
 
     // Create the breadcrumbs
     // Filter removes any empty values if the path.sep is at the end
@@ -53,7 +52,13 @@ export function generate_index_content(
 
     // Collect the files and folders from the given path
     const sorter = (a: DirectoryEntry, b: DirectoryEntry) => a.name.localeCompare(b.name)
-    const contents = get_dir_entries(directory)
+    let contents = get_dir_entries(directory)
+
+    // Apply whitelist if given
+    if (whitelist){
+        contents = contents.filter(item => whitelist.includes(item.name))
+    }
+
     // lodash partition seperates the array based on predicate
     // @link https://lodash.com/docs/4.17.15#partition
     const results = partition(contents, (content: DirectoryEntry) => content.isDirectory)

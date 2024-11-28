@@ -167,6 +167,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             literalness: null,
             tags: [],
             reviewed: false,
+            published: false,
         }
 
         // Save meta file

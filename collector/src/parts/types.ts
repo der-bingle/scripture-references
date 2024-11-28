@@ -32,14 +32,15 @@ export interface CommonSourceMeta {
     language:string
     direction:'ltr'|'rtl'
     copyright:MetaCopyright
+    tags:TranslationTag[]
+    reviewed:boolean
+    published:boolean
 }
 
 
 export interface TranslationSourceMeta extends CommonSourceMeta {
     literalness:TranslationLiteralness
-    tags:TranslationTag[]
     source:TranslationSource
-    reviewed:boolean
 }
 
 

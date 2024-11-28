@@ -43,8 +43,14 @@ await yargs(process.argv.slice(2))
     .command('serve [port]', "Serve the collection for testing", {},
         argv => serve(argv['port'] ? parseInt(argv['port'] as string) : undefined))
 
-    .command('publish [id]', "Publish translations to server", {},
-        argv => publish(argv['id'] as string))
+    .command('publish', "Publish all changes to server", {},
+        argv => publish())
+    .command('publish-bible [id]', "Publish translations to server", {},
+        argv => publish('bible', argv['id'] as string))
+    .command('publish-notes [id]', "Publish study notes to server", {},
+        argv => publish('notes', argv['id'] as string))
+    .command('publish-data [id]', "Publish other data to server", {},
+        argv => publish('data', argv['id'] as string))
 
     .command('report', "Report the status of included translations", {},
         argv => report_items())

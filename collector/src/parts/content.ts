@@ -160,7 +160,8 @@ async function _update_dist_single(id:string, force:boolean){
     }
 
     // Get translation's meta data
-    const meta = read_json<TranslationSourceMeta>(join(src_dir, 'meta.json'))
+    const meta_file_path = join(src_dir, 'meta.json')
+    const meta = read_json<TranslationSourceMeta>(meta_file_path)
 
     // Confirm have downloaded source already
     const format_dir = join(src_dir, meta.source.format)
@@ -243,4 +244,8 @@ async function _update_dist_single(id:string, force:boolean){
             generate_chapter_headings(json_txt, trans_extra.sections[book]!)
     }
     write_json(join(dist_dir, 'extra.json'), trans_extra)
+
+    // Mark as unpublished since have just made changes to distributables
+    meta.published = false
+    write_json(meta_file_path, meta, true)
 }
