@@ -3,9 +3,7 @@ import path from 'path'
 
 import {partition} from 'lodash-es'
 
-import {
-    DirectoryEntry, FirstFullParent, find_first_full_parent_dir, get_dir_entries,
-} from './utils.js'
+import {DirectoryEntry, get_dir_entries} from './utils.js'
 
 
 /**
@@ -164,61 +162,20 @@ export function generate_index_content(directory:string, exclude_breadcrumbs:str
 }
 
 
-interface UpdateIndexesReturn {
-    update:{path:string, html:string}[]
-    remove:string[]
-}
+// Generate index files for the dirs of given files
+export function generate_indexes_for_files(files:string[]){
 
-/**
- * Using the provided values, we tell S3 which index files need to be updated.
- *
- * @param modified The files that have been modified
- * @param removed The files that have been removed
- *
- * @returns The data needed to update S3
- */
-export function update_indexes(modified:string[], removed:string[]): UpdateIndexesReturn {
+    // Get dirs for all files
+    let dirs = files.map(file => path.dirname(file) + '/')
 
-    // This map stores the removed directory (key), and the first parent that has content (value).
-    // This is used to illiminate the need to readdirSync multiple times
-    const first_full_parents = new Map<string, string>()
+    // Make dirs unique as will have a lot of duplicates
+    dirs = [...new Set(dirs)]
 
-    // Build the removals
-    const removals: string[] = removed.flatMap((entry: string) => {
-        // The entry was removed so check it's parent
-        const results: FirstFullParent = find_first_full_parent_dir(path.dirname(entry))
-        first_full_parents.set(entry, results.directory)
-        // We need to make the path S3 friendly
-        return results.emptyDirectories
-            .map((dir: string) => `${dir.replaceAll(path.sep, '/')}/`)
+    // Generate an index for each
+    return dirs.map(dir => {
+        return {
+            path: dir.slice('dist/'.length).replaceAll(path.sep, '/') + 'index.html',
+            html: generate_index_content(dir, ['dist']),
+        }
     })
-    const modified_handle_paths: string[] = modified.map((file: string) => `${path.dirname(file)}/`)
-
-    // All removed paths should include the parent and grandparent path
-    const removed_handle_paths: string[] = removed
-        .flatMap((file: string) => {
-            const full_parent = first_full_parents.get(file)
-            if (!full_parent) {
-                return []
-            }
-            return [`${full_parent}/`, `${path.dirname(full_parent)}/`]
-        })
-
-    // Create an array by merging the arrays, and keep only unique paths
-    const handle_paths = [...new Set([...modified_handle_paths, ...removed_handle_paths])]
-
-    // Build the updates
-    const updates: {path:string, html:string}[] = handle_paths
-        .map((directory: string) => {
-            // Path should use the standard /
-            return {
-                path: directory.replaceAll(path.sep, '/'),
-                html: generate_index_content(directory, ['dist']),
-            }
-        })
-
-    return {
-        update: updates,
-        remove: removals,
-    }
 }
