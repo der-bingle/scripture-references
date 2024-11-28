@@ -136,9 +136,11 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 attribution: row['Copyright'],
                 attribution_url: ebible_url,
             },
+            ids: {
+                ebible: ebible_id,
+            },
             source: {
                 service: 'ebible',
-                id: ebible_id,
                 format: 'usfm',
                 url: `https://ebible.org/Scriptures/${ebible_id}_usfm.zip`,
                 updated: row['UpdateDate'],

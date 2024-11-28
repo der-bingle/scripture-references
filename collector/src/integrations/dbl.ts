@@ -159,9 +159,11 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 attribution_url: org.contact_url ||
                     `https://app.thedigitalbiblelibrary.org/entry?id=${item.id}`,
             },
+            ids: {
+                dbl: item.id,
+            },
             source: {
                 service: 'dbl',
-                id: item.id,
                 format: 'usx',
                 url: 'https://app.thedigitalbiblelibrary.org/entry/download_archive'
                     + `?id=${item.id}&type=release`,

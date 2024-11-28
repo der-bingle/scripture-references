@@ -169,9 +169,11 @@ async function _discover(subject:string, discover_specific_id?:string)
                     attribution_url: `https://git.door43.org/Door43-Catalog/${door43_id}`,
                     licenses: license ? [{license, url: license_url}] : [],
                 },
+                ids: {
+                    door43: door43_id,
+                },
                 source: {
                     service: 'door43',
-                    id: door43_id,
                     format: 'usfm',
                     url: format['url'],
                     updated: format['modified'].split('T')[0]!,

@@ -21,7 +21,6 @@ export interface TranslationSource {
     format:'usfm'|'usx'
     updated:string  // yyyy-mm-dd
     revision:number  // 0 if not used
-    id:string
     url:string|null
 }
 
@@ -37,6 +36,7 @@ export interface CommonSourceMeta {
 
 
 export interface TranslationSourceMeta extends CommonSourceMeta {
+    ids:Partial<Record<'ebible'|'dbl'|'door43', string>>
     literalness:TranslationLiteralness
     source:TranslationSource
 }
