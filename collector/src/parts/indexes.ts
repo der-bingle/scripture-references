@@ -6,26 +6,14 @@ import {partition} from 'lodash-es'
 import {DirectoryEntry, get_dir_entries} from './utils.js'
 
 
-/**
- * Generate the HTML content using the specific directory path content
- *
- * @param directory             The path to generate an index content for
- * @param exclude_breadcrumbs   An array of folders in the directory that should not be included
- *                              in the breadcrumbs
- * @param whitelist             Only include given names
- *
- * @returns The html content
- */
-export function generate_index_content(directory:string, exclude_breadcrumbs:string[]=[],
-        whitelist?:string[]):string {
+// Generate a HTML index file for given dir
+export function generate_index_content(directory:string):string {
 
     // Create the breadcrumbs
     // Filter removes any empty values if the path.sep is at the end
-    // Also remove any paths passed in exclude_breadcrumbs
-    const pieces = directory
+    const pieces = directory.slice('dist/'.length)
         .split(path.sep)
-        .filter((n: string) => n)
-        .filter((n: string) => !exclude_breadcrumbs.includes(n))
+        .filter(n => n)
         .reverse()
 
     let crumb_path = ''
@@ -50,12 +38,7 @@ export function generate_index_content(directory:string, exclude_breadcrumbs:str
 
     // Collect the files and folders from the given path
     const sorter = (a: DirectoryEntry, b: DirectoryEntry) => a.name.localeCompare(b.name)
-    let contents = get_dir_entries(directory)
-
-    // Apply whitelist if given
-    if (whitelist){
-        contents = contents.filter(item => whitelist.includes(item.name))
-    }
+    const contents = get_dir_entries(directory)
 
     // lodash partition seperates the array based on predicate
     // @link https://lodash.com/docs/4.17.15#partition
@@ -175,7 +158,7 @@ export function generate_indexes_for_files(files:string[]){
     return dirs.map(dir => {
         return {
             path: dir.slice('dist/'.length).replaceAll(path.sep, '/') + 'index.html',
-            html: generate_index_content(dir, ['dist']),
+            html: generate_index_content(dir),
         }
     })
 }

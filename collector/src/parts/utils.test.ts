@@ -4,10 +4,7 @@ import {closeSync, existsSync, mkdirSync, openSync, rmSync, statSync} from 'fs'
 
 import {afterEach, beforeEach, describe, it} from 'vitest'
 
-import {
-    read_dir, get_dir_entries, DirectoryEntry, read_files_in_dir, FirstFullParent,
-    find_first_full_parent_dir,
-} from './utils'
+import {read_dir, get_dir_entries, DirectoryEntry, read_files_in_dir} from './utils'
 
 
 describe('read_dir', () => {
@@ -55,67 +52,4 @@ describe('read_files_in_dir', () => {
         expect(files[0]).toEqual('manifest.json')
     })
 
-})
-describe('find_first_full_parent_dir', () => {
-    const test_dir = path.join('dist', 'bibles', 'first_full_parent')
-
-    beforeEach(() => {
-        if (!existsSync(test_dir)) {
-            mkdirSync(test_dir)
-        }
-    })
-
-    afterEach(() => {
-        if (existsSync(test_dir)) {
-            rmSync(test_dir, { recursive: true, force: true })
-        }
-    })
-
-    it('should return the correct full parent', ({expect}) => {
-        const results: FirstFullParent = find_first_full_parent_dir(test_dir)
-        expect(results).not.toBeNull()
-        expect(results.directory).toEqual(path.join('dist', 'bibles'))
-        expect(results.emptyDirectories).toHaveLength(1)
-        expect(results.emptyDirectories[0]).toEqual(test_dir)
-    })
-
-    it('should handle deep empty directories', ({expect}) => {
-        const first_level = path.join(test_dir, 'first_level')
-        const second_level = path.join(first_level, 'second_level')
-        mkdirSync(first_level)
-        mkdirSync(second_level)
-        const results: FirstFullParent = find_first_full_parent_dir(second_level)
-        expect(results).not.toBeNull()
-        expect(results.directory).toEqual(path.join('dist', 'bibles'))
-        expect(results.emptyDirectories).toHaveLength(3)
-        expect(results.emptyDirectories.sort())
-            .toEqual([test_dir, first_level, second_level].sort())
-    })
-
-    it('should handle where there is no empty directories', ({expect}) => {
-        closeSync(openSync(path.join(test_dir, 'temp.html'), 'w'))
-        const results: FirstFullParent = find_first_full_parent_dir(test_dir)
-        expect(results).not.toBeNull()
-        expect(results.directory).toEqual(test_dir)
-        expect(results.emptyDirectories).toHaveLength(0)
-    })
-
-    it('should handle when all parents are empty', ({expect}) => {
-        const empty_parent = 'empty_parent'
-        if (!existsSync(empty_parent)) {
-            mkdirSync(empty_parent)
-        }
-        const empty_sibling = path.join(empty_parent, 'empty_sibling')
-        if (!existsSync(empty_sibling)) {
-            mkdirSync(empty_sibling)
-        }
-        const results: FirstFullParent = find_first_full_parent_dir(empty_sibling)
-        if (existsSync(empty_parent)) {
-            rmSync(empty_parent, { recursive: true, force: true })
-        }
-        expect(results).not.toBeNull()
-        expect(results.directory).toEqual('')
-        expect(results.emptyDirectories).toHaveLength(2)
-        expect(results.emptyDirectories.sort()).toEqual([empty_parent, empty_sibling].sort())
-    })
 })
