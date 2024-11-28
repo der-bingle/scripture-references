@@ -25,7 +25,8 @@ export interface BibleClientConfig {
         which have incompatible licenses. You can alternatively do this per translation when
         fetching actual passages.
 
-        All options default to `false` which results in having access to the most translations.
+        All options default to `false` which results in having access to the most translations,
+        except for `limitless` which defaults to `true` to ensure full use of bibles is allowed.
 
          * `commercial`: `true` if you will use translations in a commercial manner
          * `attributionless`: `true` if you will be using Bible translations without including
@@ -64,8 +65,8 @@ export class BibleClient {
     _usage:UsageConfig = {
         commercial: false,
         attributionless: false,
-        limitless: false,
         derivatives: false,
+        limitless: true,  // Defaults to true since most apps will display entire bibles
     }
     // @internal
     _remember_fetches:boolean

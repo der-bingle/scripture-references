@@ -42,17 +42,9 @@ export interface MetaRestrictions {
 
     */
 
-    // Limit on how many verses can be quoted in a single "work"
-    // NOTE Inclusive (1000 means 1000 is ok but 1001 is a violation)
-    limit_verses:number|null
-
-    // Limit on how much of a single Bible "book" can be quoted
-    // NOTE Inclusive (50 means 50% of book is ok but 51% is not)
-    limit_book_ratio:number|null
-
-    // Limit on how much of the total "work" can be made up of quotations
-    // NOTE Exclusive (50 means 50% is a violation but 49% isn't)
-    limit_content_ratio:number|null
+    // There are limits on how much may be quoted for digital use
+    // NOTE Print restrictions should be manually reviewed by developers and don't apply here
+    forbid_limitless:boolean
 
     // Commercial use is forbidden
     forbid_commercial:boolean

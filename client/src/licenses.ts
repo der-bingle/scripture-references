@@ -12,8 +12,7 @@ export function filter_licenses(licenses:RuntimeLicense[], usage:UsageConfig):Ru
             && (!usage.attributionless || !r.forbid_attributionless)
             && (!usage.derivatives || !r.forbid_derivatives || usage.derivatives === 'same-license'
                 && r.forbid_derivatives === 'same-license')
-            && (!usage.limitless
-                || (!r.limit_verses && !r.limit_book_ratio && !r.limit_content_ratio))
+            && (!usage.limitless || !r.forbid_limitless)
         )
     })
 }
