@@ -55,14 +55,27 @@ export interface GetTranslationsItem {
     language:string
     direction:'ltr'|'rtl',
     year:number
-    name_local:string
-    name_english:string
-    name_abbrev:string
     attribution:string
     attribution_url:string
     licenses:RuntimeLicense[]
     tags:TranslationTag[]
     liternalness:TranslationLiteralness
+    // Local name of translation (falls back to English)
+    name:string
+    // Local abbreviation of translation (falls back to English)
+    name_abbrev:string
+    // English name of translation (may not exist)
+    name_english:string
+    // English abbreviation of translation (may not exist)
+    name_english_abbrev:string
+    // Local name of translation (may not exist)
+    name_local:string
+    // Local abbreviation of translation (may not exist)
+    name_local_abbrev:string
+    // Local name of translation with the English name in brackets when it differs
+    name_bilingual:string
+    // Local abbreviation of translation with the English abbreviation in brackets when it differs
+    name_bilingual_abbrev:string
 }
 
 export interface GetBooksOptions {
@@ -93,6 +106,8 @@ export interface GetBooksItem {
     name_local_long:string
     // Local name of book with the English name in brackets when it differs
     name_bilingual:string
+    // Local abbreviation of book with the English abbreviation in brackets when it differs
+    name_bilingual_abbrev:string
 }
 
 export interface GetCompletionReturn {
@@ -180,7 +195,7 @@ export class BibleCollection {
                 if (!licenses.length){
                     continue  // No compatible licenses so exclude translation
                 }
-                languages.add(trans_data.language)
+                languages.add(trans.slice(0, 3))
 
                 // Work out exactly what books are included (interpret `true` for whole testament)
                 const ot = trans_data.books_ot === true
@@ -358,14 +373,34 @@ export class BibleCollection {
         // NOTE Filters out translations not compatible with usage config
         // WARN Careful to unpack all objects so originals can't be modified
         let list = Object.entries(this._manifest.translations).map(([id, trans]) => {
+
+            // Work out bilingual names
+            let bilingual = trans.name.local || trans.name.english
+            if (trans.name.local && trans.name.english &&
+                    trans.name.local.toLowerCase() !== trans.name.english.toLowerCase()){
+                bilingual = `${trans.name.local} (${trans.name.english})`
+            }
+            let bilingual_abbrev = trans.name.local_abbrev || trans.name.english_abbrev
+            if (trans.name.local_abbrev && trans.name.english_abbrev &&
+                    trans.name.local_abbrev !== trans.name.english_abbrev){
+                bilingual_abbrev = `${trans.name.local_abbrev} (${trans.name.english_abbrev})`
+            }
+
             return {
                 id,
                 language: id.slice(0, 3),
                 direction: trans.direction,
                 year: trans.year,
-                name_local: trans.name.local,
+
+                name: trans.name.local || trans.name.english,
+                name_abbrev: trans.name.local_abbrev || trans.name.english_abbrev,
                 name_english: trans.name.english,
-                name_abbrev: trans.name.abbrev,
+                name_english_abbrev: trans.name.english_abbrev,
+                name_local: trans.name.local,
+                name_local_abbrev: trans.name.local_abbrev,
+                name_bilingual: bilingual,
+                name_bilingual_abbrev: bilingual_abbrev,
+
                 attribution: trans.copyright.attribution,
                 attribution_url: trans.copyright.attribution_url,
                 licenses: deep_copy(
@@ -432,7 +467,7 @@ export class BibleCollection {
         for (const [id, data] of Object.entries(this._manifest.translations)){
 
             // Obviously must be desired language
-            if (data.language === language){
+            if (id.slice(0, 3) === language){
 
                 // If recommended, don't bother checking any others
                 if (data.tags.includes('recommended')){
@@ -489,21 +524,30 @@ export class BibleCollection {
             .filter(id => whole || available.includes(id))
             .map(id => {
                 const ot = books_ordered.indexOf(id) < 39
+
+                // Work out bilingual names
                 const local_name = local[id]?.normal
                 let bilingual = book_names_english[id]!
                 if (local_name && bilingual.toLowerCase() !== local_name.toLowerCase()){
                     bilingual = `${local_name} (${bilingual})`
                 }
+                const local_abbrev = local[id]?.abbrev
+                let bilingual_abbrev = book_abbrev_english[id]!
+                if (local_abbrev && bilingual_abbrev.toLowerCase() !== local_abbrev.toLowerCase()){
+                    bilingual_abbrev = `${local_abbrev} (${bilingual_abbrev})`
+                }
+
                 return {
                     id,
                     name: local_name || book_names_english[id]!,
-                    name_abbrev: local[id]?.abbrev || book_abbrev_english[id]!,
+                    name_abbrev: local_abbrev || book_abbrev_english[id]!,
                     name_english: book_names_english[id]!,
                     name_english_abbrev: book_abbrev_english[id]!,
                     name_local: local_name ?? '',
-                    name_local_abbrev: local[id]?.abbrev ?? '',
+                    name_local_abbrev: local_abbrev ?? '',
                     name_local_long: local[id]?.long ?? '',
                     name_bilingual: bilingual,
+                    name_bilingual_abbrev: bilingual_abbrev,
                     ot,
                     nt: !ot,
                     available: !!translation && available.includes(id),
