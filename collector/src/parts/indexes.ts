@@ -143,22 +143,3 @@ export function generate_index_content(directory:string):string {
         </body>
         </html>`
 }
-
-
-// Generate index files for the dirs of given files
-export function generate_indexes_for_files(files:string[]){
-
-    // Get dirs for all files
-    let dirs = files.map(file => path.dirname(file) + '/')
-
-    // Make dirs unique as will have a lot of duplicates
-    dirs = [...new Set(dirs)]
-
-    // Generate an index for each
-    return dirs.map(dir => {
-        return {
-            path: dir.slice('dist/'.length).replaceAll(path.sep, '/') + 'index.html',
-            html: generate_index_content(dir),
-        }
-    })
-}

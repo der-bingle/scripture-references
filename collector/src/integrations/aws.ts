@@ -1,5 +1,6 @@
 
-import {readFileSync} from 'fs'
+import {sep} from 'node:path'
+import {readFileSync} from 'node:fs'
 
 import {parse as parse_yaml} from 'yaml'
 import {S3} from '@aws-sdk/client-s3'
@@ -29,7 +30,7 @@ export class PublisherAWS {
         // Upload a file to the bucket
         await this._s3.putObject({
             Bucket: this._bucket,
-            Key: key,
+            Key: key.replaceAll(sep, '/'),
             Body: body,
             ContentType: type,
         })

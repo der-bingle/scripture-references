@@ -131,20 +131,23 @@ export function read_files_in_dir(directory:string): string[] {
 }
 
 
-// Get paths for all the files in a dir and any child dirs (recursive)
-export function read_files_deep(directory:string):string[]{
+// Get paths for all the files and subdirs in a containing dir (recursive)
+export function read_dir_deep(directory:string):{dirs: string[], files: string[]}{
+    const dirs:string[] = [directory]
     const files:string[] = []
     for (const entry of readdirSync(directory, {withFileTypes: true})){
         const entry_path = join(directory, entry.name)
         if (entry.isDirectory()){
-            files.push(...read_files_deep(entry_path))
+            const subdir_results = read_dir_deep(entry_path)
+            dirs.push(...subdir_results.dirs)
+            files.push(...subdir_results.files)
             continue
         } else if (!entry.isFile() || IGNORE_FILES.includes(entry.name)){
             continue
         }
         files.push(entry_path)
     }
-    return files
+    return {dirs, files}
 }
 
 
