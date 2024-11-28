@@ -4,7 +4,7 @@ import {existsSync, mkdirSync} from 'fs'
 
 import {parse as csv_parse} from 'csv-parse/sync'
 
-import {request, concurrent, write_json} from '../parts/utils.js'
+import {request, concurrent, write_json, read_json} from '../parts/utils.js'
 import {LICENSES, detect_year} from '../parts/license.js'
 import {get_language_data} from '../parts/languages.js'
 import type {TranslationSourceMeta} from '../parts/types'
@@ -28,7 +28,7 @@ interface EbibleRow {
 const IGNORE = ['engnet']
 
 
-export async function discover(discover_specific_id?:string):Promise<void>{
+export async function discover(existing:string[], discover_specific_id?:string):Promise<void>{
     // Discover translations that are available
 
     // Parse eBible CSV to get translations list and useful metadata
@@ -65,6 +65,12 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             return
         }
 
+        // Skip if already exists
+        if (existing.includes(ebible_id)){
+            exists.push(ebible_id)
+            return
+        }
+
         // Ignore if invalid language or in ignored list
         if (!lang_code){
             console.error(`INVALID ${log_ids} (unknown language)`)
@@ -75,10 +81,13 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             return
         }
 
-        // Skip if already discovered
+        // If already added via another service, add ebible id to it
         const trans_dir = join('sources', 'bibles', trans_id)
         const meta_file = join(trans_dir, 'meta.json')
         if (existsSync(meta_file)){
+            const existing_meta = read_json<TranslationSourceMeta>(meta_file)
+            existing_meta.ids.ebible = ebible_id
+            write_json(meta_file, existing_meta, true)
             exists.push(ebible_id)
             return
         }

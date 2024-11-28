@@ -3,8 +3,9 @@ import {join} from 'path'
 import {existsSync, mkdirSync} from 'fs'
 
 import {LICENSES} from '../parts/license.js'
-import {request, write_json} from '../parts/utils.js'
+import {read_json, request, write_json} from '../parts/utils.js'
 import {get_language_data} from '../parts/languages.js'
+
 import type {TranslationSourceMeta} from '../parts/types'
 
 
@@ -73,11 +74,11 @@ function select_format(formats:Door43Format[]):Door43Format|null{
 }
 
 
-export async function discover(discover_specific_id?:string):Promise<void>{
+export async function discover(existing:string[], discover_specific_id?:string):Promise<void>{
     // Discover new translations
-    const stats_bible = await _discover('Bible', discover_specific_id)
-    const stats_aligned = await _discover('Aligned_Bible', discover_specific_id)
-    const stats_hebrew = await _discover('Hebrew_Old_Testament', discover_specific_id)
+    const stats_bible = await _discover('Bible', existing, discover_specific_id)
+    const stats_aligned = await _discover('Aligned_Bible', existing, discover_specific_id)
+    const stats_hebrew = await _discover('Hebrew_Old_Testament', existing, discover_specific_id)
 
     // Report stats
     console.info(`New: ${stats_bible.added + stats_aligned.added + stats_hebrew.added}`)
@@ -85,7 +86,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
 }
 
 
-async function _discover(subject:string, discover_specific_id?:string)
+async function _discover(subject:string, existing:string[], discover_specific_id?:string)
         :Promise<{added:number, exists:number}>{
     // Discover new translations for a "subject"
     // Door43 has two subjects for bibles and others for translation notes, stories, etc.
@@ -127,11 +128,23 @@ async function _discover(subject:string, discover_specific_id?:string)
                 continue
             }
 
-            // Ignore if already exists or an issue
-            if (existsSync(meta_file)){
+            // Skip if exists already
+            if (existing.includes(door43_id)){
                 exists.push(door43_id)
                 continue
-            } else if (IGNORE.includes(door43_id)){
+            }
+
+            // If already added via another service, add door43 id to it
+            if (existsSync(meta_file)){
+                const existing_meta = read_json<TranslationSourceMeta>(meta_file)
+                existing_meta.ids.door43 = door43_id
+                write_json(meta_file, existing_meta, true)
+                exists.push(door43_id)
+                continue
+            }
+
+            // Ignore for some cases
+            if (IGNORE.includes(door43_id)){
                 console.warn(`IGNORED ${log_ids} (in ignore list)`)
                 continue
             } else if (resource['rights'].toLowerCase().includes('free translate')){

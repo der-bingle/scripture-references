@@ -2,7 +2,7 @@
 import {join} from 'node:path'
 import {existsSync, mkdirSync} from 'node:fs'
 
-import {request, concurrent, write_json} from '../parts/utils.js'
+import {request, concurrent, write_json, read_json} from '../parts/utils.js'
 import {LICENSES} from '../parts/license.js'
 import {get_language_data} from '../parts/languages.js'
 
@@ -49,7 +49,7 @@ interface OrgResp {
 }
 
 
-export async function discover(discover_specific_id?:string):Promise<void>{
+export async function discover(existing:string[], discover_specific_id?:string):Promise<void>{
     // Discover translations that are available
 
     // Get list of translations
@@ -96,17 +96,26 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             return
         }
 
+        // Skip if already exists
+        if (existing.includes(item.id)){
+            num_existing += 1
+            return
+        }
+
         // Ignore if invalid language
         if (!lang_code){
-            console.error(`INVALID ${log_ids} (unknown language)`)
+            console.error(`INVALID ${item.languageCode} (unknown language)`)
             num_ignored += 1
             return
         }
 
-        // Skip if already discovered
+        // If already added via another service, add dbl id to it
         const trans_dir = join('sources', 'bibles', trans_id)
         const meta_file = join(trans_dir, 'meta.json')
         if (existsSync(meta_file)){
+            const existing_meta = read_json<TranslationSourceMeta>(meta_file)
+            existing_meta.ids.dbl = item.id
+            write_json(meta_file, existing_meta, true)
             num_existing += 1
             return
         }

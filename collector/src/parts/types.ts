@@ -16,8 +16,11 @@ export interface CollectionConfig {
 }
 
 
+export type ServiceId = 'ebible'|'dbl'|'door43'
+
+
 export interface TranslationSource {
-    service:'ebible'|'dbl'|'door43'|'manual'
+    service:ServiceId|'manual'
     format:'usfm'|'usx'
     updated:string  // yyyy-mm-dd
     revision:number  // 0 if not used
@@ -36,7 +39,7 @@ export interface CommonSourceMeta {
 
 
 export interface TranslationSourceMeta extends CommonSourceMeta {
-    ids:Partial<Record<'ebible'|'dbl'|'door43', string>>
+    ids:Partial<Record<ServiceId, string>>
     literalness:TranslationLiteralness
     source:TranslationSource
 }
