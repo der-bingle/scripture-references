@@ -149,7 +149,13 @@ export function usx_to_json_txt(xml:string, parser=DOMParser):BibleJsonTxt{
 
 
 // Process the contents of a node (nested or not) within a <para> element
-function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>){
+function process_contents(state:ParserState, nodes_raw:NodeListOf<ChildNode>){
+
+    // Drop any preceeding whitespace at the beginning of a paragraph as messes up later logic
+    const nodes = Array.from(nodes_raw)
+    if (nodes[0]?.nodeType === 3 && !nodes[0].textContent?.trim()){
+        nodes.shift()
+    }
 
     for (let index = 0; index < nodes.length; index++){
         const node = nodes[index]!

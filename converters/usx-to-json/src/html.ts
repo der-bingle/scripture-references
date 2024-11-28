@@ -149,7 +149,7 @@ export function usx_to_json_html(xml:string, alignment=true, parser=DOMParser): 
 }
 
 
-function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
+function process_contents(state:ParserState, nodes_raw:NodeListOf<ChildNode>,
         escape_text:(t:string|undefined|null)=>string, allow_nonbib=false){
     // Process the contents of a node (nested or not) within a <para> element
     /* WARN It's important to call this between modifying state for opening/closing tags
@@ -159,6 +159,13 @@ function process_contents(state:ParserState, nodes:NodeListOf<ChildNode>,
             add_html(state, '</sup>')
 
     */
+
+    // Drop any preceeding whitespace at the beginning of a paragraph as messes up later logic
+    const nodes = Array.from(nodes_raw)
+    if (nodes[0]?.nodeType === 3 && !nodes[0].textContent?.trim()){
+        nodes.shift()
+    }
+
     for (let index = 0; index < nodes.length; index++){
         const node = nodes[index]!
 
