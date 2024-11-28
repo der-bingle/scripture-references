@@ -12,6 +12,9 @@ import type {TranslationSourceMeta} from '../parts/types'
 // Translations that can be sourced from a better location (or other issue)
 const IGNORE:string[] = []
 
+// Some language codes are outdated
+const OUTDATED_LANG:Record<string, string> = {cug: 'cnq'}
+
 
 interface ListItem {
     // NOTE Only relevant items included
@@ -80,7 +83,8 @@ export async function discover(existing:string[], discover_specific_id?:string):
     await concurrent(items.map(item => async () => {
 
         // Prepare english abbreviation first as will use for id
-        const lang_code = language_data.normalise(item.languageCode)
+        const lang_code = language_data.normalise(
+            OUTDATED_LANG[item.languageCode] ?? item.languageCode)
         let eng_abbrev = item.nameAbbreviation.toLowerCase().replace(/[^a-z]/gi, '')
         if (lang_code && eng_abbrev.startsWith(lang_code)){
             // Some translations start abbreviations with the language code which isn't helpful
