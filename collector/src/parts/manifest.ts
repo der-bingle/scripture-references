@@ -42,7 +42,7 @@ export async function update_manifest(){
 
         // Skip if meta data missing
         if (_missing_meta(meta)){
-            console.error(`IGNORING ${trans} (missing year, license, name, or review)`)
+            console.error(`IGNORING ${trans} (missing year, license, name, etc)`)
             continue
         }
 
