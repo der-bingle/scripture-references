@@ -8,6 +8,7 @@ import {JSDOM} from 'jsdom'
 
 import * as door43 from '../integrations/door43.js'
 import * as ebible from '../integrations/ebible.js'
+import * as dbl from '../integrations/dbl.js'
 import {pre_usx_to_json} from '../integrations/patches.js'
 import {generic_update_sources} from '../integrations/generic.js'
 import {update_manifest} from './manifest.js'
@@ -26,6 +27,7 @@ export async function update_source(trans_id?:string){
     const manual_sourced:Record<string, TranslationSourceMeta> = {}
     const door43_sourced:Record<string, TranslationSourceMeta> = {}
     const ebible_sourced:Record<string, TranslationSourceMeta> = {}
+    const dbl_sourced:Record<string, TranslationSourceMeta> = {}
 
     for (const id of read_dir(join('sources', 'bibles'))){
 
@@ -41,11 +43,13 @@ export async function update_source(trans_id?:string){
             door43_sourced[id] = meta
         } else if (meta.source.service === 'ebible'){
             ebible_sourced[id] = meta
+        } else if (meta.source.service === 'dbl'){
+            dbl_sourced[id] = meta
         }
     }
 
     // Fail if nothing matched
-    if ([manual_sourced, door43_sourced, ebible_sourced]
+    if ([manual_sourced, door43_sourced, ebible_sourced, dbl_sourced]
         .every(source => !Object.keys(source).length)){
         console.error("No translations identified")
     }
@@ -55,6 +59,7 @@ export async function update_source(trans_id?:string){
         generic_update_sources(manual_sourced),
         door43.update_sources(door43_sourced),
         ebible.update_sources(ebible_sourced),
+        dbl.update_sources(dbl_sourced),
     ])
 }
 
@@ -69,9 +74,9 @@ async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx
         return
     }
 
-    // If converting USX? -> USX3 then sniff the version to know if can copy or need to convert
+    // If converting from USX need to know whether version is 3+ or not
     let source_is_usx3 = false
-    if (from === to && to === 'usx'){
+    if (from === 'usx'){
         const first_file = read_dir(src_dir)[0]
         if (first_file){
             const contents = fs.readFileSync(join(src_dir, first_file), {encoding: 'utf8'})
@@ -90,22 +95,23 @@ async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx
     }
 
     // Determine parts of cmd
-    const bmc_format = {
-        'usx': 'USX',
+    const from_format = {
+        'usx': source_is_usx3 ? 'USX3' : 'USX',
         'usfm': 'USFM',
     }[from]
+    const to_format = to === 'usfm' ? 'USFM' : 'USX3'
     const tool = ['usfm', 'usx'].includes(from) ? 'ParatextConverter' : ''
     const bmc = join(PKG_PATH, 'bmc', 'BibleMultiConverter.jar')
 
     // Execute command
 
     // Workaround for Java 16+ (See https://stackoverflow.com/questions/68117860/)
-    const args_fix = '--illegal-access=warn --add-opens java.base/java.lang=ALL-UNNAMED'
+    const args_fix = '--add-opens java.base/java.lang=ALL-UNNAMED'
 
     // NOTE '*' is specific to BMC and is replaced by the book's uppercase code
     // NOTE keeps space between verses (https://github.com/schierlm/BibleMultiConverter/issues/63)
     const cmd = `java ${args_fix} "-Dbiblemulticonverter.paratext.usx.verseseparatortext= " -jar ${bmc}`
-        + ` ${tool} ${bmc_format} "${src_dir}" USX3 "${dist_dir}" "*.usx"`
+        + ` ${tool} ${from_format} "${src_dir}" ${to_format} "${dist_dir}" "*.${to}"`
     // NOTE ignoring stdio as converter can output too many warnings and overflow Node's maxBuffer
     //      Should instead manually replay commands that fail to observe output
     //      Problem that prompted this was not inserting verse end markers for some (e.g. vie_ulb)
