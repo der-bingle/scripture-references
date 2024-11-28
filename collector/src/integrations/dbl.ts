@@ -18,8 +18,9 @@ interface ListItem {
     id:string  // A random chars id
     entrytype:string  // 'text' or other...
     revision:string  // Incrementing number that identifies if an update has been issued
-    dateUpdated:string // YYYY-MM-DD[T...]
-    dateCompleted:string  // YYYY-MM-DD[T...]
+    dateUpdated:string // YYYY-MM-DD[T...] Date of latest update
+    dateArchived:string  // YYYY-MM-DD[T...] First date added to DBL
+    dateCompleted:string  // YYYY-MM-DD[T...] This is often blank for partial translations
     rightsHolder:{link:string, name:string}[]
     languageCode:string  // 3 char
     nameCommon:string
@@ -138,6 +139,10 @@ export async function discover(discover_specific_id?:string):Promise<void>{
             // Some orgs will throw 403
         }
 
+        // Work out earliest year of publication
+        const date_archived = parseInt(item.dateArchived.slice(0, 4)) || 9999
+        const date_completed = parseInt(item.dateCompleted.slice(0, 4)) || 9999
+
         // Prepare the meta data
         const meta:TranslationSourceMeta = {
             name: {
@@ -146,7 +151,7 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 english: item.nameCommon,
                 english_abbrev: eng_abbrev.toUpperCase(),
             },
-            year: parseInt(item.dateCompleted.slice(0, 4)),
+            year: Math.min(date_archived, date_completed),
             direction: item.languageScriptDirection.toLowerCase() === 'rtl' ? 'rtl' : 'ltr',
             copyright: {
                 licenses: license ? [{license, url: license_url}] : [],
