@@ -128,7 +128,6 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 english: title_is_english ? row['title'] : '',
                 english_abbrev: trans_abbr.toUpperCase(),
             },
-            language: lang_code,
             year: detect_year(row['title'], row['shortTitle'], row['translationId'],
                 row['swordName'], row['Copyright'], row['description']),
             direction: row['textDirection'] === 'rtl' ? 'rtl' : 'ltr',

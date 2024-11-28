@@ -46,7 +46,6 @@ export function notes_process(){
             manifest.notes[id] = {
                 ...meta,
                 year: meta.year ?? new Date().getFullYear(),
-                language: id.split('_')[0]!,
                 books: Object.keys(notes),
             }
         }

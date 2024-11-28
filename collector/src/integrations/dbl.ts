@@ -146,7 +146,6 @@ export async function discover(discover_specific_id?:string):Promise<void>{
                 english: item.nameCommon,
                 english_abbrev: eng_abbrev.toUpperCase(),
             },
-            language: lang_code,
             year: parseInt(item.dateCompleted.slice(0, 4)),
             direction: item.languageScriptDirection.toLowerCase() === 'rtl' ? 'rtl' : 'ltr',
             copyright: {

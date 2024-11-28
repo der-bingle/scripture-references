@@ -360,7 +360,7 @@ export class BibleCollection {
         let list = Object.entries(this._manifest.translations).map(([id, trans]) => {
             return {
                 id,
-                language: trans.language,
+                language: id.slice(0, 3),
                 direction: trans.direction,
                 year: trans.year,
                 name_local: trans.name.local,

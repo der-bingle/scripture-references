@@ -63,7 +63,6 @@ export async function update_manifest(){
         // Put it all together
         // NOTE Not including meta data that client doesn't need (users can still check git repo)
         manifest.translations[trans] = {
-            language: meta.language,
             name: meta.name,
             year: meta.year as number,  // Verified to exist above
             direction: meta.direction,
@@ -76,7 +75,7 @@ export async function update_manifest(){
         }
 
         // Record the language as being included
-        included_languages.add(meta.language)
+        included_languages.add(trans.slice(0, 3))
     }
 
     // Populate language data

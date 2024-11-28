@@ -161,7 +161,6 @@ async function _discover(subject:string, discover_specific_id?:string)
                     english: resource['title'],
                     english_abbrev: resource['identifier'].toUpperCase(),
                 },
-                language: lang_code,
                 year,
                 direction: language['direction'] === 'rtl' ? 'rtl' : 'ltr',
                 copyright: {

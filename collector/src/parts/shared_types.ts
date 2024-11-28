@@ -77,7 +77,6 @@ export interface MetaCopyright {
 
 // Common to bibles/notes/etc
 export interface DistManifestItem {
-    language:string
     name:MetaTranslationName
     year:number
     direction:'ltr'|'rtl'

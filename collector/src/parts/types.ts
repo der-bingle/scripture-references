@@ -29,7 +29,6 @@ export interface TranslationSource {
 export interface CommonSourceMeta {
     name:MetaTranslationName
     year:number|null
-    language:string
     direction:'ltr'|'rtl'
     copyright:MetaCopyright
     tags:TranslationTag[]
