@@ -12,6 +12,7 @@ import {TranslationSourceMeta} from '../parts/types.js'
 export async function generic_update_sources(sources:Record<string, TranslationSourceMeta>){
     // Update the source files for given translation
     await concurrent(Object.entries(sources).map(([id, meta]) => async () => {
+        console.info(`Downloading source files for ${id}`)
         try {
             await _update_source(id, meta)
         } catch (error){

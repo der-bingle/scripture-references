@@ -139,6 +139,7 @@ export async function update_dist(trans_id?:string){
         }
 
         // Update assets for the translation
+        console.info(`Preparing distributable formats for ${id}`)
         try {
             await _update_dist_single(id, force)
         } catch (error){
