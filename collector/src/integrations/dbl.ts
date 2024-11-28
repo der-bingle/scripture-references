@@ -88,7 +88,8 @@ export async function discover(existing:string[], discover_specific_id?:string):
         }
 
         // Determine ids
-        const trans_id = `${lang_code ?? ''}_${eng_abbrev}`
+        // NOTE When can't get a good abbreviation, default to 'a' but expected to later change
+        const trans_id = `${lang_code ?? ''}_${eng_abbrev || 'a'}`
         const log_ids = `${trans_id}/${item.id}`
 
         // Skip if only want to discover a single translation
