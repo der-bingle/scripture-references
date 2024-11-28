@@ -180,7 +180,6 @@ async function _discover(subject:string, discover_specific_id?:string)
                 },
                 literalness: null,
                 tags: [],
-                reviewed: false,
                 published: false,
             }
 

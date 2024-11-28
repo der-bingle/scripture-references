@@ -33,7 +33,6 @@ export interface CommonSourceMeta {
     direction:'ltr'|'rtl'
     copyright:MetaCopyright
     tags:TranslationTag[]
-    reviewed:boolean
     published:boolean
 }
 

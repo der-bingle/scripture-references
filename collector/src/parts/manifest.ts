@@ -40,8 +40,7 @@ export async function update_manifest(){
         // Load the meta data for the translation
         const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', trans, 'meta.json'))
 
-        // Skip if meta data missing or not reviewed yet
-        // TODO Also skip if not reviewed (must be applied before beta released)
+        // Skip if meta data missing
         if (_missing_meta(meta)){
             console.error(`IGNORING ${trans} (missing year, license, name, or review)`)
             continue
