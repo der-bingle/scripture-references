@@ -73,20 +73,9 @@ async function _publish_bible(publisher:Publisher, translation?:string):Promise<
             continue  // Only publishing a single translation
         }
 
-        // See if translation's latest changes have been published yet
-        const meta_file_path = join('sources', 'bibles', id, 'meta.json')
-        const bible_meta = read_json<TranslationSourceMeta>(meta_file_path)
-        if (bible_meta.published && !translation){
-            continue  // Skip if published but force if only publishing this translation
-        }
-
         // Upload bible's files and dir indexes
         await publisher.upload_dir(join('dist', 'bibles', id))
         invalidations.push(`/bibles/${id}/*`)
-
-        // Mark as published in sources meta
-        bible_meta.published = true
-        write_json(meta_file_path, bible_meta, true)
     }
 
     // Upload manifest last so assets are ready before it is used

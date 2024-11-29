@@ -251,8 +251,4 @@ async function _update_dist_single(id:string, force:boolean){
             generate_chapter_headings(json_txt, trans_extra.sections[book]!)
     }
     write_json(join(dist_dir, 'extra.json'), trans_extra)
-
-    // Mark as unpublished since have just made changes to distributables
-    meta.published = false
-    write_json(meta_file_path, meta, true)
 }

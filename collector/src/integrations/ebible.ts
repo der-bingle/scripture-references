@@ -157,7 +157,6 @@ export async function discover(existing:string[], discover_specific_id?:string):
             },
             literalness: null,
             tags: [],
-            published: false,
         }
 
         // Save meta file

@@ -194,7 +194,6 @@ async function _discover(subject:string, existing:string[], discover_specific_id
                 },
                 literalness: null,
                 tags: [],
-                published: false,
             }
 
             // Save meta file
