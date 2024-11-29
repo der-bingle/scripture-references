@@ -149,6 +149,10 @@ export async function discover(existing:string[], discover_specific_id?:string):
         let org:OrgItem = {contact_url: '', full_name: '', local_name: ''}
         try {
             org = (await request<OrgResp>(item.rightsHolder[0]!.link, 'json')).orgs[0]!
+            // Some entries have a domain without a scheme
+            if (org.contact_url && !org.contact_url.startsWith('http')){
+                org.contact_url = 'https://' + org.contact_url
+            }
         } catch {
             // Some orgs will throw 403
         }
