@@ -24,7 +24,7 @@ interface ListItem {
     dateUpdated:string // YYYY-MM-DD[T...] Date of latest update
     dateArchived:string  // YYYY-MM-DD[T...] First date added to DBL
     dateCompleted:string  // YYYY-MM-DD[T...] This is often blank for partial translations
-    rightsHolder:{link:string, name:string}[]
+    rightsHolder:{link:string, name:string}[]  // Link for API request for org, not URL of org
     languageCode:string  // 3 char
     nameCommon:string
     nameCommonLocal:string
@@ -49,6 +49,18 @@ interface OrgItem {
 
 interface OrgResp {
     orgs: OrgItem[]
+}
+
+
+// Short abbreviations for orgs that have many translations
+const org_abbreviations:Record<string, string> = {
+    '545d2cb05f032bce5404dab8': 'wfw',
+    '545d2cb013cb53cafc2bad91': 'pio',
+    '545d2cb007eaee5131ab123a': 'ubs',
+    '545d2cb00fd5dca263562474': 'bib',
+    '545d2cb00be06579ca809b57': 'wbt',
+    '54650d065117ad695d428986': 'seed',
+    '019217aaaebdd5e7e372cf90': 'love',
 }
 
 
@@ -82,24 +94,28 @@ export async function discover(existing:string[], discover_specific_id?:string):
     // Do concurrently since each involves a network request
     await concurrent(items.map(item => async () => {
 
-        // Prepare english abbreviation first as will use for id
+        // Skip if only want to discover a single translation
+        if (discover_specific_id && item.id !== discover_specific_id){
+            return
+        }
+
+        // Get org abbrev if any
+        const org_id = item.rightsHolder[0]!.link.split('/').at(-1) ?? ''
+        const org_abbrev = org_abbreviations[org_id]
+
+        // Prepare english abbreviation first as may need to use for id
         const lang_code = language_data.normalise(
             OUTDATED_LANG[item.languageCode] ?? item.languageCode)
         let eng_abbrev = item.nameAbbreviation.toLowerCase().replace(/[^a-z]/gi, '')
-        if (lang_code && eng_abbrev.startsWith(lang_code)){
-            // Some translations start abbreviations with the language code which isn't helpful
-            eng_abbrev = eng_abbrev.slice(lang_code.length)
+        if (lang_code && eng_abbrev.includes(lang_code)){
+            // Some translations include the language code in the abbreviation which isn't helpful
+            eng_abbrev = eng_abbrev.replace(lang_code, '')
         }
 
         // Determine ids
-        // NOTE When can't get a good abbreviation, default to 'a' but expected to later change
-        const trans_id = `${lang_code ?? ''}_${eng_abbrev || 'a'}`
+        // NOTE Use org abbreviation when available (fallback on 'a' for later manual correction)
+        const trans_id = `${lang_code ?? ''}_${org_abbrev || eng_abbrev || 'a'}`
         const log_ids = `${trans_id}/${item.id}`
-
-        // Skip if only want to discover a single translation
-        if (discover_specific_id && trans_id !== discover_specific_id){
-            return
-        }
 
         // Skip if already exists
         if (existing.includes(item.id)){

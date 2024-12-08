@@ -124,7 +124,7 @@ async function _discover(subject:string, existing:string[], discover_specific_id
             const meta_file = join(trans_dir, 'meta.json')
 
             // Ignore if only want to discover a specific translation
-            if (discover_specific_id && trans_id !== discover_specific_id){
+            if (discover_specific_id && door43_id !== discover_specific_id){
                 continue
             }
 

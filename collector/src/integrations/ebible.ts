@@ -61,7 +61,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
         const log_ids = `${trans_id}/${ebible_id}`
 
         // Skip if only want to discover a single translation
-        if (discover_specific_id && trans_id !== discover_specific_id){
+        if (discover_specific_id && ebible_id !== discover_specific_id){
             return
         }
 
