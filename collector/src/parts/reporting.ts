@@ -8,7 +8,10 @@ import type {TranslationSourceMeta} from './types'
 
 export function _missing_meta(meta:TranslationSourceMeta){
     // True if important meta data missing (and so shouldn't publish)
-    return !meta.year || !meta.copyright.licenses.length || !(meta.name.local || meta.name.english)
+    return !meta.year
+        || !meta.copyright.licenses.length
+        || !(meta.name.local || meta.name.english)
+        || !(meta.name.local_abbrev || meta.name.english_abbrev)
 }
 
 
@@ -30,8 +33,16 @@ export function report_items(mode?:'missing'){
             license = 'custom'
         }
 
+        // Get URL for source's page for translation
+        let url = ''
+        if (meta.source.service === 'dbl'){
+            url = `https://app.thedigitalbiblelibrary.org/entry?id=${meta.ids.dbl!}`
+        } else if (meta.source.service === 'ebible'){
+            url = `https://ebible.org/Scriptures/details.php?id=${meta.ids.ebible!}`
+        }
+
         // Output fields in columns
-        const fields = [id, meta.year, meta.source.format, license, meta.copyright.attribution_url]
+        const fields = [id, meta.year, license, url]
         console.info(fields.map(field => `${field ?? 'null'}`.padEnd(16)).join(' '))
     }
 }
