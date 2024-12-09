@@ -32,6 +32,7 @@ interface ListItem {
     nameAbbreviationLocal:string
     languageScriptDirection:string
     copyrightStatement:string
+    confidential:'true'|'false'  // Whether can view HTML meta or not (can still download, lol)
 }
 
 
@@ -183,8 +184,11 @@ export async function discover(existing:string[], discover_specific_id?:string):
                 org.contact_url = 'https://' + org.contact_url
             }
         } catch {
-            // Some orgs will throw 403
+            // Some orgs will throw 403 (not related to translation's `confidential` prop)
         }
+
+        // Determine most useful URL for a user to learn more about the translation
+        const attr_url = item.confidential === 'true' ? org.contact_url : html_url
 
         // Work out earliest year of publication
         const date_archived = parseInt(item.dateArchived.slice(0, 4)) || 9999
@@ -203,8 +207,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
             copyright: {
                 licenses: license ? [{license, url: license_url}] : [],
                 attribution: org.full_name || org.local_name || item.rightsHolder[0]!.name,
-                attribution_url: org.contact_url ||
-                    `https://app.thedigitalbiblelibrary.org/entry?id=${item.id}`,
+                attribution_url: attr_url,
             },
             ids: {
                 dbl: item.id,
