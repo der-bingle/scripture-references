@@ -135,20 +135,35 @@ export async function discover(existing:string[], discover_specific_id?:string):
         const meta_file = join(trans_dir, 'meta.json')
         if (existsSync(meta_file)){
             const existing_meta = read_json<TranslationSourceMeta>(meta_file)
-            existing_meta.ids.dbl = item.id
-            write_json(meta_file, existing_meta, true)
+            if (!existing_meta.ids.dbl){
+                existing_meta.ids.dbl = item.id
+                write_json(meta_file, existing_meta, true)
+            }
             num_existing += 1
             return
         }
 
-        // Detect the license
+        // Search for the license
         const html_url = `https://app.thedigitalbiblelibrary.org/entry?id=${item.id}`
         const html_resp = await request(html_url, 'text')
         let license:string|null = null
         let license_url = html_url
-        const cc_abbrev = /cc (by[a-z-]*)/i.exec(html_resp)
-        if (cc_abbrev){
-            const conditions = cc_abbrev[1]!.toLowerCase()
+
+        // Get unique CC license types mentioned
+        // WARN Won't detect some versions which have "confidential" true yet still appear in list
+        //      As these require logging into the DBL despite having an open license
+        const cc_abbrev =
+            new Set([...html_resp.matchAll(/cc (by[a-z-]*)/ig)].map(r => r[1]!.toLowerCase()))
+
+        // Determine what the license is
+        if (/public domain/i.test(html_resp) && !/not public domain/i.test(html_resp)){
+            license = 'public'
+            if (html_resp.includes('creativecommons.org/publicdomain/zero/1.0')){
+                license_url = 'https://creativecommons.org/publicdomain/zero/1.0/'
+            }
+        } else if (cc_abbrev.size === 1){
+            // Only auto-add if one license type (otherwise manually review which is best)
+            const conditions = [...cc_abbrev.values()][0]!
             license = `cc-${conditions}`
             if (license in LICENSES){
                 // NOTE DBL doesn't specify license version so 4.0 can only be assumed
@@ -157,8 +172,6 @@ export async function discover(existing:string[], discover_specific_id?:string):
                 console.warn(`Failed to detect CC license "${license}" (${log_ids})`)
                 license = null
             }
-        } else if (/public domain/i.test(html_resp) && !/not public domain/i.test(html_resp)){
-            license = 'public'
         }
 
         // Get owner details
