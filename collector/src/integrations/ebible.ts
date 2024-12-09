@@ -28,6 +28,11 @@ interface EbibleRow {
 const IGNORE = ['engnet']
 
 
+// It's not helpful to abbreviate a translation title with its org, so detect when it is the case
+const large_org_initials =
+    ['wbt', 'tbl', 'png', 'pbt', 'twf', 'bib', 'ulb', 'bsa', 'sim', 'ubb', 'wtc', 'wyi']
+
+
 export async function discover(existing:string[], discover_specific_id?:string):Promise<void>{
     // Discover translations that are available
 
@@ -54,15 +59,22 @@ export async function discover(existing:string[], discover_specific_id?:string):
     await concurrent(rows.map(row => async () => {
 
         // Determine ids
+        // NOTE Using FCBHID which is usually LANG+ORG or abbrev of title if org small
         const ebible_id = row['translationId']
         const ebible_url = `https://ebible.org/Scriptures/details.php?id=${ebible_id}`
         const lang_code = language_data.normalise(row['languageCode'])
-        const trans_abbr = row['FCBHID'].slice(3).toLowerCase()
-        const trans_id = `${lang_code ?? ''}_${trans_abbr}`
+        const fcbhid_end = row['FCBHID'].slice(3).toLowerCase()
+        let trans_id = `${lang_code ?? ''}_${fcbhid_end}`
         const log_ids = `${trans_id}/${ebible_id}`
 
         // Skip if only want to discover a single translation
         if (discover_specific_id && ebible_id !== discover_specific_id){
+            return
+        }
+
+        // Skip if in ignored list
+        if (IGNORE.includes(ebible_id)){
+            ignored.push(ebible_id)
             return
         }
 
@@ -72,14 +84,10 @@ export async function discover(existing:string[], discover_specific_id?:string):
             return
         }
 
-        // Ignore if invalid language or in ignored list
-        if (!lang_code){
-            console.error(`INVALID Unknown language ${ebible_url}`)
-            ignored.push(ebible_id)
-            return
-        } else if (IGNORE.includes(ebible_id)){
-            ignored.push(ebible_id)
-            return
+        // Warn if invalid language or id and fallback on ebible's id
+        if (!lang_code || !fcbhid_end){
+            trans_id = '_' + row['FCBHID'].toLowerCase()
+            console.error(`INVALID Id ${trans_id} ${ebible_url}`)
         }
 
         // If already added via another service, add ebible id to it
@@ -125,14 +133,20 @@ export async function discover(existing:string[], discover_specific_id?:string):
         }
 
         // Guess if title is in English or native language (printable ASCII)
-        const title_is_english = /^[\x20-\x7F]*$/.test(row['title'])
+        const shorttitle_is_english = /^[\x20-\x7F]*$/.test(row['shortTitle'])
+
+        // Determine abbreviation
+        let trans_abbr = fcbhid_end
+        if (large_org_initials.includes(fcbhid_end)){
+            trans_abbr = row['shortTitle'].replace(/[^A-Z]/g, '').slice(0, 5)
+        }
 
         // Prepare the meta data
         const meta:TranslationSourceMeta = {
             name: {
-                local: title_is_english ? '' : row['title'],
+                local: row['title'],  // Usually in local language
                 local_abbrev: '',
-                english: title_is_english ? row['title'] : '',
+                english: shorttitle_is_english ? row['shortTitle'] : '',
                 english_abbrev: trans_abbr.toUpperCase(),
             },
             year: detect_year(row['title'], row['shortTitle'], row['translationId'],
@@ -141,6 +155,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
             copyright: {
                 licenses: license ? [{license, url: license_url}] : [],
                 attribution: row['Copyright'],
+                // Use eBible URL so can point to specific translation and not generic org
                 attribution_url: ebible_url,
             },
             ids: {
