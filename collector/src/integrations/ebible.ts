@@ -55,6 +55,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
 
         // Determine ids
         const ebible_id = row['translationId']
+        const ebible_url = `https://ebible.org/Scriptures/details.php?id=${ebible_id}`
         const lang_code = language_data.normalise(row['languageCode'])
         const trans_abbr = row['FCBHID'].slice(3).toLowerCase()
         const trans_id = `${lang_code ?? ''}_${trans_abbr}`
@@ -73,7 +74,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
 
         // Ignore if invalid language or in ignored list
         if (!lang_code){
-            console.error(`INVALID ${log_ids} (unknown language)`)
+            console.error(`INVALID Unknown language ${ebible_url}`)
             ignored.push(ebible_id)
             return
         } else if (IGNORE.includes(ebible_id)){
@@ -93,7 +94,6 @@ export async function discover(existing:string[], discover_specific_id?:string):
         }
 
         // Get translation's details page to see what data formats are available
-        const ebible_url = `https://ebible.org/Scriptures/details.php?id=${ebible_id}`
         let page_resp = await request(ebible_url, 'text')
 
         // Some pages have broken license links
@@ -118,9 +118,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
         // Ignore if no USFM source (almost always because license is restrictive)
         if (!page_resp.includes('usfm.zip')){
             if (license){
-                console.error(`INVALID ${log_ids} (no USFM even though unrestricted license?)`)
-            } else {
-                console.warn(`INVALID ${log_ids} (probably restricted)`)
+                console.error(`INVALID No USFM available ${ebible_url}`)
             }
             ignored.push(ebible_id)
             return
