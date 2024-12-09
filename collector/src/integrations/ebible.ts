@@ -25,7 +25,10 @@ interface EbibleRow {
 
 
 // Translations that can be sourced from a better location (or other issue)
-const IGNORE = ['engnet']
+const IGNORE = [
+    'daf',  // Not open and causes language code error
+    'dud',  // Not open and causes language code error
+]
 
 
 // It's not helpful to abbreviate a translation title with its org, so detect when it is the case
@@ -146,7 +149,8 @@ export async function discover(existing:string[], discover_specific_id?:string):
             name: {
                 local: row['title'],  // Usually in local language
                 local_abbrev: '',
-                english: shorttitle_is_english ? row['shortTitle'] : '',
+                english: lang_code === 'eng' ? row['title'] :
+                    (shorttitle_is_english ? row['shortTitle'] : ''),
                 english_abbrev: trans_abbr.toUpperCase(),
             },
             year: detect_year(row['title'], row['shortTitle'], row['translationId'],
