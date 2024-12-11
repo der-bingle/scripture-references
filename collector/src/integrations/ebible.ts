@@ -70,7 +70,10 @@ export async function discover(existing:string[], discover_specific_id?:string):
         const ebible_id = row['translationId']
         const ebible_url = `https://ebible.org/Scriptures/details.php?id=${ebible_id}`
         const lang_code = language_data.normalise(row['languageCode'])
-        const fcbhid_end = row['FCBHID'].slice(3).toLowerCase()
+        let fcbhid_end = row['FCBHID'].slice(3).toLowerCase()
+        if (fcbhid_end === 'twf'){
+            fcbhid_end = 'wft'  // eBible is inconsistent and sometimes uses 'twf' for same org
+        }
         let trans_id = `${lang_code ?? ''}_${fcbhid_end}`
         const log_ids = `${trans_id}/${ebible_id}`
 
