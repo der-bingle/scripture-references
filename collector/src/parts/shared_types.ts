@@ -84,8 +84,16 @@ export interface DistManifestItem {
 }
 
 
-// 1-unnatural 2-literal 3-balanced 4-dynamic 5-paraphrase
+/* Literalness score from 1 (high) to 5 (low)
+    1: So literal that it is not gramatically correct at times (e.g. LSV)
+    2: Readable English but awkward and hard to understand at times (e.g. ESV/NASB)
+    3: Easily readable with rephrasing only when necessary (e.g. BSB/NIV)
+    4: Frequent rephrasing to help modern readers (e.g. NLT)
+    5: Constant rephrasing that is highly interpretive (e.g. MSG)
+*/
 export type TranslationLiteralness = 1|2|3|4|5|null
+
+
 /* Tags:
     recommended: Only one per language, the best default translation for most people
     archaic: Uses old language (even if a relatively new version)
