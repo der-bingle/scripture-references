@@ -53,15 +53,15 @@ interface OrgResp {
 }
 
 
-// Short abbreviations for orgs that have many translations
+// Short abbreviations for orgs that have many translations (matching eBible)
 const org_abbreviations:Record<string, string> = {
-    '545d2cb05f032bce5404dab8': 'wfw',
+    '545d2cb05f032bce5404dab8': 'wft',
     '545d2cb013cb53cafc2bad91': 'pbt',
     '545d2cb007eaee5131ab123a': 'ubs',
     '545d2cb00fd5dca263562474': 'bib',
     '545d2cb00be06579ca809b57': 'wbt',
     '54650d065117ad695d428986': 'seed',
-    '019217aaaebdd5e7e372cf90': 'love',
+    '019217aaaebdd5e7e372cf90': 'tlf',
 }
 
 
