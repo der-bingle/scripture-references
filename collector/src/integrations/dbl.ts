@@ -56,7 +56,7 @@ interface OrgResp {
 // Short abbreviations for orgs that have many translations
 const org_abbreviations:Record<string, string> = {
     '545d2cb05f032bce5404dab8': 'wfw',
-    '545d2cb013cb53cafc2bad91': 'pio',
+    '545d2cb013cb53cafc2bad91': 'pbt',
     '545d2cb007eaee5131ab123a': 'ubs',
     '545d2cb00fd5dca263562474': 'bib',
     '545d2cb00be06579ca809b57': 'wbt',
