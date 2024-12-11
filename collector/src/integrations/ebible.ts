@@ -28,6 +28,10 @@ interface EbibleRow {
 const IGNORE = [
     'daf',  // Not open and causes language code error
     'dud',  // Not open and causes language code error
+    'eng-web',  // Copy of existing translation with added deuterocanon
+    'eng-webbe',  // Copy of existing translation with added deuterocanon
+    'eng-web-c',  // Copy of existing translation with added deuterocanon
+    'aka',  // An incorrect mix of twiasante and twi
 ]
 
 
