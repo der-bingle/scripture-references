@@ -96,7 +96,7 @@ export type TranslationLiteralness = 1|2|3|4|5|null
 
 /* Tags:
     recommended: Only one per language, the best default translation for most people
-    archaic: Uses old language (even if a relatively new version)
+    archaic: Uses old language (only used when year is modern as can assume all old are archaic)
     questionable: Substantial criticism or concerning origins
     niche: Only useful for academic study or for people with a certain ideology
 */
