@@ -36,6 +36,7 @@ const IGNORE = [
     'hltmcsb',  // 'hlt' is the same but includes strongs
     'kld',  // Old collection of snippets, not complete books
     'pon2006a',  // Same as pon2006 but with Apoc.
+    'kud2014',  // Not openly licensed
 ]
 
 
