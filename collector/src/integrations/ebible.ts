@@ -32,12 +32,11 @@ const IGNORE = [
     'eng-webbe',  // Copy of existing translation with added deuterocanon
     'eng-web-c',  // Copy of existing translation with added deuterocanon
     'aka',  // An incorrect mix of twiasante and twi
+    'hbo',  // Assumed to be same text as hboWLC
+    'hltmcsb',  // 'hlt' is the same but includes strongs
+    'kld',  // Old collection of snippets, not complete books
+    'pon2006a',  // Same as pon2006 but with Apoc.
 ]
-
-
-// It's not helpful to abbreviate a translation title with its org, so detect when it is the case
-const large_org_initials =
-    ['wbt', 'tbl', 'png', 'pbt', 'twf', 'bib', 'ulb', 'bsa', 'sim', 'ubb', 'wtc', 'wyi']
 
 
 export async function discover(existing:string[], discover_specific_id?:string):Promise<void>{
@@ -142,23 +141,19 @@ export async function discover(existing:string[], discover_specific_id?:string):
             return
         }
 
-        // Guess if title is in English or native language (printable ASCII)
-        const shorttitle_is_english = /^[\x20-\x7F]*$/.test(row['shortTitle'])
+        // Short title is usually in English, but remove any diacritics if present
+        const english_name = row['shortTitle'].normalize('NFKD').replace(/\p{Diacritic}/gu, '')
 
-        // Determine abbreviation
-        let trans_abbr = fcbhid_end
-        if (large_org_initials.includes(fcbhid_end)){
-            trans_abbr = row['shortTitle'].replace(/[^A-Z]/g, '').slice(0, 5)
-        }
+        // Form abbreviation from uppercase letters of English name
+        const english_abbrev = english_name.replace(/[^A-Z]/g, '').slice(0, 5)
 
         // Prepare the meta data
         const meta:TranslationSourceMeta = {
             name: {
                 local: row['title'],  // Usually in local language
                 local_abbrev: '',
-                english: lang_code === 'eng' ? row['title'] :
-                    (shorttitle_is_english ? row['shortTitle'] : ''),
-                english_abbrev: trans_abbr.toUpperCase(),
+                english: lang_code === 'eng' ? row['title'] : english_name,
+                english_abbrev: english_abbrev,
             },
             year: detect_year(row['title'], row['shortTitle'], row['translationId'],
                 row['swordName'], row['Copyright'], row['description']),
