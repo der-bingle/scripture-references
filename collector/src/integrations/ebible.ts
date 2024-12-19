@@ -100,17 +100,6 @@ export async function discover(existing:string[], discover_specific_id?:string):
             console.error(`INVALID Id ${trans_id} ${ebible_url}`)
         }
 
-        // If already added via another service, add ebible id to it
-        const trans_dir = join('sources', 'bibles', trans_id)
-        const meta_file = join(trans_dir, 'meta.json')
-        if (existsSync(meta_file)){
-            const existing_meta = read_json<TranslationSourceMeta>(meta_file)
-            existing_meta.ids.ebible = ebible_id
-            write_json(meta_file, existing_meta, true)
-            exists.push(ebible_id)
-            return
-        }
-
         // Get translation's details page to see what data formats are available
         let page_resp = await request(ebible_url, 'text')
 
@@ -139,6 +128,18 @@ export async function discover(existing:string[], discover_specific_id?:string):
                 console.error(`INVALID No USFM available ${ebible_url}`)
             }
             ignored.push(ebible_id)
+            return
+        }
+
+        // If already added via another service, add ebible id to it
+        // NOTE Do after license detection as some restricted versions will match a prev open one
+        const trans_dir = join('sources', 'bibles', trans_id)
+        const meta_file = join(trans_dir, 'meta.json')
+        if (existsSync(meta_file)){
+            const existing_meta = read_json<TranslationSourceMeta>(meta_file)
+            existing_meta.ids.ebible = ebible_id
+            write_json(meta_file, existing_meta, true)
+            exists.push(ebible_id)
             return
         }
 
