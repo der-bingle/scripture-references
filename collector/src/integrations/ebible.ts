@@ -39,6 +39,7 @@ const IGNORE = [
     'pon2006a',  // Same as pon2006 but with Apoc.
     'kud2014',  // Not openly licensed
     'bbr2013',  // Not openly licensed
+    'spav1602p',  // A KJV update of the original Valera from 1602
 ]
 
 
