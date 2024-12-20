@@ -46,7 +46,7 @@ async function _update_source(id:string, meta:TranslationSourceMeta):Promise<voi
 
         // Ignore if not in a compatible format
         const ext = entry.name.toLowerCase().split('.').at(-1)!
-        if (!['usx', 'usfm'].includes(ext)){
+        if (!['usx', 'xml', 'usfm', 'sfm'].includes(ext)){
             continue
         }
 
@@ -57,9 +57,9 @@ async function _update_source(id:string, meta:TranslationSourceMeta):Promise<voi
         // NOTE book code always at start so only search first 300 chars (normally before 100)
         const contents_str = contents.toString('utf-8', 0, 300)
         let book:string|undefined = undefined
-        if (ext === 'usfm'){
+        if (ext === 'usfm' || ext === 'sfm'){
             book = /^\\id (\w\w\w)/m.exec(contents_str)?.[1]?.toLowerCase()
-        } else if (ext === 'usx'){
+        } else if (ext === 'usx' || ext === 'xml'){
             book = /<book[^>]+code="(\w\w\w)"/.exec(contents_str)?.[1]?.toLowerCase()
         }
 
@@ -67,7 +67,8 @@ async function _update_source(id:string, meta:TranslationSourceMeta):Promise<voi
         if (!book){
             console.error(`Valid format but couldn't identify book: ${entry.name}`)
         } else if (books_ordered.includes(book)){
-            writeFileSync(join(format_dir, `${book}.${ext}`), contents)
+            const clean_ext = ext.endsWith('sfm') ? 'usfm' : 'usx'
+            writeFileSync(join(format_dir, `${book}.${clean_ext}`), contents)
         }
     }
 }
