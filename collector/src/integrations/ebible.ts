@@ -28,6 +28,7 @@ interface EbibleRow {
 const IGNORE = [
     'daf',  // Not open and causes language code error
     'dud',  // Not open and causes language code error
+    'eng-kjv',  // Same as 'eng-kjv2006' with Apoc.
     'eng-web',  // Copy of existing translation with added deuterocanon
     'eng-webbe',  // Copy of existing translation with added deuterocanon
     'eng-web-c',  // Copy of existing translation with added deuterocanon
@@ -37,6 +38,7 @@ const IGNORE = [
     'kld',  // Old collection of snippets, not complete books
     'pon2006a',  // Same as pon2006 but with Apoc.
     'kud2014',  // Not openly licensed
+    'bbr2013',  // Not openly licensed
 ]
 
 
@@ -137,6 +139,12 @@ export async function discover(existing:string[], discover_specific_id?:string):
         const meta_file = join(trans_dir, 'meta.json')
         if (existsSync(meta_file)){
             const existing_meta = read_json<TranslationSourceMeta>(meta_file)
+            if (existing_meta.ids.ebible){
+                // Translation already has a different eBible id so need to resolve manually
+                console.error(`INVALID Matched ${ebible_id} to ${trans_id} but it already has `
+                    + existing_meta.ids.ebible)
+                return
+            }
             existing_meta.ids.ebible = ebible_id
             write_json(meta_file, existing_meta, true)
             exists.push(ebible_id)
