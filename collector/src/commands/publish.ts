@@ -2,12 +2,11 @@
 import fs from 'node:fs'
 import {join} from 'node:path'
 
-import {concurrent, read_json, type_from_path, write_json, read_dir_deep} from './utils.js'
+import {concurrent, read_json, type_from_path, read_dir_deep} from '../parts/utils.js'
 import {PublisherAWS} from '../integrations/aws.js'
-import {generate_index_content} from './indexes.js'
+import {generate_index_content} from '../parts/indexes.js'
 
-import type {TranslationSourceMeta} from './types'
-import type {DistManifest} from './shared_types'
+import type {DistManifest} from '../parts/shared_types'
 
 
 export class Publisher extends PublisherAWS {

@@ -10,7 +10,9 @@ import type {TranslationSourceMeta} from '../parts/types'
 
 
 // Translations that can be sourced from a better location (or other issue)
-const IGNORE:string[] = []
+const IGNORE:string[] = [
+    '69ffe7eecd894e52',  // Only second half of genesis
+]
 
 // Some language codes are outdated
 const OUTDATED_LANG:Record<string, string> = {cug: 'cnq'}
@@ -236,6 +238,3 @@ export async function discover(existing:string[], discover_specific_id?:string):
     console.info(`DBL ignored: ${num_ignored}`)
     console.info(`DBL total: ${num_total}`)
 }
-
-
-export {generic_update_sources as update_sources} from './generic.js'

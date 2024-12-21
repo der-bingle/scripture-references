@@ -4,7 +4,7 @@ import {join} from 'node:path'
 import {convert as html_to_text} from 'html-to-text'
 
 import * as tyndale from '../integrations/tyndale.js'
-import {clean_dir, mkdir_exist, read_dir, read_json, write_json} from '../parts/utils.js'
+import {clean_dir, list_dirs, mkdir_exist, read_json, write_json} from '../parts/utils.js'
 
 import type {StudyNotes} from '../integrations/tyndale.js'
 import type {NotesSourceMeta} from '../parts/types.js'
@@ -21,7 +21,7 @@ export function notes_process(){
     const manifest:DistNotesManifest = {notes: {}}
 
     // Loop through available notes
-    for (const id of read_dir(join('sources', 'notes'))){
+    for (const id of list_dirs(join('sources', 'notes'))){
 
         // See if a Tyndale format
         const notes = tyndale.get_notes(id)

@@ -2,15 +2,18 @@
 
 import yargs from 'yargs'
 
+import {report_invalid, report_incomplete, report_items, report_unprocessed}
+    from './commands/report.js'
+import {publish} from './commands/publish.js'
+import {serve} from './commands/serve.js'
+import {update_dist} from './commands/process.js'
+import {download_source} from './commands/download.js'
+import {clean_collection} from './commands/clean.js'
+import {discover_translations} from './commands/discover.js'
 import {gen_language_data} from './parts/languages.js'
-import {report_items, report_unprocessed} from './parts/reporting.js'
-import {publish} from './parts/publish.js'
-import {serve} from './parts/serve.js'
-import {update_dist, update_source} from './parts/content.js'
 import {update_bmc} from './parts/bmc.js'
 import {init_config} from './parts/config.js'
 import {update_manifest} from './parts/manifest.js'
-import {discover_translations} from './parts/discover.js'
 import {notes_process} from './notes/notes.js'
 import {crossref_process} from './data/crossref.js'
 
@@ -34,8 +37,9 @@ await yargs(process.argv.slice(2))
     .command('discover [service] [id]', "Discover what translations are available", {},
         argv => discover_translations(argv['service'] as ServiceId, argv['id'] as string))
 
-    .command('download [id]', "Download source files for translations", {},
-        argv => update_source(argv['id'] as string))
+    .command('download [id]', "Download source files (--recheck for updating existing)",
+        {recheck: {type: 'boolean'}, force: {type: 'boolean'}},
+        argv => download_source(!!argv['recheck'], !!argv['force'], argv['id'] as string))
 
     .command('process [id]', "Convert source files to distributable formats", {},
         argv => update_dist(argv['id'] as string))
@@ -54,12 +58,21 @@ await yargs(process.argv.slice(2))
     .command('publish-data [id]', "Publish other data to server", {},
         argv => publish('data', argv['id'] as string))
 
+    .command('clean', "Remove any unnecessary files from the collection", {},
+        argv => clean_collection())
+
     .command('report', "Report the status of included translations", {},
         argv => report_items())
     .command('report-missing', "Report translations missing metadata", {},
         argv => report_items('missing'))
-    .command('report-unprocessed', "Report translations yet to be processed", {},
-        argv => report_unprocessed())
+    .command('report-bookless', "Report translations with no valid books", {},
+        argv => report_invalid(true))
+    .command('report-invalid', "Report translations with invalid books", {},
+        argv => report_invalid())
+    .command('report-incomplete', "Report translations with almost complete testaments", {},
+        argv => report_incomplete())
+    .command('report-unprocessed [type]', "Report translations yet to be processed", {},
+        argv => report_unprocessed(argv['type'] as 'usfmx'|'other'|undefined))
 
     // Notes
     .command('notes-process', "Convert study notes to standard format", {}, argv => notes_process())

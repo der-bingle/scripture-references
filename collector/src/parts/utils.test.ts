@@ -4,7 +4,7 @@ import {closeSync, existsSync, mkdirSync, openSync, rmSync, statSync} from 'fs'
 
 import {afterEach, beforeEach, describe, it} from 'vitest'
 
-import {read_dir, get_dir_entries, DirectoryEntry, read_files_in_dir} from './utils'
+import {read_dir, get_dir_entries, DirectoryEntry} from './utils'
 
 
 describe('read_dir', () => {
@@ -41,15 +41,6 @@ describe('get_dir_entries', () => {
         expect(manifest!.isDirectory).toBe(false)
         expect(manifest!.fileSize).toEqual(expected_size)
         expect(manifest!.dirSize).toEqual(undefined)
-    })
-
-})
-describe('read_files_in_dir', () => {
-
-    it('should only get the files', ({expect}) => {
-        const files = read_files_in_dir(path.join('dist', 'bibles'))
-        expect(files).toHaveLength(1)
-        expect(files[0]).toEqual('manifest.json')
     })
 
 })

@@ -37,5 +37,16 @@ export function pre_usx_to_json(translation:string, book:string, usx:string){
         usx = usx.replaceAll('<para style="b"/>', '')
     }
 
+    // cmn_bib has moved ISA 38:21-22 to after ISA 38:6 for text critical reasons
+    // Preserve their text but merge the verses into 38:6 so numbering stays sequential
+    if (translation === 'cmn_bib' && book === 'isa'){
+        usx = usx
+            .replace('<verse eid="ISA 38:6"/>', '')
+            .replace('<verse number="21" style="v" sid="ISA 38:21"/>', '')
+            .replace('<verse eid="ISA 38:21"/>', '')
+            .replace('<verse number="22" style="v" sid="ISA 38:22"/>', '')
+            .replace('<verse eid="ISA 38:22"/>', '<verse eid="ISA 38:6"/>')
+    }
+
     return usx
 }

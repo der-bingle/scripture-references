@@ -6,7 +6,7 @@ import {last_verse} from '@gracious.tech/bible-references'
 export function parse_usx(xml:string, parser:typeof DOMParser){
 
     // Create parser
-    const doc = new parser().parseFromString(xml, 'application/xml')
+    const doc:XMLDocument = new parser().parseFromString(xml, 'application/xml')
     const usx_element = doc.documentElement as Element
 
     // Confirm was given a USX doc

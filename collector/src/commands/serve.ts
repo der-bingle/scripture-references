@@ -4,8 +4,8 @@ import http from 'node:http'
 import fs from 'node:fs'
 import {join} from 'node:path'
 
-import {type_from_path} from './utils.js'
-import {generate_index_content} from './indexes.js'
+import {type_from_path} from '../parts/utils.js'
+import {generate_index_content} from '../parts/indexes.js'
 
 
 export async function serve(port=8430){

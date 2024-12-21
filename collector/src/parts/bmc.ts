@@ -1,6 +1,6 @@
 
 import {join} from 'path'
-import {renameSync, rmSync, writeFileSync} from 'fs'
+import {rmSync, writeFileSync} from 'fs'
 
 import StreamZip from 'node-stream-zip'
 
@@ -14,7 +14,7 @@ export async function update_bmc(version='0.0.8'){
     const dir = join(PKG_PATH, 'bmc')
     const zip_path = join(dir, 'download.zip')
     const url = `https://github.com/schierlm/BibleMultiConverter/releases/download/`
-        + `v${version}/BibleMultiConverter-SWORDEdition-${version}.zip`
+        + `v${version}/BibleMultiConverter-AllInOneEdition-${version}.zip`
 
     // Remove existing
     clean_dir(dir)
@@ -27,8 +27,4 @@ export async function update_bmc(version='0.0.8'){
     // Extract files
     await new StreamZip.async({file: zip_path}).extract(null, dir)
     rmSync(zip_path)
-    renameSync(
-        join(dir, 'BibleMultiConverter-SWORDEdition.jar'),
-        join(dir, 'BibleMultiConverter.jar'),
-    )
 }

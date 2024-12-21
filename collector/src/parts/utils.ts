@@ -116,17 +116,19 @@ export function get_dir_entries(path:string):DirectoryEntry[] {
 }
 
 
-/**
- * Read only the files in a directory
- *
- * @param directory The path of the directory
- *
- * @returns Only the files in the directory
- */
-export function read_files_in_dir(directory:string): string[] {
+// List files in dir
+export function list_files(directory:string):string[]{
     return readdirSync(directory, {withFileTypes: true})
-        .filter((entity: Dirent) => !IGNORE_FILES.includes(entity.name))
         .filter((entity: Dirent) => entity.isFile())
+        .filter((entity: Dirent) => !IGNORE_FILES.includes(entity.name))
+        .map((entity: Dirent) => entity.name)
+}
+
+
+// List subdirs in dir
+export function list_dirs(directory:string):string[]{
+    return readdirSync(directory, {withFileTypes: true})
+        .filter((entity: Dirent) => entity.isDirectory())
         .map((entity: Dirent) => entity.name)
 }
 

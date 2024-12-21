@@ -206,7 +206,3 @@ async function _discover(subject:string, existing:string[], discover_specific_id
     // Return stats
     return {added: added.length, exists: exists.length}
 }
-
-
-// Generic method is compatible with this service's source format
-export {generic_update_sources as update_sources} from './generic.js'

@@ -91,7 +91,7 @@ async function update_content(){
 function update_select_language(){
     const languages = collection.get_languages()
     update_options(select_language, languages.map(language => {
-        return [language.code, language.bilingual]
+        return [language.code, language.name_bilingual]
     }))
     // Default to English
     select_language.value = 'eng'

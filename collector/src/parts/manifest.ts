@@ -6,10 +6,18 @@ import {book_names_english, books_ordered} from './bible.js'
 import {languages_by_total_speakers} from '../data/languages.js'
 import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
-import {read_json, read_dir, write_json} from './utils.js'
+import {read_json, write_json, list_dirs, list_files} from './utils.js'
 import type {DistManifest} from './shared_types'
 import type {TranslationSourceMeta} from './types'
-import {_missing_meta} from './reporting.js'
+
+
+export function _missing_meta(meta:TranslationSourceMeta){
+    // True if important meta data missing (and so shouldn't publish)
+    return !meta.year
+        || !meta.copyright.licenses.length
+        || !(meta.name.local || meta.name.english)
+        || !(meta.name.local_abbrev || meta.name.english_abbrev)
+}
 
 
 export async function update_manifest(){
@@ -31,7 +39,7 @@ export async function update_manifest(){
     const included_languages:Set<string> = new Set()
 
     // Loop through published translations in dist dir
-    for (const trans of read_dir(join('dist', 'bibles'))){
+    for (const trans of list_dirs(join('dist', 'bibles'))){
 
         if (trans === 'manifest.json'){
             continue  // Ignore self
@@ -50,7 +58,7 @@ export async function update_manifest(){
         // TODO Ensure all formats available, not just HTML
         const html_dir = join('dist', 'bibles', trans, 'html')
         const html_books = existsSync(html_dir) ?
-            read_dir(html_dir).map(name => name.slice(0, 3)) : []
+            list_files(html_dir).map(name => name.slice(0, 3)) : []
         if (html_books.length === 0){
             console.error(`IGNORING ${trans} (no books)`)
             continue

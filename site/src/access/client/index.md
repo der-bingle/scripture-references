@@ -130,3 +130,13 @@ Variable                        | Default           | Description
 
 ## Design
 This client has zero external dependencies, no differences between the browser and Node versions (no unused code), and is overall very small and fast. It only connects to the endpoints you specify so can be used completely independently of the official fetch(bible) service.
+
+
+## Changes
+
+### Version 0.10.0
+
+ * Official collection upgraded and now found at [v1.fetch.bible](https://v1.fetch.bible)
+ * Some bibles removed or changed id (always verify a translation still exists before using)
+ * `get_languages()` item props renamed to `name_local`, `name_english`, `population`
+ * Must now call `fetch_translation_extras()` to get book names in translation's language

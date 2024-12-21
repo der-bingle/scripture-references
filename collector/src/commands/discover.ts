@@ -4,9 +4,9 @@ import {join} from 'node:path'
 import * as door43 from '../integrations/door43.js'
 import * as ebible from '../integrations/ebible.js'
 import * as dbl from '../integrations/dbl.js'
-import {read_dir, read_json} from './utils.js'
+import {list_dirs, read_json} from '../parts/utils.js'
 
-import type {ServiceId, TranslationSourceMeta} from './types'
+import type {ServiceId, TranslationSourceMeta} from '../parts/types.js'
 
 
 export async function discover_translations(service:ServiceId, discover_specific_id?:string){
@@ -22,7 +22,7 @@ export async function discover_translations(service:ServiceId, discover_specific
     // Get service ids for all existing translations so know if already discovered
     const ids = Object.fromEntries(services.map(
         service => [service, [] as string[]])) as Record<ServiceId, string[]>
-    for (const trans of read_dir(join('sources', 'bibles'))){
+    for (const trans of list_dirs(join('sources', 'bibles'))){
         const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', trans, 'meta.json'))
         for (const service of Object.keys(meta.ids) as ServiceId[]){
             ids[service].push(meta.ids[service]!)

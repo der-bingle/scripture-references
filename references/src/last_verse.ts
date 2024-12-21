@@ -982,6 +982,9 @@ export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
         37,
         72,
         47,
+        // Mark's ending: 1-8 common, 9-20 long ending
+        // Some also add the alternate short ending to end of long ending with 21-22
+        // Not supporting 21-22 as whether ending abrupt/long/short it definitely wasn't both
         20,
     ],
     'nam': [

@@ -4,80 +4,42 @@ import {join} from 'node:path'
 import {execSync} from 'node:child_process'
 
 import {usx_to_json_html, usx_to_json_txt} from 'usx-to-json'
+import {reverse_usx} from 'reverse-usx'
 import {JSDOM} from 'jsdom'
 
-import * as door43 from '../integrations/door43.js'
-import * as ebible from '../integrations/ebible.js'
-import * as dbl from '../integrations/dbl.js'
 import {pre_usx_to_json} from '../integrations/patches.js'
-import {generic_update_sources} from '../integrations/generic.js'
-import {update_manifest} from './manifest.js'
-import {concurrent, PKG_PATH, read_json, read_dir, write_json} from './utils.js'
-import {extract_sections, generate_chapter_headings} from './sections.js'
+import {update_manifest} from '../parts/manifest.js'
+import {concurrent, PKG_PATH, read_json, write_json, list_files, list_dirs} from '../parts/utils.js'
+import {extract_sections, generate_chapter_headings} from '../parts/sections.js'
+import {rm_mark_second_ending} from '../parts/mark_ending.js'
 
-import type {TranslationSourceMeta} from './types'
-import type {BibleJsonTxt, DistTranslationExtra} from './shared_types'
-
-
-export async function update_source(trans_id?:string){
-    // Update the source files for all translations (or single if given)
-    // TODO Don't update if update date unchanged
-
-    // Collect meta files by service to better manage concurrency
-    const manual_sourced:Record<string, TranslationSourceMeta> = {}
-    const door43_sourced:Record<string, TranslationSourceMeta> = {}
-    const ebible_sourced:Record<string, TranslationSourceMeta> = {}
-    const dbl_sourced:Record<string, TranslationSourceMeta> = {}
-
-    for (const id of read_dir(join('sources', 'bibles'))){
-
-        if (trans_id && id !== trans_id){
-            continue  // Only updating a single translation
-        }
-
-        // Get translation's meta data and allocate to correct service
-        const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', id, 'meta.json'))
-        if (meta.source.service === 'manual'){
-            manual_sourced[id] = meta
-        } else if (meta.source.service === 'door43'){
-            door43_sourced[id] = meta
-        } else if (meta.source.service === 'ebible'){
-            ebible_sourced[id] = meta
-        } else if (meta.source.service === 'dbl'){
-            dbl_sourced[id] = meta
-        }
-    }
-
-    // Fail if nothing matched
-    if ([manual_sourced, door43_sourced, ebible_sourced, dbl_sourced]
-        .every(source => !Object.keys(source).length)){
-        console.error("No translations identified")
-    }
-
-    // Wait for all to be updated
-    await Promise.all([
-        generic_update_sources(manual_sourced),
-        door43.update_sources(door43_sourced),
-        ebible.update_sources(ebible_sourced),
-        dbl.update_sources(dbl_sourced),
-    ])
-}
+import type {TranslationSourceMeta} from '../parts/types.js'
+import type {BibleJsonTxt, DistTranslationExtra} from '../parts/shared_types.js'
 
 
-async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx'|'usfm'){
+const DOM = new JSDOM()
+const DOMParser = DOM.window.DOMParser
+const XMLSerializer = DOM.window.XMLSerializer
+
+
+async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx'|'usfm',
+        src_dir_type:'sources'|'dist'='sources'):Promise<void>{
     // Convert translation's source files to an equivalent distributable format (USFM or USX)
 
-    // Skip if already converted
-    const src_dir = join('sources', 'bibles', trans, from)
+    const src_dir = join(src_dir_type, 'bibles', trans, from)
     const dist_dir = join('dist', 'bibles', trans, to)
-    if (read_dir(src_dir).length === read_dir(dist_dir).length){
+
+    // Skip if already converted
+    const valid_src_files = list_files(src_dir).filter(f => !f.endsWith('.invalid')).length
+    if (valid_src_files === list_files(dist_dir).length){
         return
     }
+    console.info(`Converting ${trans} to ${to}`)
 
     // If converting from USX need to know whether version is 3+ or not
     let source_is_usx3 = false
     if (from === 'usx'){
-        const first_file = read_dir(src_dir)[0]
+        const first_file = list_files(src_dir)[0]
         if (first_file){
             const contents = fs.readFileSync(join(src_dir, first_file), {encoding: 'utf8'})
             const usx_version = /<usx version="([\d.]+)">/.exec(contents)
@@ -88,7 +50,7 @@ async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx
     // If converting to same format, simply copy the files
     // WARN USFM1-2 is valid USFM3, but USX1-2 must be converted to USX3 which requires end markers
     if (from === to && (from === 'usfm' || source_is_usx3)){
-        for (const file of read_dir(src_dir)){
+        for (const file of list_files(src_dir).filter(f => !f.endsWith('.invalid'))){
             fs.copyFileSync(join(src_dir, file), join(dist_dir, file))
         }
         return
@@ -101,7 +63,7 @@ async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx
     }[from]
     const to_format = to === 'usfm' ? 'USFM' : 'USX3'
     const tool = ['usfm', 'usx'].includes(from) ? 'ParatextConverter' : ''
-    const bmc = join(PKG_PATH, 'bmc', 'BibleMultiConverter.jar')
+    const bmc = join(PKG_PATH, 'bmc', 'BibleMultiConverter-AllInOneEdition.jar')
 
     // Execute command
 
@@ -115,11 +77,13 @@ async function _source_to_distributable(trans:string, from:'usx'|'usfm', to:'usx
     // NOTE ignoring stdio as converter can output too many warnings and overflow Node's maxBuffer
     //      Should instead manually replay commands that fail to observe output
     //      Problem that prompted this was not inserting verse end markers for some (e.g. vie_ulb)
-    execSync(cmd, {stdio: 'ignore'})
-
-    // Rename output files to lowercase
-    for (const file of read_dir(dist_dir)){
-        fs.renameSync(join(dist_dir, file), join(dist_dir, file.toLowerCase()))
+    try {
+        execSync(cmd, {stdio: 'ignore'})
+    } finally {
+        // Rename output files to lowercase
+        for (const file of list_files(dist_dir)){
+            fs.renameSync(join(dist_dir, file), join(dist_dir, file.toLowerCase()))
+        }
     }
 }
 
@@ -132,14 +96,13 @@ export async function update_dist(trans_id?:string){
 
     // Process translations concurrently (only 4 since waiting on processor, not network)
     // NOTE While not multi-threaded itself, conversions done externally... so effectively so
-    await concurrent(read_dir(join('sources', 'bibles')).map(id => async () => {
+    await concurrent(list_dirs(join('sources', 'bibles')).map(id => async () => {
 
         if (trans_id && id !== trans_id){
             return  // Only updating a single translation
         }
 
         // Update assets for the translation
-        console.info(`Preparing distributable formats for ${id}`)
         try {
             await _update_dist_single(id, force)
         } catch (error){
@@ -160,11 +123,6 @@ async function _update_dist_single(id:string, force:boolean){
     // Determine paths
     const src_dir = join('sources', 'bibles', id)
     const dist_dir = join('dist', 'bibles', id)
-
-    // Ignore if not a dir (e.g. sources/.DS_Store)
-    if (!fs.statSync(src_dir).isDirectory()){
-        return
-    }
 
     // Get translation's meta data
     const meta_file_path = join(src_dir, 'meta.json')
@@ -190,16 +148,54 @@ async function _update_dist_single(id:string, force:boolean){
     // Convert source to USX3 (if needed)
     await _source_to_distributable(id, meta.source.format, 'usx')
 
-    // TODO Convert versification if needed
+    // Default to producing USFM from source (not dist/usx)
+    let usfm_from = meta.source.format
+    let usfm_from_dir:'sources'|'dist' = 'sources'
+
+    // Convert versification of any books if needed
+    for (const file of list_files(join(dist_dir, 'usx'))){
+        const file_path = join(dist_dir, 'usx', file)
+        const contents = fs.readFileSync(file_path, 'utf8')
+        let reversed:string|undefined
+        try {
+            reversed = reverse_usx(contents, DOMParser, XMLSerializer)
+            if (file === 'mrk.usx'){
+                reversed = rm_mark_second_ending(reversed)
+            }
+        } catch {
+            console.error(`Failed to re-verse ${file_path}`)
+        }
+
+        // If contents unchanged then didn't need to reverse
+        if (contents === reversed){
+            continue
+        } else {
+
+            // Distributed USX needed reversing so rm any other dist formats to ensure redo
+            for (const format of ['usfm', 'html', 'txt']){
+                const ext = format === 'usfm' ? 'usfm' : 'json'
+                fs.rmSync(join(dist_dir, format, file.replace('usx', ext)), {force: true})
+            }
+
+            if (reversed){
+                fs.writeFileSync(file_path, reversed)
+            } else {
+                // Failed to re-verse, rm the dist USX to stop other formats copying wrong numbering
+                fs.unlinkSync(file_path)
+            }
+
+            // Ensure USFM is produced from re-versed USX and not source
+            usfm_from = 'usx'
+            usfm_from_dir = 'dist'
+        }
+    }
 
     // Convert source to USFM3 (if needed)
-    // TODO Convert from distributable USX3 if did change versification
-    await _source_to_distributable(id, meta.source.format, 'usfm')
+    await _source_to_distributable(id, usfm_from, 'usfm', usfm_from_dir)
 
     // Convert distributable USX to HTML and plain text
     const usx_dir = join(dist_dir, 'usx')
-    const parser = new JSDOM().window.DOMParser
-    for (const file of read_dir(usx_dir)){
+    for (const file of list_files(usx_dir)){
 
         // Determine paths
         const book = file.split('.')[0]!
@@ -214,7 +210,7 @@ async function _update_dist_single(id:string, force:boolean){
         // Convert to plain text if doesn't exist yet
         if (!fs.existsSync(dst_txt)){
             try {
-                const txt = usx_to_json_txt(usx_str, parser)
+                const txt = usx_to_json_txt(usx_str, DOMParser)
                 write_json(dst_txt, txt)
             } catch (error){
                 console.warn(`INVALID BOOK: failed to convert '${book}' to txt for ${id}`)
@@ -225,7 +221,7 @@ async function _update_dist_single(id:string, force:boolean){
         // Convert to HTML if doesn't exist yet
         if (!fs.existsSync(dst_html)){
             try {
-                const html = usx_to_json_html(usx_str, false, parser)
+                const html = usx_to_json_html(usx_str, false, DOMParser)
                 write_json(dst_html, html)
             } catch (error){
                 console.warn(`INVALID BOOK: failed to convert '${book}' to html for ${id}`)
@@ -236,7 +232,7 @@ async function _update_dist_single(id:string, force:boolean){
 
     // Extract names/headings for all books into single file for translation
     const trans_extra:DistTranslationExtra = {book_names: {}, chapter_headings: {}, sections: {}}
-    for (const filename of read_dir(join(dist_dir, 'txt'))){
+    for (const filename of list_files(join(dist_dir, 'txt'))){
 
         // Determine paths and read data from txt format output
         const book = filename.split('.')[0]!

@@ -26,20 +26,56 @@ interface EbibleRow {
 
 // Translations that can be sourced from a better location (or other issue)
 const IGNORE = [
-    'daf',  // Not open and causes language code error
-    'dud',  // Not open and causes language code error
+
+    // Ignored for being a duplicate
     'eng-kjv',  // Same as 'eng-kjv2006' with Apoc.
     'eng-web',  // Copy of existing translation with added deuterocanon
     'eng-webbe',  // Copy of existing translation with added deuterocanon
     'eng-web-c',  // Copy of existing translation with added deuterocanon
-    'aka',  // An incorrect mix of twiasante and twi
+    'aka',  // An incorrect mix of twiasante and twi, one of which has same text
     'hbo',  // Assumed to be same text as hboWLC
-    'hltmcsb',  // 'hlt' is the same but includes strongs
-    'kld',  // Old collection of snippets, not complete books
     'pon2006a',  // Same as pon2006 but with Apoc.
-    'kud2014',  // Not openly licensed
-    'bbr2013',  // Not openly licensed
+    'hltmcsb',  // 'hlt' is the same but includes strongs
+
+    // Ignored for being too questionable
     'spav1602p',  // A KJV update of the original Valera from 1602
+
+    // Ignored for not having a complete book (and unlikely to ever do so)
+    'kld',  // Old collection of snippets, not complete books
+    'alh',  // Songs, not biblical books
+    'bbd',  // Just a Bible story, not Bible book
+    'yij',  // Partial book only
+    'rmb',  // Partial book only
+    'lrg',  // One passage only
+    'kux',  // Two passages only
+    'kky',  // One passage only
+    'kjn',  // One passage only
+    'gupmay',  // One passage only
+    'dwuliv',  // One passage only
+    'adt',  // Two passages only
+    'byr-w',  // Partial books only
+    'djj',  // Partial books only (2023, so may get more)
+    'guf',  // Partial books only (2023, so may get more)
+    'gupk',  // Partial books only
+    'nay',  // Partial books only
+    'omw-v',  // Partial books only
+    'tbg-a',  // Partial books only
+    'tiwm',  // Single passage only (2023, so may get more)
+    'wlg',  // Partial books only
+]
+
+
+// Ignore as long as a license can't be detected (will auto-add if open license ever added)
+const IGNORE_UNLICENSED = [
+    'daf',
+    'dud',
+    'kud2014',
+    'bbr2013',
+    'big2013',
+    'fad',
+    'ino2013',
+    'kxw',
+    'nuq',
 ]
 
 
@@ -123,6 +159,8 @@ export async function discover(existing:string[], discover_specific_id?:string):
             }
         } else if (/public domain/i.test(page_resp) && !/not public domain/i.test(page_resp)){
             license = 'public'
+        } else if (IGNORE_UNLICENSED.includes(ebible_id)){
+            return
         }
 
         // Ignore if no USFM source (almost always because license is restrictive)
@@ -201,7 +239,3 @@ export async function discover(existing:string[], discover_specific_id?:string):
     console.info(`EBIBLE ignored: ${ignored.length}`)
     console.info(`EBIBLE total: ${added.length + exists.length + ignored.length}`)
 }
-
-
-// Generic method is compatible with this service's source format
-export {generic_update_sources as update_sources} from './generic.js'

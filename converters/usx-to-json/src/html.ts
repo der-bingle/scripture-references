@@ -6,6 +6,7 @@ import type {BibleJsonHtml} from './shared_types'
 
 
 interface ParserState {
+    book:string
     chapter:number
     verse:number
     para_open:string
@@ -33,6 +34,7 @@ export function usx_to_json_html(xml:string, alignment=true, parser=DOMParser): 
 
     // Prepare state tracking
     const state:ParserState = {
+        book: book_code,
         chapter: 0,
         verse: 0,
         para_open: '',  // The opening tag of the current <para> element
@@ -206,12 +208,18 @@ function process_contents(state:ParserState, nodes_raw:NodeListOf<ChildNode>,
 
             // Get the new verse number
             // NOTE If a range, stick everything in the first verse of the range (e.g. 17-18 -> 17)
-            const new_number = parseInt(element.getAttribute('number')?.split('-')[0] ?? '0', 10)
-            if (new_number < 0 || new_number >= state.contents[state.chapter]!.length){
-                throw new Error(`Verse number isn't valid for the book: ${new_number}`)
+            // NOTE Some translations have 1a 1b, in which case ignore 'b' onwards to concat
+            const digits = /^\d+/.exec(element.getAttribute('number') ?? '')
+            const new_number = parseInt(digits?.[0] ?? '-1', 10)
+            if (new_number === state.verse){
+                continue  // Ignore as probably '1b' after a '1a', etc.
             }
-            if (new_number <= state.verse){
-                throw new Error(`Verse ${new_number} is not greater than previous ${state.verse}`)
+            if (new_number < 0 || new_number >= state.contents[state.chapter]!.length){
+                throw new Error(`Invalid verse: ${state.book} ${state.chapter}:${new_number}`)
+            }
+            if (new_number < state.verse){
+                throw new Error(
+                    `${new_number} less than ${state.book} ${state.chapter}:${state.verse}`)
             }
 
             // If not at beginning of a <para> then verse now ending is mid-paragraph

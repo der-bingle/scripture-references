@@ -41,6 +41,8 @@ export interface TranslationSourceMeta extends CommonSourceMeta {
     ids:Partial<Record<ServiceId, string>>
     literalness:TranslationLiteralness
     source:TranslationSource
+    notes?:string  // Notes relevant to sourcing the translation and any issues that came up
+    modified?:boolean  // Whether have modified source files (e.g. to fix bugs)
 }
 
 
