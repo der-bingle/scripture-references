@@ -12,7 +12,7 @@ v-dialog(v-model='state.show_about_dialog' :fullscreen='!state.wide' :max-width=
         v-card-text(class='pa-6')
             p This app is powered by #[a(href='https://fetch.bible' target='_blank') fetch(bible)]
             p Study notes by #[a(href='https://tyndaleopenresources.com/' target='_blank') Tyndale House Publishers]
-            p Original languages: #[a(href='https://hb.openscriptures.org/' target='_blank') Leningrad Codex] used for Old Testament, #[a(href='https://greekcntr.org/' target='_blank') Statistical Restoration] for New Testament.
+            p Original languages: #[a(href='https://github.com/jjmccollum/solid-rock-hb' target='_blank') Solid Rock Hebrew] used for Old Testament, #[a(href='https://greekcntr.org/' target='_blank') Statistical Restoration] for New Testament.
 
 
 </template>
