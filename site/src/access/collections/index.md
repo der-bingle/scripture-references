@@ -3,7 +3,7 @@
 
 Collections are the content sources that clients access and fetch(bible) has an official collection that we maintain, but you can also create your own collection if you desire.
 
-The official collection is at: https://collection.fetch.bible/
+The official collection is at: https://v1.fetch.bible/
 
 ## Custom collections
 You can create your own collection to either complement or replace the official one. This may be necessary if for example:

@@ -17,6 +17,7 @@ function enhance(){
     }
 
     // Find script element that included this script itself
+    // WARN Should use old collection.fetch.bible domain which still hosts enhance.js
     const element:HTMLScriptElement|null =
         document.querySelector('script[src="https://collection.fetch.bible/enhance.js"]')
 

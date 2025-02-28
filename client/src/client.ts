@@ -11,7 +11,7 @@ import type {CrossrefData, DistManifest, OneOrMore} from './shared_types'
 export interface BibleClientConfig {
 
     /* A list of CDN endpoints to connect to that defaults to the official CDN
-        (https://collection.fetch.bible/).
+        (https://v1.fetch.bible/).
     You can optionally host your own fetch(bible) collection and use that instead, or you could
     use it in addition to the official CDN by listing it first.
     The values can be relative URLs but all must end in a slash.
@@ -79,7 +79,7 @@ export class BibleClient {
 
     // Create a new BibleClient, defaulting to the official fetch(bible) collection
     constructor(config:BibleClientConfig={}){
-        this._endpoints = config.endpoints ?? ['https://collection.fetch.bible/']
+        this._endpoints = config.endpoints ?? ['https://v1.fetch.bible/']
         this._data_endpoint = config.data_endpoint ?? this._endpoints[0]!
         this._usage = {...this._usage, ...config.usage}
         this._remember_fetches = config.remember_fetches !== false

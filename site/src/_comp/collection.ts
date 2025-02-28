@@ -3,7 +3,7 @@ import {BibleClient} from '@gracious.tech/fetch-client'
 
 
 // Use localhost endpoint during dev
-const endpoint = import.meta.env.PROD ? 'https://collection.fetch.bible/' : 'http://localhost:8430/'
+const endpoint = import.meta.env.PROD ? 'https://v1.fetch.bible/' : 'http://localhost:8430/'
 
 
 // Get collection
