@@ -3,12 +3,6 @@
 
 &nbsp;
 
-:::tip fetch(bible) is still in beta
-Signup to [Gracious Tech news](https://gracious.tech) to be notified when it officially launches.
-:::
-
-&nbsp;
-
 # fetch(bible) is...
 
  * __A collection__ of all publicly available Bible translations

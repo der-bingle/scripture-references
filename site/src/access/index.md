@@ -1,6 +1,12 @@
 
 # How to access
 
+
+:::tip fetch(bible) continues to be improved
+Signup to [Gracious Tech news](https://gracious.tech/contact) if you'd like to know when new features are added.
+:::
+
+
 You can use fetch(bible) however you like and we make it easy with a variety of methods of integration for whatever your situation may require.
 
 ### Choose your level of integration
