@@ -1,0 +1,8 @@
+#!/bin/bash
+# Execute collector within the official collection
+set -e
+cd "$(realpath -m "$0/../..")/collection_official"
+
+
+../.bin/build_collector --log-level=warning
+NODE_OPTIONS="--no-warnings" node ../collector/dist/index.js "$@"
