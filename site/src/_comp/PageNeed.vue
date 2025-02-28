@@ -20,7 +20,7 @@ table
         th English
         th Code
         th Population
-    tr(v-for='lang of languages_without_shareable_limited')
+    tr(v-for='lang of languages_without_shareable_limited' :key='lang.id')
         td {{ lang.local }}
         td {{ lang.english }}
         td {{ lang.id }}
@@ -59,7 +59,7 @@ import population from './population.json'
 
 
 // Languages that have the same written form as another language that does have a translation
-const COVERED_BY_UNRESTRICTED_ALT = []
+const COVERED_BY_UNRESTRICTED_ALT = ['wuu']
 const COVERED_BY_SHAREABLE_ALT = [...COVERED_BY_UNRESTRICTED_ALT]
 
 
