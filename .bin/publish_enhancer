@@ -7,5 +7,8 @@ cd "$(realpath -m "$0/../..")/enhancer"
 npm publish --access=public
 
 # Publish self-executing version to collection.fetch.bible too
+# WARN Using old domain for collection so isn't affected by future versions of collections
+#      e.g. v1.fetch v2.fetch, and (2) doesn't break websites already using it
+#      So basically collection.fetch.bible is now the domain for `enhance.js` going forward
 aws s3 cp dist/execute.js s3://collection-fetch-bible/enhance.js
 aws cloudfront create-invalidation --distribution-id E3K5SZPCAYX1I4 --paths "/enhance.js"
