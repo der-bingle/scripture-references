@@ -1,0 +1,6 @@
+#!/bin/bash
+# Serve official collection
+set -e
+cd "$(realpath -m "$0/../..")"
+
+.bin/collector_official serve
