@@ -134,9 +134,10 @@ This client has zero external dependencies, no differences between the browser a
 
 ## Changes
 
-### Version 0.10.0
+### Version 1.0.0
 
- * Official collection upgraded and now found at [v1.fetch.bible](https://v1.fetch.bible)
+ * Official collection upgraded and now found at [v1.fetch.bible](https://v1.fetch.bible) (client defaults to the new collection)
  * Some bibles removed or changed id (always verify a translation still exists before using)
  * `get_languages()` item props renamed to `name_local`, `name_english`, `population`
  * Must now call `fetch_translation_extras()` to get book names in translation's language
+ * `get_preferred_language()` and `get_preferred_translation()` now return objects
