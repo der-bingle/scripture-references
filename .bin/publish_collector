@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build collector
+# Publish collector
 set -e
 cd "$(realpath -m "$0/../..")/collector"
 
@@ -8,3 +8,5 @@ cd "$(realpath -m "$0/../..")/collector"
 
 # Also include types (slow so not part of build command)
 npx tsc --emitDeclarationOnly --outDir dist
+
+npm publish --access=public
