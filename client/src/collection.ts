@@ -269,6 +269,22 @@ export class BibleCollection {
         return trans_meta.books_ot_list.includes(book) || trans_meta.books_nt_list.includes(book)
     }
 
+    // Get a language's metadata
+    get_language(code:string):GetLanguagesItem|undefined{
+        const data = this._manifest.languages[code]
+        if (!data){
+            return undefined
+        }
+        return {
+            code,
+            name_local: data.local,
+            name_english: data.english,
+            name_bilingual:
+                data.english === data.local ? data.local : `${data.local} (${data.english})`,
+            population: data.pop,
+        }
+    }
+
     // Get available languages as either a list or an object
     get_languages(options:ObjT<GetLanguagesOptions>):Record<string, GetLanguagesItem>
     get_languages(options?:ObjF<GetLanguagesOptions>):GetLanguagesItem[]
@@ -276,16 +292,7 @@ export class BibleCollection {
             GetLanguagesItem[]|Record<string, GetLanguagesItem>{
 
         // Start with list and dereference internal objects so manifest can't be modified
-        let list = Object.entries(this._manifest.languages).map(([code, data]) => {
-            return {
-                code,
-                name_local: data.local,
-                name_english: data.english,
-                name_bilingual:
-                    data.english === data.local ? data.local : `${data.local} (${data.english})`,
-                population: data.pop,
-            }
-        })
+        let list = Object.keys(this._manifest.languages).map(code => this.get_language(code)!)
 
         // Optionally exclude non-living languages
         if (exclude_old){
@@ -335,7 +342,12 @@ export class BibleCollection {
     }
 
     // Get the user's preferred available language (no arg required when used in browser)
-    get_preferred_language(preferences:string[]=[]):string{
+    get_preferred_language(preferences:string[]=[]):GetLanguagesItem{
+        return this.get_language(this._get_preferred_language_code(preferences))!
+    }
+
+    // @internal Get preferred language code
+    _get_preferred_language_code(preferences:string[]=[]):string{
 
         // Default to navigator property when in browser
         if (preferences.length === 0 && typeof self !== 'undefined'){
@@ -363,6 +375,54 @@ export class BibleCollection {
         return 'eng' in this._manifest.languages ? 'eng' : Object.keys(this._manifest.languages)[0]!
     }
 
+    // Get a translation's metadata
+    get_translation(id:string):GetTranslationsItem|undefined{
+        return this._get_translation(id)
+    }
+
+    // @internal Version that takes a `usage` arg which is only useful for `get_translations()`
+    _get_translation(id:string, usage?:UsageOptions):GetTranslationsItem|undefined{
+        const trans = this._manifest.translations[id]
+        if (!trans){
+            return undefined
+        }
+
+        // Work out bilingual names
+        let bilingual = trans.name.local || trans.name.english
+        if (trans.name.local && trans.name.english &&
+                trans.name.local.toLowerCase() !== trans.name.english.toLowerCase()){
+            bilingual = `${trans.name.local} (${trans.name.english})`
+        }
+        let bilingual_abbrev = trans.name.local_abbrev || trans.name.english_abbrev
+        if (trans.name.local_abbrev && trans.name.english_abbrev &&
+                trans.name.local_abbrev !== trans.name.english_abbrev){
+            bilingual_abbrev = `${trans.name.local_abbrev} (${trans.name.english_abbrev})`
+        }
+
+        return {
+            id,
+            language: id.slice(0, 3),
+            direction: trans.direction,
+            year: trans.year,
+
+            name: trans.name.local || trans.name.english,
+            name_abbrev: trans.name.local_abbrev || trans.name.english_abbrev,
+            name_english: trans.name.english,
+            name_english_abbrev: trans.name.english_abbrev,
+            name_local: trans.name.local,
+            name_local_abbrev: trans.name.local_abbrev,
+            name_bilingual: bilingual,
+            name_bilingual_abbrev: bilingual_abbrev,
+
+            attribution: trans.copyright.attribution,
+            attribution_url: trans.copyright.attribution_url,
+            licenses: deep_copy(
+                filter_licenses(trans.copyright.licenses, {...this._usage, ...usage})),
+            liternalness: trans.literalness,
+            tags: [...trans.tags],
+        } as GetTranslationsItem
+    }
+
     // Get available translations as either a list or an object
     get_translations(options:ObjT<GetTranslationsOptions>):Record<string, GetTranslationsItem>
     get_translations(options?:ObjF<GetTranslationsOptions>):GetTranslationsItem[]
@@ -372,42 +432,8 @@ export class BibleCollection {
         // Start with list of translations, extracting properties that don't need extra processing
         // NOTE Filters out translations not compatible with usage config
         // WARN Careful to unpack all objects so originals can't be modified
-        let list = Object.entries(this._manifest.translations).map(([id, trans]) => {
-
-            // Work out bilingual names
-            let bilingual = trans.name.local || trans.name.english
-            if (trans.name.local && trans.name.english &&
-                    trans.name.local.toLowerCase() !== trans.name.english.toLowerCase()){
-                bilingual = `${trans.name.local} (${trans.name.english})`
-            }
-            let bilingual_abbrev = trans.name.local_abbrev || trans.name.english_abbrev
-            if (trans.name.local_abbrev && trans.name.english_abbrev &&
-                    trans.name.local_abbrev !== trans.name.english_abbrev){
-                bilingual_abbrev = `${trans.name.local_abbrev} (${trans.name.english_abbrev})`
-            }
-
-            return {
-                id,
-                language: id.slice(0, 3),
-                direction: trans.direction,
-                year: trans.year,
-
-                name: trans.name.local || trans.name.english,
-                name_abbrev: trans.name.local_abbrev || trans.name.english_abbrev,
-                name_english: trans.name.english,
-                name_english_abbrev: trans.name.english_abbrev,
-                name_local: trans.name.local,
-                name_local_abbrev: trans.name.local_abbrev,
-                name_bilingual: bilingual,
-                name_bilingual_abbrev: bilingual_abbrev,
-
-                attribution: trans.copyright.attribution,
-                attribution_url: trans.copyright.attribution_url,
-                licenses: deep_copy(
-                    filter_licenses(trans.copyright.licenses, {...this._usage, ...usage})),
-                liternalness: trans.literalness,
-                tags: [...trans.tags],
-            } as GetTranslationsItem
+        let list = Object.keys(this._manifest.translations).map(id => {
+            return this._get_translation(id, usage)!
         }).filter(trans => trans.licenses.length)
 
         // Optionally limit to single language
@@ -455,10 +481,15 @@ export class BibleCollection {
     }
 
     // Get user's preferred available translation (provide language preferences if not in browser)
-    get_preferred_translation(languages:string[]=[]):string{
+    get_preferred_translation(languages:string[]=[]):GetTranslationsItem{
+        return this.get_translation(this._get_preferred_translation_id(languages))!
+    }
+
+    // @internal Get preferred translation id
+    _get_preferred_translation_id(languages:string[]=[]):string{
 
         // First get preferred language
-        const language = this.get_preferred_language(languages)
+        const language = this._get_preferred_language_code(languages)
 
         // Return recommended translation, or otherwise the most modern full translation
         let candidate:string|null = null

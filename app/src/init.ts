@@ -64,7 +64,7 @@ void content.client.fetch_collection().then(collection => {
     // NOTE Changing also triggers content to load for the first time
     const valid_trans = state.trans.filter(code => code in content.translations)
     state.trans = valid_trans.length ? (valid_trans as [string, ...string[]])
-        : [content.collection.get_preferred_translation()]
+        : [content.collection.get_preferred_translation().id]
 
     // Parse initial search
     if (state.search){

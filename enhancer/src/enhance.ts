@@ -104,22 +104,24 @@ export class BibleEnhancer {
 
         // If translation hasn't been set yet, choose sensible default
         if (!this._translations.length){
-            this._translations = [collection.get_preferred_translation()]
+            this._translations = [collection.get_preferred_translation().id]
         }
 
         let html = ''
         for (const trans of this._translations){
             // Confirm translation has book before attempting to get it
-            if (collection.has_translation(trans) && collection.has_book(trans, ref.book)){
+            const trans_meta = collection.get_translation(trans)
+            if (!trans_meta){
+                continue  // Must have been given invalid trans id
+            }
+            if (collection.has_book(trans, ref.book)){
                 const book = await collection.fetch_book(trans, ref.book)
                 html += book.get_passage_from_ref(ref, {attribute: false})
             } else {
                 html += '<p>&mdash;</p>'
             }
             // Append custom attribution which is just the translation's abbreviation
-            html += `<p class='fb-attribution'>
-                ${collection._manifest.translations[trans]?.name.abbrev ?? '&mdash;'}
-            </p>`
+            html += `<p class='fb-attribution'>${trans_meta.name_abbrev}</p>`
         }
         div.innerHTML = html
     }
@@ -224,7 +226,7 @@ export class BibleEnhancer {
         // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
         if (!this._translations.length){
-            this._translations = [collection.get_preferred_translation()]
+            this._translations = [collection.get_preferred_translation().id]
         }
 
         // Ensure existing links are active (SPAs might reattach without event listeners)
