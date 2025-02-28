@@ -10,6 +10,7 @@ npm ci
 
 
 # Build components that other components rely on
+.bin/build_references
 .bin/build_client
 .bin/build_client_docs
 .bin/build_converters
