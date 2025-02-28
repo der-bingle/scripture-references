@@ -434,11 +434,11 @@ const highlight_range = (passage:PassageReference, id:string) => {
             margin-bottom: 0
 
     // Color translations to distinguish between them
-    .verse_trans:nth-child(2)
+    .verse_trans:nth-child(1)
         background-color: transparent
-    .verse_trans:nth-child(3)
+    .verse_trans:nth-child(2)
         background-color: hsla(0, 50%, 50%, 0.15)
-    .verse_trans:nth-child(4)
+    .verse_trans:nth-child(3)
         background-color: hsla(40, 50%, 50%, 0.15)
 
     // Display translations in separate columns when screen wide enough
