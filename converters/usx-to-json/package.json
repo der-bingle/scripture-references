@@ -1,6 +1,6 @@
 {
   "name": "usx-to-json",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "description": "Convert USX Bible format to JSON with verse contents in either HTML or plain text.",
   "type": "module",
   "exports": {
@@ -27,6 +27,6 @@
   },
   "homepage": "https://github.com/gracious-tech/fetch/tree/master/converters/usx-to-json",
   "dependencies": {
-    "@gracious.tech/bible-references": "^0.2.0"
+    "@gracious.tech/bible-references": "^1.0.0"
   }
 }
