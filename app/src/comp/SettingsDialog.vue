@@ -15,7 +15,7 @@ v-dialog(v-model='state.show_style_dialog' :fullscreen='!state.wide' :max-width=
 
             div.row
                 app-icon(name='light_mode')
-                v-switch.theme(v-model='state.dark' hide-details)
+                v-switch.theme(v-model='dark' hide-details)
                 app-icon(name='dark_mode')
 
             v-btn-toggle(v-model='state.font_size' mandatory class='my-1' color='primary')
@@ -45,7 +45,19 @@ v-dialog(v-model='state.show_style_dialog' :fullscreen='!state.wide' :max-width=
 
 <script lang='ts' setup>
 
+import {computed} from 'vue'
+
 import {state, density, dialog_max_width} from '@/services/state'
+
+
+const dark = computed({
+    get(){
+        return state.dark ?? matchMedia('(prefers-color-scheme: dark)').matches
+    },
+    set(value:boolean){
+        state.dark = value
+    },
+})
 
 </script>
 
