@@ -1,0 +1,7 @@
+#!/bin/bash
+# Publish reverse-usx
+set -e
+cd "$(realpath -m "$0/../..")/converters/reverse-usx"
+
+../../.bin/build_converters
+npm publish --access=public
