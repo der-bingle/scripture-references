@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 // A script for extracting language population data from DBS data dump
+// NOTE This data is needed for the website too, so can't just be put into collector
+//      as collector will only publish languages that have translations, not all of them
 
 import {dirname, join} from 'path'
 import {fileURLToPath} from 'node:url'
