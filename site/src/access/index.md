@@ -55,18 +55,22 @@ Most developers will want to use these formats. They are organised by verse usin
 
 ### Raw paragraph-based formats
 
-These formats provide raw access to translations with all of the metadata and extra-biblical content intact. You should only use these if you are familiar with them and know how to display them without confusing biblical text with metadata. They are paragraph-based, meaning paragraphs form the main structure of the documents, and verse markers occur within paragraphs. There is no guarantee all verses will be present, or that the text is broken up by the most common versification standard.
+These formats provide raw access to translations with all of the metadata and extra-biblical content intact. You should only use these if you are familiar with them and know how to display them without confusing biblical text with metadata. They are paragraph-based, meaning paragraphs form the main structure of the documents, and verse markers occur within paragraphs. There is no guarantee all verses will be present.
 
  * __[USFM](https://ubsicap.github.io/usfm/)__ -- The most common format used to create translations, with a syntax similar to TeX where backslash'd tags are used to markup the text
  * __[USX](https://ubsicap.github.io/usx/)__ -- An XML format designed to support all the features of USFM, so it can be parsed with modern tooling
 
+&nbsp;
 
-::: tip What is "versification"?
+::: tip Versification
+
+All distributed formats use the modern standard for versification.
+
 Most modern translations use the same system for numbering chapters and verses, [originally created by Robert Estienne](https://en.wikipedia.org/wiki/Chapters_and_verses_of_the_Bible#Verses) in 1551 AD and later popularized by the KJV.
 
 Careful research into the original manuscripts has led many modern bibles to drop some verses that were originally included in older translations. However, to avoid confusing readers, the numbers of later verses remained the same, which is why some verses are "missing" today.
 
 Bibles based on other manuscripts (such as the Septuagint) or from other Christian traditions (such as Orthodox and Catholic) were given somewhat [different systems of numbering verses](https://github.com/Copenhagen-Alliance/versification-specification/tree/master/versification-mappings/standard-mappings).
 
-This platform preserves the numbering in raw Bible formats (USFM and USX) but uses the standard "KJV" numbering for all converted formats (HTML and plain text). This allows developers to not have to deal with versification issues for regular apps, but to still have access to the data if they need it.
+This platform uses the standard "KJV" numbering for all distributed formats. This allows developers to not have to deal with versification issues. If you do want the original versification for a certain translation, you can access its [source format](https://github.com/gracious-tech/fetch_collection).
 :::
