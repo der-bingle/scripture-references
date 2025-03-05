@@ -1,6 +1,6 @@
 
 import {join} from 'path'
-import {writeFileSync} from 'fs'
+import {existsSync, writeFileSync} from 'fs'
 
 import StreamZip from 'node-stream-zip'
 import {last_verse} from '@gracious.tech/bible-references'
@@ -30,7 +30,8 @@ export async function download_source(recheck:boolean, force:boolean, trans_id?:
         const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', id, 'meta.json'))
 
         // Don't redownload if already downloaded (unless --recheck enabled)
-        if (!recheck && list_files(join('sources', 'bibles', id, meta.source.format)).length){
+        const src_dir = join('sources', 'bibles', id, meta.source.format)
+        if (!recheck && existsSync(src_dir) && list_files(src_dir).length){
             continue  // Already downloaded
         }
 
