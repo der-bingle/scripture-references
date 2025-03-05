@@ -80,7 +80,7 @@ export async function gen_language_data(){
     }
 
     // Save to file
-    write_json('languages.json', data, true)
+    write_json(join('sources', 'languages.json'), data, true)
 }
 
 
@@ -104,5 +104,5 @@ export class Languages {
 
 export function get_language_data():Languages{
     // Read language data from file and return within an interface
-    return new Languages(read_json<LanguageData>('languages.json'))
+    return new Languages(read_json<LanguageData>(join('sources', 'languages.json')))
 }
