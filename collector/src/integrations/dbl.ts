@@ -12,7 +12,6 @@ import type {TranslationSourceMeta} from '../parts/types'
 // Translations that can be sourced from a better location (or other issue)
 const IGNORE:string[] = [
     '69ffe7eecd894e52',  // Only second half of genesis
-    '9915a49ed60cc12f',  // Duplicate and older version of 'ecab53fbf87d865a'
 ]
 
 // Some language codes are outdated
