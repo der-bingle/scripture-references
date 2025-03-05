@@ -10,15 +10,10 @@ import {_missing_meta} from '../parts/manifest.js'
 import type {TranslationSourceMeta} from '../parts/types'
 
 
-export function report_items(mode?:'missing'){
+export function report_items(){
     // Output a list of all included translations
     for (const id of list_dirs(join('sources', 'bibles'))){
         const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', id, 'meta.json'))
-
-        // Ignore depending on mode
-        if (mode === 'missing' && !_missing_meta(meta)){
-            continue
-        }
 
         // Report the first license if any
         let license = meta.copyright.licenses[0]?.license
@@ -43,7 +38,35 @@ export function report_items(mode?:'missing'){
 }
 
 
-export function report_invalid(report_no_books=false){
+export function report_invalid_meta(){
+    // Output a list of translations that have invalid metadata
+    for (const id of list_dirs(join('sources', 'bibles'))){
+        const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', id, 'meta.json'))
+
+        // See if missing any metadata
+        if (_missing_meta(meta)){
+            console.error(`MISSING METADATA: ${id}`)
+        }
+
+        // See if ids not consistent
+        const service = meta.source.service
+        if (service === 'dbl' || service === 'ebible'){
+            const service_id = meta.ids[service]!
+            const attr_url = meta.copyright.attribution_url
+            if ((attr_url.includes('ebible') || attr_url.includes('digitalbiblelibrary'))
+                    && !meta.copyright.attribution_url.includes(service_id)){
+                console.error(`WRONG ATTRIBUTION: ${id}`)
+            }
+
+            if(!meta.source.url!.includes(service_id)){
+                console.error(`WRONG ID IN SOURCE URL: ${id}`)
+            }
+        }
+    }
+}
+
+
+export function report_invalid_books(report_no_books=false){
     // Report translations that have invalid books
     for (const id of list_dirs(join('sources', 'bibles'))){
         const src_format = existsSync(join('sources', 'bibles', id, 'usx')) ? 'usx' : 'usfm'

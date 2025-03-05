@@ -2,8 +2,8 @@
 
 import yargs from 'yargs'
 
-import {report_invalid, report_incomplete, report_items, report_unprocessed}
-    from './commands/report.js'
+import {report_invalid_books, report_incomplete, report_items, report_unprocessed,
+    report_invalid_meta} from './commands/report.js'
 import {publish} from './commands/publish.js'
 import {serve} from './commands/serve.js'
 import {update_dist} from './commands/process.js'
@@ -63,12 +63,12 @@ await yargs(process.argv.slice(2))
 
     .command('report', "Report the status of included translations", {},
         argv => report_items())
-    .command('report-missing', "Report translations missing metadata", {},
-        argv => report_items('missing'))
+    .command('report-invalid-meta', "Report translations with invalid metadata", {},
+        argv => report_invalid_meta())
     .command('report-bookless', "Report translations with no valid books", {},
-        argv => report_invalid(true))
-    .command('report-invalid', "Report translations with invalid books", {},
-        argv => report_invalid())
+        argv => report_invalid_books(true))
+    .command('report-invalid-books', "Report translations with invalid books", {},
+        argv => report_invalid_books())
     .command('report-incomplete', "Report translations with almost complete testaments", {},
         argv => report_incomplete())
     .command('report-unprocessed [type]', "Report translations yet to be processed", {},
