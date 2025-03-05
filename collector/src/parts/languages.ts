@@ -1,6 +1,7 @@
 
 import {join} from 'path'
 import {existsSync} from 'fs'
+import {merge} from 'lodash-es'
 
 import {PKG_PATH, read_json, request, write_json} from './utils.js'
 import {MetaLanguage} from './shared_types.js'
@@ -21,6 +22,34 @@ interface CLDRLanguages {
 interface LanguageData {
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
+}
+
+interface LanguageDataPartial {
+    languages:Record<string, Partial<MetaLanguage>>
+    language2to3:Record<string, string>
+}
+
+
+// Ensure these values are present in result
+const overrides:LanguageDataPartial = {
+    languages: {
+        /* Chinese is hard to classify
+            Many in China speak Mandarin but read simplified script
+            Many in Taiwan speak Mandarin but read traditional script
+            Many in Hong Kong speak Cantonese but read traditional script
+            Many in Singapore speak Hokkien but read simplified script
+        International codes and this platform learn towards classifying languages by speech
+        Audio bibles can be assigned the correct spoken language
+        But written Chinese bibles can't be isolated to a single spoken language
+        TODO Solution: client-side aliasing (for now just putting everything in "cmn")
+        */
+        cmn: {local: '中文', english: "Chinese"},  // TODO Change to "Mandarin" when aliasing done
+        awk: {local: 'Awabakal'},  // Population data uses region name by mistake, no CLDR data
+    },
+    language2to3: {
+        // TODO Modify to support including country codes and routing to correct spoken language
+        zh: 'cmn',  // Default to cmn for now which contains all Chinese bibles
+    },
 }
 
 
@@ -78,6 +107,9 @@ export async function gen_language_data(){
                 .main[cldr_code]!.localeDisplayNames.languages[cldr_code]!
         }
     }
+
+    // Apply overrides
+    merge(data, overrides)
 
     // Save to file
     write_json(join('sources', 'languages.json'), data, true)
