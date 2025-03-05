@@ -117,8 +117,8 @@ export async function discover(existing:string[], discover_specific_id?:string):
 
         // Determine ids
         // NOTE Use org abbreviation when available (fallback on 'a' for later manual correction)
-        const trans_id = `${lang_code ?? ''}_${org_abbrev || eng_abbrev || 'a'}`
-        const log_ids = `${trans_id}/${item.id}`
+        let trans_id = `${lang_code ?? ''}_${org_abbrev || eng_abbrev || 'a'}`
+
 
         // Skip if already exists
         if (existing.includes(item.id)){
@@ -133,18 +133,25 @@ export async function discover(existing:string[], discover_specific_id?:string):
             return
         }
 
-        // If already added via another service, add dbl id to it
-        const trans_dir = join('sources', 'bibles', trans_id)
-        const meta_file = join(trans_dir, 'meta.json')
+        // Handle case when generated id already matches an existing translation
+        let trans_dir = join('sources', 'bibles', trans_id)
+        let meta_file = join(trans_dir, 'meta.json')
         if (existsSync(meta_file)){
             const existing_meta = read_json<TranslationSourceMeta>(meta_file)
             if (!existing_meta.ids.dbl){
+                // Already added via another service so add dbl id to it
                 existing_meta.ids.dbl = item.id
                 write_json(meta_file, existing_meta, true)
+                num_existing += 1
+                return
+            } else {
+                // Wants to have same id as another from DBL, so append abbrev to make more unique
+                trans_id += '_' + eng_abbrev
+                trans_dir = join('sources', 'bibles', trans_id)
+                meta_file = join(trans_dir, 'meta.json')
             }
-            num_existing += 1
-            return
         }
+        const log_ids = `${trans_id}/${item.id}`
 
         // Search for the license
         const html_url = `https://app.thedigitalbiblelibrary.org/entry?id=${item.id}`
@@ -230,6 +237,7 @@ export async function discover(existing:string[], discover_specific_id?:string):
         mkdirSync(trans_dir, {recursive: true})
         write_json(meta_file, meta, true)
         num_added += 1
+        existing.push(item.id)
     }))
 
     // Report stats
