@@ -1,6 +1,6 @@
 {
     "name": "@gracious.tech/fetch-collector",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "CLI for managing a fetch(bible) collection",
     "main": "dist/index.js",
     "type": "module",
