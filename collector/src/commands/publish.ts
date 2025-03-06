@@ -36,18 +36,18 @@ export class Publisher extends PublisherAWS {
 }
 
 
-export async function publish(type?:'bible'|'notes'|'data', id?:string){
+export async function publish(type?:'bible'|'notes'|'data', ids?:string){
     // Publish files to server
     const publisher = new Publisher()
     const invalidations = []
     if (!type || type === 'bible'){
-        invalidations.push(...await _publish_bible(publisher, id))
+        invalidations.push(...await _publish_bible(publisher, ids))
     }
     if (!type || type === 'notes'){
-        invalidations.push(...await _publish_notes(publisher, id))
+        invalidations.push(...await _publish_notes(publisher, ids))
     }
     if (!type || type === 'data'){
-        invalidations.push(...await _publish_data(publisher, id))
+        invalidations.push(...await _publish_data(publisher, ids))
     }
 
     // Always update root index file, just in case
@@ -58,7 +58,7 @@ export async function publish(type?:'bible'|'notes'|'data', id?:string){
 }
 
 
-async function _publish_bible(publisher:Publisher, translation?:string):Promise<string[]>{
+async function _publish_bible(publisher:Publisher, translations?:string):Promise<string[]>{
     // Publish bibles and return paths needing invalidation
 
     // Detect translations from manifest so know they passed review
@@ -66,13 +66,15 @@ async function _publish_bible(publisher:Publisher, translation?:string):Promise<
     const manifest = read_json<DistManifest>(manifest_path)
 
     // Add translations if not published yet
+    const trans_ids = translations ? translations.split(',') : null
     const invalidations:string[] = []
     for (const id in manifest.translations){
-        if (translation && id !== translation){
-            continue  // Only publishing a single translation
+        if (trans_ids && !trans_ids.includes(id)){
+            continue  // Only publishing certain translations
         }
 
         // Upload bible's files and dir indexes
+        console.info(`Publishing bible: ${id}`)
         await publisher.upload_dir(join('dist', 'bibles', id))
         invalidations.push(`/bibles/${id}/*`)
     }

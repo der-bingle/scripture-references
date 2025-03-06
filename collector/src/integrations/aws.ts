@@ -41,7 +41,8 @@ export class PublisherAWS {
 
         // If invalidating too many paths, better to just use single wildcard
         // NOTE AWS only gives 1000 free paths (wilcard = 1 path) per month
-        if (paths.length > 100){
+        // NOTE AWS only allows 15 wildcard paths at one time
+        if (paths.length > 12){
             paths = ['/*']
         }
 

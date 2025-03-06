@@ -51,8 +51,8 @@ await yargs(process.argv.slice(2))
 
     .command('publish', "Publish all changes to server", {},
         argv => publish())
-    .command('publish-bible [id]', "Publish translations to server", {},
-        argv => publish('bible', argv['id'] as string))
+    .command('publish-bible [ids]', "Publish translations to server", {},
+        argv => publish('bible', argv['ids'] as string))
     .command('publish-notes [id]', "Publish study notes to server", {},
         argv => publish('notes', argv['id'] as string))
     .command('publish-data [id]', "Publish other data to server", {},
