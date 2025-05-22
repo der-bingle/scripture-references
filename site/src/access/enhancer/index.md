@@ -147,29 +147,30 @@ enhancer.change_translation('eng_bsb', 'grc_sr')
 
 ### Real example with SPA
 
-The following is an example of how the enhancer can be used in a SPA framework like [VitePress](https://vitepress.dev/).
+The following is an example of how the enhancer can be used in a SPA framework like [VitePress](https://vitepress.dev/), which will change URL/content without reloading the page.
+
+The following code should be run within VitePress' [`enhanceApp(ctx)`](https://vitepress.dev/guide/custom-theme) function.
 
 ```js
-// Within a root component that only renders once
-onMounted(() => {
-
-    // Init enhancer with support for VitePress' router
-    const enhancer = new BibleEnhancer({
-        translations: ['eng_bsb', 'grc_sr'],
-        before_history_push: () => {
-            // Store scroll position for VitePress to prevent page jump
-            history.replaceState({scrollPosition: window.scrollY}, '')
-        },
-    })
-
-    // Initial discovery
-    enhancer.discover_bible_references()
-
-    // Discover for every page visited
-    useRouter().onAfterRouteChanged = to => {
+// Enhancer is not needed/compatible with Server-Side Rendering
+if (!import.meta.env.SSR){
+    let enhancer
+    ctx.router.onAfterPageLoad = to => {
+        // Init enhancer after first page mounted and DOM ready
+        if (!enhancer){
+            enhancer = new BibleEnhancer({
+                before_history_push: () => {
+                    // VitePress expects scroll value to prevent page jump
+                    history.replaceState({
+                        scrollPosition: window.scrollY,
+                    }, '')
+                },
+            })
+        }
+        // Discover new references whenever a new page is loaded
         enhancer.discover_bible_references()
     }
-})
+}
 ```
 
 
