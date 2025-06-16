@@ -10,6 +10,7 @@ interface ConstructorOptions {
     history?:boolean
     translations?:string[]
     always_detect_english?:boolean
+    spaces_to_nbsp?:boolean
     before_history_push?:()=>void
 }
 
@@ -24,6 +25,7 @@ export class BibleEnhancer {
     _history:boolean
     _translations:string[]
     _always_detect_english:boolean
+    _spaces_to_nbsp:boolean
     _before_history_push:()=>void
     _hover_divs:[HTMLDivElement, PassageReference][] = []
     // Detect whether device can hover (without emulation)
@@ -38,6 +40,7 @@ export class BibleEnhancer {
         this._history = options.history !== false
         this._translations = options.translations ?? []
         this._always_detect_english = options.always_detect_english !== false
+        this._spaces_to_nbsp = options.spaces_to_nbsp === true  // TODO Default to true if reliable
         this._before_history_push = options.before_history_push ?? (() => {})
 
         // Pre-generate app DOM so it is ready to go once user clicks a reference
@@ -305,7 +308,8 @@ export class BibleEnhancer {
                 + `&search=${match.ref.book}${verses}&${this._app_args}`)
             ref_a.setAttribute('target', '_blank')
             ref_a.setAttribute('class', 'fb-enhancer-link')
-            ref_a.textContent = match.text
+            ref_a.textContent =
+                this._spaces_to_nbsp ? match.text.replace(/ /g, '\u00A0') : match.text
             ref_node.replaceWith(ref_a)
 
             // Enhance the new <a> element
