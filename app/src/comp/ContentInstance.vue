@@ -382,6 +382,40 @@ const highlight_range = (passage:PassageReference, id:string) => {
         @media (min-width: 800px)
             font-size: 22px
 
+    // Make chapter headings invisible rather than not present, so doesn't mess up navigation
+    // WARN Changing this can break chapter navigation
+    &.no-chapters :deep(h3[data-c])
+        display: block !important
+        visibility: hidden
+
+    // Make verse numbers buttons
+    :deep(sup[data-v])
+        background-color: #8884
+        display: inline-flex
+        justify-content: center
+        align-items: center
+        vertical-align: middle
+        position: static
+        border-radius: 50%
+        padding: 0 !important
+        margin-right: 0.3em
+        width: 2em
+        height: 2em
+        cursor: pointer
+
+        &:hover
+            background-color: rgb(var(--v-theme-primary))
+
+    :deep(.fb-attribution)
+        margin-top: 80px !important
+        opacity: 0.5
+        text-align: center
+        a
+            color: inherit
+            text-decoration: none
+            &:hover
+                text-decoration: underline
+
 .single
     padding: 24px
 
