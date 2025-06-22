@@ -10,11 +10,14 @@ template(v-if='notes')
 template(v-if='crossrefs.length')
     h5(class='mb-2') Cross references
     template(v-for='crossref of crossrefs' :key='crossref.label')
-        v-chip(class='mr-2 mb-2' size='small' @click='crossref.view') {{ crossref.label }}
+        v-chip(class='mr-2 mb-2' rounded size='small' @click='crossref.view') {{ crossref.label }}
 template(v-if='original')
     h5 Original language
     div.orig(v-html='original'
         class='fetch-bible no-verses no-chapters no-headings no-notes no-red-letter')
+div(v-if='variants_url' class='mb-4')
+    v-btn(:href='variants_url' target='variants' color='' size='small' variant='tonal' rounded)
+        | Variants &amp; Manuscripts
 
 </template>
 
@@ -23,7 +26,7 @@ template(v-if='original')
 
 import {computed, watch, ref, nextTick} from 'vue'
 
-import {PassageReference} from '@gracious.tech/fetch-client'
+import {books_ordered, PassageReference} from '@gracious.tech/fetch-client'
 
 import {change_book, state} from '@/services/state'
 
@@ -92,6 +95,31 @@ watch(() => state.study, () => {
         return
     }
     original.value = state.original.get_verse(state.study[1], state.study[2], {attribute: false})
+}, {immediate: true})
+
+
+// Link to variants
+const variants_url = ref('')
+watch(() => state.study, () => {
+    if (!state.study){
+        variants_url.value = ''
+        return
+    }
+
+    // Determine CNTR code for verse
+    const book_index = books_ordered.findIndex(b => b === state.study![0])
+    if (book_index < books_ordered.findIndex(b => b === 'mat')){
+        variants_url.value = ''
+        return  // No link for OT
+    }
+    const padded_book = String(book_index + 1).padStart(2, '0')  // CNTR indexes from 1
+    const padded_ch = String(state.study[1]).padStart(3, '0')
+    const padded_v = String(state.study[2]).padStart(3, '0')
+    const cntr_code = padded_book + padded_ch + padded_v
+
+    // Set URL
+    variants_url.value = `https://greekcntr.org/collation/index.htm?v=${cntr_code}`
+
 }, {immediate: true})
 
 
