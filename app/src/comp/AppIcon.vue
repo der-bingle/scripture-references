@@ -1,7 +1,7 @@
 
 <template lang='pug'>
 
-component.icon(:is='icons[name]')
+component.icon(:is='icons[name]' :class='{small}')
 
 </template>
 
@@ -26,16 +26,18 @@ import dark_mode from '@material-symbols/svg-400/outlined/dark_mode.svg?componen
 import light_mode from '@material-symbols/svg-400/outlined/light_mode.svg?component'
 import cloud_off from '@material-symbols/svg-400/outlined/cloud_off.svg?component'
 import sync from '@material-symbols/svg-400/outlined/sync.svg?component'
+import arrow_outward from '@material-symbols/svg-400/outlined/arrow_outward.svg?component'
 
 
 defineProps({
     name: {required: true, type: String},
+    small: {type: Boolean},
 })
 
 
 const icons = {
     close, search, more_vert, add, delete: delete_, arrow_back, add_circle, expand_circle_down,
-    settings, info, dark_mode, light_mode, cloud_off, sync, close_small, check,
+    settings, info, dark_mode, light_mode, cloud_off, sync, close_small, check, arrow_outward,
 } as Record<string, FunctionalComponent>
 
 
@@ -49,6 +51,10 @@ const icons = {
     height: 24px
     width: 24px
     fill: currentColor
+
+    &.small
+        height: 18px
+        width: 18px
 
 
 </style>

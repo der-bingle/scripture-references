@@ -18,6 +18,7 @@ template(v-if='original')
 div(v-if='variants_url' class='mb-4')
     v-btn(:href='variants_url' target='variants' color='' size='small' variant='tonal' rounded)
         | Variants &amp; Manuscripts
+        app-icon(name='arrow_outward' small class='ml-1')
 
 </template>
 
