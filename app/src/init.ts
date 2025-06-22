@@ -1,6 +1,7 @@
 
 import {createApp} from 'vue'
 import {createVuetify} from 'vuetify'
+import {md3} from 'vuetify/blueprints'
 
 import AppRoot from './comp/AppRoot.vue'
 import AppIcon from '@/comp/AppIcon.vue'
@@ -23,6 +24,7 @@ const app = createApp(AppRoot)
 // Add Vuetify
 const dark_val = state.dark ?? matchMedia('(prefers-color-scheme: dark)').matches
 app.use(createVuetify({
+    blueprint: md3,
     defaults: {
         VDialog: {
             scrollable: true,  // Stops toolbars in dialogs from scrolling with contents
