@@ -150,7 +150,7 @@ h5
     cursor: pointer
 
 .orig
-    margin-bottom: 24px
+    margin-bottom: 8px
     font-size: 16px !important
 
 </style>
