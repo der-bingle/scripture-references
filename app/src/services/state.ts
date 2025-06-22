@@ -139,7 +139,8 @@ export const safe_hsl = computed(() => {
     // NOTE values is state are forced to be numbers but not restricted in amount yet
     const safe_hue = parse_int(state.hue, 0, 360)
     const safe_sat = parse_int(state.saturation, 20, 80)  // Very high/low harder to see
-    return `hsl(${safe_hue}, ${safe_sat}%, 50%)`
+    // NOTE lightness set slightly about 50% since dark mode needs more contrast than light mode
+    return `hsl(${safe_hue}, ${safe_sat}%, 60%)`
 })
 
 
