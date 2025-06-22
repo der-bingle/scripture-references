@@ -215,7 +215,13 @@ const update_dom = () => {
     for (const node of Object.values(verse_nodes)){
         node.addEventListener('click', () => {
             const data_v = node.dataset['v']!.split(':').map(part => parseInt(part))
-            state.study = [state.book, data_v[0]!, data_v[1]!]
+            const new_study = [state.book, data_v[0]!, data_v[1]!] as [string, number, number]
+            // If clicking on verse already being studied, deselect it instead
+            if (state.study && state.study.join('-') === new_study.join('-')){
+                state.study = null
+            } else {
+                state.study = new_study
+            }
         })
     }
 
