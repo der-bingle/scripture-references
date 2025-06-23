@@ -10,6 +10,7 @@ export type * from '@gracious.tech/bible-references'
 // Code
 // NOTE Don't export classes not meant to be initiated directly, export them as types instead
 export {BibleClient} from './client.js'
+export {substantial_poetry} from './data.js'
 
 
 // Types (only expose those relevant to the user and willing to support going forward)
