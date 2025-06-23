@@ -399,6 +399,18 @@ export class BibleBookTxt {
         return result + this._attribution(options.attribute)
     }
 
+    // Get txt for a specific passage specified by a PassageReference object
+    get_passage_from_ref(ref:PassageReference, options:GetTxtOptions={}):string{
+        if (ref.type === 'book'){
+            return this.get_whole(options)
+        }
+        if (ref.type === 'chapter' || ref.type === 'range_chapters'){
+            return this.get_chapters(ref.start_chapter, ref.end_chapter, options)
+        }
+        return this.get_passage(ref.start_chapter, ref.start_verse, ref.end_chapter, ref.end_verse,
+            options)
+    }
+
     // Get txt for multiple chapters
     get_chapters(first:number, last:number, options:GetTxtOptions={}):string{
         if (typeof first !== 'number' || typeof last !== 'number'){
