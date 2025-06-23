@@ -221,6 +221,8 @@ const update_dom = () => {
                 state.study = null
             } else {
                 state.study = new_study
+                // Clear passage highlight when selecting a verse
+                clear_highlight('passage')
             }
         })
     }
