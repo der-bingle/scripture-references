@@ -6,16 +6,18 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
 
     v-card(height='100%')
 
-        v-tabs(v-model='selected_trans_index' color='primary')
+        v-tabs(v-model='selected_trans_index' color='' bg-color='primary')
             v-tab(v-for='(item, i) of chosen_translations' :key='item.id + i')
-                | {{ item.name_abbrev }}
-                v-btn(v-if='chosen_translations.length > 1' icon variant='text' color='#888f'
+                div.abbrev {{ item.name_abbrev }}
+                v-btn.remove(v-if='chosen_translations.length > 1' icon variant='text' color=''
                         @click.stop='remove_trans(i)')
                     app-icon(name='close_small')
-            v-btn.add(v-if='edited_trans.length < 3' icon variant='text' @click='add_trans')
-                app-icon(name='add_circle')
-            v-btn.close(icon variant='text' @click='confirm_changes')
-                app-icon(name='check')
+            v-btn.add(v-if='edited_trans.length < 3' icon variant='text' color=''
+                    @click='add_trans')
+                app-icon(name='add_circle_fill')
+            div.close
+                v-btn(icon variant='text' @click='confirm_changes' color='')
+                    app-icon(name='close')
 
         div.subbar
             v-text-field.search(v-if='show_languages' v-model='languages_search' variant='outlined'
@@ -156,16 +158,33 @@ onUnmounted(() => {
     .v-text-field
         margin: 0 12px
 
-.close
-    margin-left: auto
-
 .v-tabs
     min-height: var(--v-tabs-height)  // Safari bug fix
 
 .v-tab
-    padding-right: 0
+    padding-right: 0  // So remove button can go right to edge
+    grid-template-columns: 0 1fr 0  // Override Vuetify to allow contents to grow
+    flex-grow: 1  // Grow width of tab
+    max-width: 250px  // Don't let tabs grow too big
+    border-right: 1px solid #fff5  // Make clear which tab remove buttons belong to
+    border-radius: 0 !important
 
-    .v-btn--icon
-        margin-left: 48px
+    &.v-tab--selected
+        background-color: #fff3  // So more obvious which one is selected
+
+    .abbrev
+        text-align: center
+        flex-grow: 1  // So remove button pushed to right edge of tab
+
+    &:not(:hover)
+        .remove
+            opacity: 0.5
+
+.close
+    margin-left: auto  // Move to end of navbar
+    // Don't let last tab's remove button get too close to diaglog close button to avoid confusion
+    padding-left: 24px
+    @media (min-width: 1000px)
+        padding-left: 48px
 
 </style>
