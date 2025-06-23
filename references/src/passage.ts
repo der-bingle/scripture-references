@@ -344,6 +344,16 @@ export class PassageReference {
         })
     }
 
+    // Whether this reference is the same as the one provided
+    equals(ref:PassageReference):boolean{
+        return this.type === ref.type
+            && this.book === ref.book
+            && this.start_chapter === ref.start_chapter
+            && this.start_verse === ref.start_verse
+            && this.end_chapter === ref.end_chapter
+            && this.end_verse === ref.end_verse
+    }
+
     // Get name for book (defaults to English when book names not provided)
     get_book_string(book_names:Record<string, string>={}):string{
         // WARN A value may be undefined or empty string
