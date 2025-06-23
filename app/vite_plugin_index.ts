@@ -3,7 +3,7 @@
 import {readFileSync} from 'fs'
 
 import pug from 'pug'
-import sass from 'sass'
+import * as sass from 'sass'
 import {Plugin, ResolvedConfig} from 'vite'
 
 
@@ -30,9 +30,9 @@ export default function(template_path:string):Plugin{
             // Replace default index contents with rendered pug template instead
 
             // Run before all core Vite plugins
-            enforce: 'pre',
+            order: 'pre',
 
-            async transform(html, context){
+            async handler(html, context){
                 // NOTE index.html is ignored as replacing entirely by index.pug
                 // NOTE context.bundle will never be available because plugin runs 'pre' others
                 const template = readFileSync(template_path, {encoding: 'utf-8'})
@@ -44,15 +44,9 @@ export default function(template_path:string):Plugin{
                         sass: (text:string, options:Record<string, unknown>) => {
                             // Render sass blocks
                             delete options['filename']  // Don't include pug-specific config
-                            return sass.renderSync({
-                                data: text,
-                                indentedSyntax: true,
-                                outputStyle: config.isProduction ? 'compressed' : 'expanded',
-                                indentWidth: 4,
-                                // NOTE Below can't be `true` so give a filename
-                                sourceMap: config.isProduction ? false : 'index_sass.map',
-                                sourceMapEmbed: true,
-                                sourceMapContents: true,
+                            return sass.compileString(text, {
+                                syntax: 'indented',
+                                style: config.isProduction ? 'compressed' : 'expanded',
                                 ...options,
                             }).css.toString()
                         },

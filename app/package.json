@@ -1,5 +1,6 @@
 {
     "name": "@gracious.tech/fetch-app",
+    "type": "module",
     "version": "1.0.0",
     "description": "Configurable bible app powered by fetch(bible)",
     "files": [
@@ -21,17 +22,17 @@
     "homepage": "https://fetch.bible/",
     "devDependencies": {
         "@gracious.tech/fetch-client": "^1.0.0",
-        "@material-symbols/svg-400": "^0.27.0",
-        "@types/pug": "^2.0.6",
-        "@vitejs/plugin-vue": "^4.2.3",
+        "@material-symbols/svg-400": "^0.31.8",
+        "@types/pug": "^2.0.10",
+        "@vitejs/plugin-vue": "^5.2.4",
         "@volar/vue-language-plugin-pug": "^1.6.5",
-        "pug": "^3.0.2",
-        "rollup-plugin-workbox": "^8.0.0",
-        "sass": "^1.63.4",
-        "vite": "^4.3.9",
-        "vite-plugin-vuetify": "^1.0.2",
-        "vite-svg-loader": "^4.0.0",
-        "vue": "^3.3.4",
-        "vuetify": "^3.7.4"
+        "pug": "^3.0.3",
+        "rollup-plugin-workbox": "^8.1.2",
+        "sass": "^1.89.2",
+        "vite": "^6.3.5",
+        "vite-plugin-vuetify": "^2.1.1",
+        "vite-svg-loader": "^5.1.0",
+        "vue": "^3.5.17",
+        "vuetify": "^3.8.10"
     }
 }
