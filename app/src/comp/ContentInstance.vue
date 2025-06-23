@@ -25,6 +25,7 @@ div.content(ref='content_div' :class='fetch_classes'
 import {ref, onMounted, watch, computed} from 'vue'
 
 import {PassageReference} from '@gracious.tech/bible-references'
+import {substantial_poetry} from '@gracious.tech/fetch-client'
 
 import {state, change_passage} from '@/services/state'
 import {chapters, direction} from '@/services/computes'
@@ -57,6 +58,7 @@ const fetch_classes = computed(() => {
         'no-notes': !state.show_notes,
         'no-red-letter': !state.show_redletter,
         'no-select': true,
+        'no-initial-indent': substantial_poetry.includes(state.book),
         [`size-${state.font_size}`]: true,
     }
 })
