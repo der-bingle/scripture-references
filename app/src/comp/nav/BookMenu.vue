@@ -84,4 +84,7 @@ const select_ch = (num:number) => {
     &.nt
         text-align: right
 
+.v-list-item--disabled
+    opacity: 0.2  // Make clearer when a book is not available
+
 </style>
