@@ -14,6 +14,8 @@ npm ci
 .bin/build_client
 .bin/build_client_docs
 .bin/build_converters
+.bin/build_search
+.bin/build_enhancer
 
 
 # Build test collection

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Publish search module
+set -e
+cd "$(realpath -m "$0/../..")/search"
+
+../.bin/build_search
+npm publish --access=public

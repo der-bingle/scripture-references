@@ -51,3 +51,12 @@ export type {
     RuntimeTranslation,
     RuntimeManifest,
 } from './types.js'
+
+export type {
+    BookNames,
+    BibleJsonHtml,
+    TxtHeading,
+    TxtNote,
+    TxtContent,
+    BibleJsonTxt,
+} from './shared_types.js'
