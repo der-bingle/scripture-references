@@ -73,9 +73,43 @@ export async function markup_references(collection:BibleCollection, root:HTMLEle
     const elements:{element: HTMLAnchorElement, ref:PassageReference}[] = []
     for (const [orig_node, detector, first_valid_match] of nodes){
 
+        // Keep track of whole references and any extra ranges they have
+        let same_group:HTMLAnchorElement[] = []
+        const wrap_if_multiple_ranges = () => {
+
+            // If only a single range then don't need to wrap
+            if (same_group.length < 2){
+                return
+            }
+
+            // Create span to group nodes and insert before first <a>
+            const span = root.ownerDocument.createElement('span')
+            span.classList.add('fb-enhancer-multi')
+            same_group[0]!.before(span)
+
+            // Collect nodes from first ref to last
+            // NOTE This will usually include a comma and other text, e.g. Matt 10:1{,}5
+            const nodes_to_move:Node[] = []
+            const end_node = same_group[same_group.length-1]!
+            let current_node:Node|null = same_group[0]!
+            while (current_node) {
+                nodes_to_move.push(current_node)
+                if (current_node === end_node)
+                    break
+                current_node = current_node.nextSibling
+            }
+
+            // Add nodes to span
+            // NOTE Have to do this after locate all nodes otherwise get error
+            for (const node of nodes_to_move){
+                span.appendChild(node)
+            }
+        }
+
         // Linkify the first match
         let {element, ref, remainder} = _linkify_ref(orig_node, first_valid_match)
         elements.push({element, ref})
+        same_group.push(element)
 
         // Linkify any remaining matches too
         while (true){
@@ -84,10 +118,20 @@ export async function markup_references(collection:BibleCollection, root:HTMLEle
                 const next = _linkify_ref(remainder, next_ref_result)
                 remainder = next.remainder
                 elements.push({element: next.element, ref: next.ref})
+
+                // If beginning a new group, need to wrap previous
+                if (next_ref_result.whole){
+                    wrap_if_multiple_ranges()
+                    same_group = []
+                }
+                same_group.push(next.element)
             } else {
                 break
             }
         }
+
+        // See if should wrap last one
+        wrap_if_multiple_ranges()
     }
 
     return elements
