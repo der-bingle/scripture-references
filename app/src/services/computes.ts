@@ -14,6 +14,12 @@ export const current_book_name = computed(() => {
 })
 
 
+// Displayable abbreviation for currently selected book
+export const current_book_abbrev = computed(() => {
+    return state.book_abbrev[state.book]!
+})
+
+
 // List of chapters for current book
 export const chapters = computed(() => {
     if (content.collection.has_book(state.trans[0], state.book)){
@@ -23,13 +29,23 @@ export const chapters = computed(() => {
 })
 
 
-// Displayable text for currently selected chapter (includes book name)
+// Displayable text for currently selected chapter (with book name)
 export const chapter_display = computed(() => {
     // Only show book name if only has one chapter
     if (chapters.value.length === 1){
         return current_book_name.value
     }
     return `${current_book_name.value} ${state.chapter}`
+})
+
+
+// Displayable text for currently selected chapter (with book abbreviation)
+export const chapter_display_abbrev = computed(() => {
+    // Only show book if only has one chapter
+    if (chapters.value.length === 1){
+        return current_book_abbrev.value
+    }
+    return `${current_book_abbrev.value} ${state.chapter}`
 })
 
 
