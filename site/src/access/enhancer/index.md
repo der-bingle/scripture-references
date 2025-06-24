@@ -5,7 +5,7 @@ import {ref, onMounted} from 'vue'
 
 
 function get_btn_text(){
-    return self.fetch_enhancer?._translations[0] === 'vie_vcb' ? "Change to English" : "Change to Vietnamese"
+    return self.fetch_enhancer?._translations[0] === 'vie_bib' ? "Change to English" : "Change to Vietnamese"
 }
 
 // Avoid executing for SSR
@@ -15,7 +15,7 @@ onMounted(() => {
 })
 
 const toggle_language = () => {
-    const new_trans = self.fetch_enhancer._translations[0] === 'vie_vcb' ? ['eng_bsb', 'grc_sr'] : ['vie_vcb']
+    const new_trans = self.fetch_enhancer._translations[0] === 'vie_bib' ? ['eng_bsb', 'grc_sr'] : ['vie_bib']
     self.fetch_enhancer.change_translation(...new_trans)
     self.fetch_enhancer.discover_bible_references(document.querySelector('.vp-doc'))
     btn_text.value = get_btn_text()
