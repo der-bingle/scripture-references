@@ -344,6 +344,14 @@ export class PassageReference {
         })
     }
 
+    // Restore reference from serialized form
+    // While deserializing using `from_string()` works, this method is faster & never returns null
+    static from_serialized(code:string){
+        const book = code.slice(0, 3)
+        const verses = code.slice(3)
+        return new PassageReference({book, ..._verses_str_to_obj(verses)})
+    }
+
     // Whether this reference is the same as the one provided
     equals(ref:PassageReference):boolean{
         return this.type === ref.type
@@ -386,6 +394,11 @@ export class PassageReference {
         const out = this.get_book_string(book_names) + ' '
             + this.get_verses_string(verse_sep, range_sep)
         return out.trim()
+    }
+
+    // Serialize reference to string that can be restored by `from_serialized()`
+    to_serialized(){
+        return this.book + this.get_verses_string()
     }
 
     // Whether this reference ends before the given chapter/verse or not

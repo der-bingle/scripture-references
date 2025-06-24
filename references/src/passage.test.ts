@@ -324,6 +324,54 @@ describe('toString', () => {
 })
 
 
+describe('serialized', () => {
+
+    it("Is deterministic", ({expect}) => {
+
+        // Expected code and props
+        const props_tit:[string, Record<string, unknown>][] = [
+            ['tit', {book: 'tit', type: 'book',
+                start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1}],
+            ['tit2', {book: 'tit', type: 'chapter',
+                start_chapter: 2, start_verse: 1, end_chapter: 2, end_verse: 1}],
+            ['tit2:2', {book: 'tit', type: 'verse',
+                start_chapter: 2, start_verse: 2, end_chapter: 2, end_verse: 2}],
+            ['tit2:2-3', {book: 'tit', type: 'range_verses',
+                start_chapter: 2, start_verse: 2, end_chapter: 2, end_verse: 3}],
+            ['tit2-3', {book: 'tit', type: 'range_chapters',
+                start_chapter: 2, start_verse: 1, end_chapter: 3, end_verse: 15}],
+            ['tit2:2-3:3', {book: 'tit', type: 'range_multi',
+                start_chapter: 2, start_verse: 2, end_chapter: 3, end_verse: 3}],
+        ]
+
+        // Also test single chapter books like Jude
+        // Produces code with chapter number included for clarity
+        //    even if parsing 'jud1' is possible and results in a verse ref (not chapter)
+        const props_jud:[string, Record<string, unknown>][] = [
+            ['jud', {book: 'jud', type: 'book',
+                start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1}],
+            // NOTE 'chapter' is not possible
+            ['jud1:2', {book: 'jud', type: 'verse',
+                start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 2}],
+            ['jud1:2-3', {book: 'jud', type: 'range_verses',
+                start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3}],
+            // NOTE 'range_chapters' is not possible
+            // NOTE 'range_multi' is not possible
+        ]
+
+        for (const test_props of [props_tit, props_jud]){
+            for (const [code, props] of test_props){
+                const ref_produced = PassageReference.from_serialized(code)
+                expect(ref_produced).toMatchObject(props)
+                const code_produced = ref_produced.to_serialized()
+                expect(code_produced).toBe(code)
+            }
+        }
+    })
+
+})
+
+
 const book_name_abbreviations = {
     "gen": ["Gen.", "Ge.", "Gn."],
     "exo": ["Ex.", "Exod.", "Exo."],
