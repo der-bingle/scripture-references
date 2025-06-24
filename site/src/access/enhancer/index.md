@@ -113,7 +113,6 @@ const enhancer = new BibleEnhancer({
     client: new BibleClient(),  // Provide a custom fetch(bible) client
     app_origin: 'https://app.fetch.bible',  // Use a custom fetch app
     app_args: {hue: '120'},  // Pass args to embedded app (see app docs)
-    spaces_to_nbsp: true,  // Convert Gen 1 to Gen&nbsp;1 to prevent wrap
     history: false,  // Don't intercept browser "back" to hide app modal
     // Do something before enhancer pushes to browser history
     // E.g. Some SPAs need to store scroll position
@@ -178,9 +177,16 @@ if (!import.meta.env.SSR){
 
 ### Styles
 
+The following classes are added to the respective elements so they can be styled:
+
 ```css
 .fb-enhancer-link {
     /* Style Bible reference links */
+}
+.fb-enhancer-multi {
+    /* Wraps multiple ranges together, e.g.
+    <span class='fb-enhancer-multi'><a>Gen 1:1</a>, <a>2:5</a></span>
+    */
 }
 .fb-enhancer-hover {
     /* Style box shown on link hover */
@@ -189,4 +195,22 @@ if (!import.meta.env.SSR){
     /* Style app modal */
 }
 
+```
+
+For example, to make enhanced references look different to other links:
+
+```css
+.fb-enhancer-link {
+    color: inherit;
+    text-decoration: none;
+    background-color: hsla(60, 100%, 45%, 0.15);
+}
+```
+
+Or to prevent references from being broken by line-wrapping,<br>like "Genesis 1:1" compared to "Genesis<br>1:1"
+
+```css
+.fb-enhancer-multi, .fb-enhancer-link {
+    white-space: nowrap;
+}
 ```
