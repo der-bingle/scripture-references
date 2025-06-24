@@ -78,7 +78,7 @@ Add the following to the `<head>` of your page:
 
 `<script type="module" crossorigin src="https://collection.fetch.bible/enhance.js"></script>`
 
-It will automatically execute and transform all references it finds in the user's language, using the default translation for that language. Add the following attribute to force it to use the given bibles `data-trans="eng_bsb,grc_sr"`. To configure any additional settings, use the standard import method below.
+It will automatically execute and transform all references it finds in the user's language, using the default translation for that language. Add the following attribute to force it to use the given bibles `data-trans="eng_bsb,grc_sr"`, or `data-plain` to disable the default theme and make links look like regular links. To configure any additional settings, use the standard import method below.
 
 ::: info TIP -- Transform other people's websites
 
@@ -108,6 +108,7 @@ new BibleEnhancer().discover_bible_references()
 ```js
 // Available settings for BibleEnhancer
 const enhancer = new BibleEnhancer({
+    default_theme: false,  // Disable default styling of links
     translations: ['eng_bsb', 'grc_sr'],  // Set the translations to be used
     always_detect_english: false,  // Disable auto-detection of English refs
     client: new BibleClient(),  // Provide a custom fetch(bible) client
@@ -197,20 +198,20 @@ The following classes are added to the respective elements so they can be styled
 
 ```
 
-For example, to make enhanced references look different to other links:
+For example, the following styles are set when the default theme is enabled:
 
 ```css
-.fb-enhancer-link {
+.fb-enhancer-theme .fb-enhancer-link {
     color: inherit;
     text-decoration: none;
     background-color: hsla(60, 100%, 45%, 0.15);
 }
-```
-
-Or to prevent references from being broken by line-wrapping,<br>like "Genesis 1:1" compared to "Genesis<br>1:1"
-
-```css
-.fb-enhancer-multi, .fb-enhancer-link {
+/* Prevent references from being broken by line-wrapping,
+    like "Genesis 1:1" compared to "Genesis
+    1:1"
+*/
+.fb-enhancer-theme .fb-enhancer-multi,
+.fb-enhancer-theme .fb-enhancer-link {
     white-space: nowrap;
 }
 ```

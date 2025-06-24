@@ -5,6 +5,7 @@ import {markup_references} from './markup'
 
 
 interface ConstructorOptions {
+    default_theme?:boolean
     client?:BibleClient
     app_origin?:string
     app_args?:Record<string, string>
@@ -31,6 +32,11 @@ export class BibleEnhancer {
     _can_hover = self.matchMedia('(hover: hover)').matches
 
     constructor(options:ConstructorOptions={}){
+
+        // Enable default theme
+        if (options.default_theme !== false){
+            document.body.classList.add('fb-enhancer-theme')
+        }
 
         // Set defaults
         this.client = options.client ?? new BibleClient()

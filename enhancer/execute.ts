@@ -21,11 +21,12 @@ function enhance(){
     const element:HTMLScriptElement|null =
         document.querySelector('script[src="https://collection.fetch.bible/enhance.js"]')
 
-    // If `data-trans` attribute on script element, use it to configure enhancer
+    // Get config from data attributes on script element
     const translations = element?.dataset['trans']?.split(',')
+    const default_theme = element?.dataset['plain'] === undefined
 
     // Discover
-    void new BibleEnhancer({translations}).discover_bible_references()
+    void new BibleEnhancer({translations, default_theme}).discover_bible_references()
 }
 
 
