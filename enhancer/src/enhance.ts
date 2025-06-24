@@ -1,6 +1,7 @@
 
-import {PassageReferenceMatch} from '@gracious.tech/bible-references'
 import {BibleClient, PassageReference} from '@gracious.tech/fetch-client'
+
+import {markup_references} from './markup'
 
 
 interface ConstructorOptions {
@@ -10,7 +11,6 @@ interface ConstructorOptions {
     history?:boolean
     translations?:string[]
     always_detect_english?:boolean
-    spaces_to_nbsp?:boolean
     before_history_push?:()=>void
 }
 
@@ -25,7 +25,6 @@ export class BibleEnhancer {
     _history:boolean
     _translations:string[]
     _always_detect_english:boolean
-    _spaces_to_nbsp:boolean
     _before_history_push:()=>void
     _hover_divs:[HTMLDivElement, PassageReference][] = []
     // Detect whether device can hover (without emulation)
@@ -40,7 +39,6 @@ export class BibleEnhancer {
         this._history = options.history !== false
         this._translations = options.translations ?? []
         this._always_detect_english = options.always_detect_english !== false
-        this._spaces_to_nbsp = options.spaces_to_nbsp === true  // TODO Default to true if reliable
         this._before_history_push = options.before_history_push ?? (() => {})
 
         // Pre-generate app DOM so it is ready to go once user clicks a reference
@@ -223,8 +221,8 @@ export class BibleEnhancer {
     }
 
     // Auto-discover references in text of page and transform into links
-    async discover_bible_references(root:HTMLElement=document.body, filter:
-            (element:Element)=>boolean=e=>!['H1','H2','H3','H4','H5','H6'].includes(e.tagName)){
+    async discover_bible_references(root:HTMLElement=document.body,
+            filter?:(element:Element)=>boolean){
 
         // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
@@ -247,27 +245,6 @@ export class BibleEnhancer {
             }
         }
 
-        // Create DOM walker that will ignore subtrees identified by filter arg
-        // NOTE Not excluding non-text nodes initially so can filter out whole subtrees if needed
-        const walker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, node => {
-
-            // Process all text nodes
-            if (node.nodeType === node.TEXT_NODE){
-                return NodeFilter.FILTER_ACCEPT
-            }
-
-            // Test all element nodes against user-supplied filter
-            if (node.nodeType === node.ELEMENT_NODE){
-                if (node.nodeName === 'A'){
-                    return NodeFilter.FILTER_REJECT  // Ignore all existing links
-                }
-                return filter(node as Element) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
-            }
-
-            // Reject all other node types (comments etc.)
-            return NodeFilter.FILTER_REJECT
-        })
-
         // Load book names for each translation before discovering references
         // NOTE Repeat calls ok since will cache results
         for (const trans of this._translations){
@@ -278,62 +255,18 @@ export class BibleEnhancer {
             await collection.fetch_translation_extras(trans)
         }
 
-        // Get all relevant text nodes in advance (as modifying DOM will interrupt walk)
-        const nodes:[Text, Generator<PassageReferenceMatch, null>, PassageReferenceMatch][] = []
-        while (walker.nextNode()){
-            if (walker.currentNode.nodeType === Node.TEXT_NODE){
-                const detector = collection.detect_references(walker.currentNode.textContent!,
-                    this._translations, this._always_detect_english)
-                const match = detector.next().value
-                if (match){
-                    // NOTE Must include detector as it preserves state for relative matches
-                    nodes.push([walker.currentNode as Text, detector, match])
-                }
-            }
-        }
+        // Discover and markup references as <a> elements
+        const items = await markup_references(
+            collection, root, this._translations, this._always_detect_english, filter)
+        for (const {element, ref} of items){
 
-        // Util for turning a passage ref into an <a> element (returns trailing text node)
-        const linkify_ref = (node:Text, match:PassageReferenceMatch) => {
-
-            // Separate ref text from preceeding text
-            const ref_node = node.splitText(match.index_from_prev_match)
-
-            // Separate ref text from trailing text
-            const remainder = ref_node.splitText(match.text.length)
-
-            // Turn ref text into a link
-            const ref_a = document.createElement('a')
-            const verses = match.ref.get_verses_string()
-            ref_a.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
-                + `&search=${match.ref.book}${verses}&${this._app_args}`)
-            ref_a.setAttribute('target', '_blank')
-            ref_a.setAttribute('class', 'fb-enhancer-link')
-            ref_a.textContent =
-                this._spaces_to_nbsp ? match.text.replace(/ /g, '\u00A0') : match.text
-            ref_node.replaceWith(ref_a)
+            // Add href to each
+            element.setAttribute('href', `${this._app_origin}#trans=${this._translations.join(',')}`
+                + `&search=${ref.to_serialized()}&${this._app_args}`)
+            element.setAttribute('target', '_blank')
 
             // Enhance the new <a> element
-            void this.enhance_element(ref_a, match.ref)
-
-            // Return newly-created trailing text node
-            return remainder
-        }
-
-        // Modify collected text nodes
-        for (const [orig_node, detector, first_valid_match] of nodes){
-
-            // Linkify the first match
-            let remainder = linkify_ref(orig_node, first_valid_match)
-
-            // Linkify any remaining matches too
-            while (true){
-                const next_ref_result = detector.next().value
-                if (next_ref_result){
-                    remainder = linkify_ref(remainder, next_ref_result)
-                } else {
-                    break
-                }
-            }
+            void this.enhance_element(element, ref)
         }
     }
 
