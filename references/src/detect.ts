@@ -7,6 +7,7 @@ export interface PassageReferenceMatch {
     text:string
     index:number
     index_from_prev_match:number
+    whole:boolean
 }
 
 
@@ -70,6 +71,7 @@ export function* detect_references(text:string, book_names?:BookNamesArg,
                 text: match[0],
                 index: match.index,
                 index_from_prev_match: match.index - end_of_prev_match,
+                whole: true,
             }
             end_of_prev_match = match.index + match[0].length
 
@@ -112,6 +114,7 @@ export function* detect_references(text:string, book_names?:BookNamesArg,
                     text: add_match[1]!,
                     index: add_match_real_index,
                     index_from_prev_match: add_match_real_index - end_of_prev_match,
+                    whole: false,
                 }
                 end_of_prev_match = add_match_real_index + add_match[1]!.length
 
