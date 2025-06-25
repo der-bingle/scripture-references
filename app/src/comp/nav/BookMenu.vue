@@ -55,7 +55,7 @@ const nt_books = computed(() => {
 const select_book = (id?:string) => {
     change_book({book: id!})  // Only optional above to get around typings in template
     if (chapters.value.length === 1){
-        state.show_select_chapter = false
+        state.show_nav = false
     }
 }
 
@@ -63,7 +63,7 @@ const select_book = (id?:string) => {
 // Change chapter
 const select_ch = (num:number) => {
     change_passage(num)
-    state.show_select_chapter = false
+    state.show_nav = false
 }
 
 

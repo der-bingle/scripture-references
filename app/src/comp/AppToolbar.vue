@@ -7,10 +7,8 @@ v-toolbar(:density='density')
         app-icon(name='arrow_back')
 
     div.ch_display(v-if='state.wide') {{ chapter_display }}
-    v-btn.loc(v-else @click='state.show_select_chapter = true')
-        | {{ chapter_display }}
-
-    v-btn(@click='state.show_trans_dialog = true') {{ trans_display }}
+    v-btn.loc(v-else @click='state.show_nav = true')
+        | {{ chapter_display_abbrev }}
 
     div(style='flex-grow: 1')
 
@@ -18,11 +16,11 @@ v-toolbar(:density='density')
 
     div(style='flex-grow: 1')
 
+    v-btn(@click='state.show_trans_dialog = true') {{ trans_display }}
+
     v-btn(v-if='state.button1_icon' icon @click='button1')
         svg(viewBox='0 0 48 48' width='24' height='24')
             path(:d='state.button1_icon' :fill='state.button1_color || "currentColor"')
-    v-btn(icon @click='state.search = state.search === null ? "" : null')
-        app-icon(name='search')
     v-btn(icon)
         app-icon(name='more_vert')
         v-menu(activator='parent')
@@ -46,7 +44,7 @@ import {computed} from 'vue'
 
 import {density, state} from '@/services/state'
 import {content} from '@/services/content'
-import {chapter_display} from '@/services/computes'
+import {chapter_display, chapter_display_abbrev} from '@/services/computes'
 import {post_message} from '@/services/post'
 
 

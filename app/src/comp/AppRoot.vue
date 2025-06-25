@@ -7,32 +7,22 @@ v-app(:style='{"max-width": max_width}' @mousemove='resize_study_move' @mouseup=
 
     //- Show book menu in drawer for narrow screens
     //- NOTE touchless disables swiping right from screen edge to open (conflicts with prev ch)
-    v-navigation-drawer(v-if='!state.wide' v-model='state.show_select_chapter' temporary touchless
+    v-navigation-drawer(v-if='!state.wide' v-model='state.show_nav' temporary touchless
             width='450')
-        template(#prepend)
-            v-toolbar(color='primary' density='compact')
-                v-toolbar-title {{ chapter_display }}
-                v-btn(icon variant='text' @click='state.show_select_chapter = false')
-                    app-icon(name='close')
-        BookMenu
+        NavPanel
 
     v-main
-        AppToolbar.toolbar(v-if='state.wide || state.search === null')
-        div.layout
-
-            //- Show book menu on side if screen wide enough
-            BookMenu.side_menu(v-if='state.wide')
-
-            div.primary
-                SearchToolbar.search(v-if='state.search !== null')
-                BibleContent.content
-                div.resize(v-if='state.study' @mousedown='resize_study_start'
-                        @touchstart.passive='resize_study_start')
-                    div.handle
-                    v-btn.close(icon variant='flat' @click='state.study = null')
-                        app-icon(name='close')
-                div.study(v-if='state.study' ref='study_div' class='pa-4 pt-0')
-                    StudyInfo
+        NavPanel.sidebar(v-if='state.wide')
+        div.main
+            AppToolbar.toolbar
+            BibleContent.content
+            div.resize(v-if='state.study' @mousedown='resize_study_start'
+                    @touchstart.passive='resize_study_start')
+                div.handle
+                v-btn.close(icon variant='flat' color='' @click='state.study = null')
+                    app-icon(name='close')
+            div.study(v-if='state.study' ref='study_div' class='pa-4 pt-0')
+                StudyInfo
 
 TransDialog(v-if='state.show_trans_dialog')
 SettingsDialog(v-if='state.show_style_dialog')
@@ -46,11 +36,10 @@ AboutDialog(v-if='state.show_about_dialog')
 import {watch, onMounted, computed, ref} from 'vue'
 import {useTheme} from 'vuetify'
 
-import BookMenu from './BookMenu.vue'
+import NavPanel from './nav/NavPanel.vue'
 import StudyInfo from './StudyInfo.vue'
 import BibleContent from './BibleContent.vue'
 import AppToolbar from './AppToolbar.vue'
-import SearchToolbar from './SearchToolbar.vue'
 import TransDialog from './TransDialog.vue'
 import SettingsDialog from './SettingsDialog.vue'
 import AboutDialog from './AboutDialog.vue'
@@ -124,68 +113,61 @@ onMounted(() => {
 
         .v-main
             display: flex
-            flex-direction: column
+            flex-direction: row
             height: 100%
 
-            .toolbar
-                flex-grow: 0  // Don't exceed desired height
+.toolbar
+    flex-grow: 0  // Don't exceed desired height
 
-            .layout
-                display: flex
-                overflow: hidden
-                flex-grow: 1
-                flex-basis: 0  // Don't crush toolbar
+.sidebar
+    min-width: 450px  // Keep same as drawer width above
+    max-width: 450px
+    display: flex
+    flex-direction: column
+    border-right: 1px solid #8883
 
-                .side_menu
-                    min-width: 450px  // Keep same as drawer width above
-                    max-width: 450px
-                    overflow-y: auto
-                    overflow-x: hidden
+.main
+    display: flex
+    flex-direction: column
+    overflow: hidden
+    flex-grow: 1
 
-                .primary
-                    display: flex
-                    flex-direction: column
-                    width: 100%
+.content, .study
+    flex-basis: 0  // So don't crush toolbar
+    overflow-y: auto
+    overflow-x: hidden
+    overflow-wrap: anywhere
 
-                    .search
-                        flex-grow: 0  // Override Vuetify to stop expanding beyond own height
+.content
+    flex-grow: 1
 
-                    .content, .study
-                        flex-basis: 0  // So don't crush toolbar
-                        overflow-y: auto
-                        overflow-x: hidden
-                        overflow-wrap: anywhere
+.resize
+    border-top: 2px solid hsl(0, 0%, 50%)
+    height: 16px
+    background-color: rgb(var(--v-theme-surface))
+    cursor: ns-resize
+    text-align: center
+    user-select: none
+    z-index: 1
 
-                    .content
-                        flex-grow: 1
+    &:hover
+        border-top-color: rgb(var(--v-theme-primary))
+        .handle
+            background-color: rgb(var(--v-theme-primary))
 
-                    .resize
-                        border-top: 2px solid hsl(0, 0%, 50%)
-                        height: 16px
-                        background-color: rgb(var(--v-theme-surface))
-                        cursor: ns-resize
-                        text-align: center
-                        user-select: none
-                        z-index: 1
+    .handle
+        display: inline-block
+        min-width: 42px
+        height: 24px
+        border-radius: 0 0 50% 50%
+        background-color: hsl(0, 0%, 50%)
 
-                        &:hover
-                            border-top-color: rgb(var(--v-theme-primary))
-                            .handle
-                                background-color: rgb(var(--v-theme-primary))
+    .close
+        position: absolute
+        right: 0
 
-                        .handle
-                            display: inline-block
-                            min-width: 42px
-                            height: 24px
-                            border-radius: 0 0 50% 50%
-                            background-color: hsl(0, 0%, 50%)
-
-                        .close
-                            position: absolute
-                            right: 0
-
-                    .study
-                        min-height: 30%
-                        background-color: rgb(var(--v-theme-surface))
+.study
+    min-height: 30%
+    background-color: rgb(var(--v-theme-surface))
 
 </style>
