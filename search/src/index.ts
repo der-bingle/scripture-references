@@ -20,11 +20,14 @@ export class BibleIndex {
     _collection:BibleCollection
     _translation:string
     _format:'txt'|'html'
+    _available_books:string[]
 
     constructor(collection:BibleCollection, translation:string, format:'txt'|'html'='html'){
         this._collection = collection
         this._translation = translation
         this._format = format
+        this._available_books =
+            this._collection.get_books(translation).map(book_meta => book_meta.id)
 
         // Init Document-type index that supports highlighting matches and other useful features
         this._flexsearch = new Document({
@@ -107,8 +110,7 @@ export class BibleIndex {
         const time = new Date().getTime()
 
         // Index all books in translation
-        const books = this._collection.get_books(this._translation).map(book_meta => book_meta.id)
-        await this.index_books(books)
+        await this.index_books(this._available_books)
 
         // @ts-ignore Don't know why it's complaining
         console.info(`Search indexing duration: ${new Date().getTime() - time}ms`)
@@ -120,6 +122,11 @@ export class BibleIndex {
         // Detect any explicit references to passages
         const passage_results:SearchResult[] = []
         for (const match of this._collection.detect_references(query, this._translation)){
+
+            // Can't use if translation doesn't have book
+            if (!this._available_books.includes(match.ref.book)){
+                continue
+            }
 
             // Need to get the passage (which is hopefully cached already)
             // NOTE Format may be txt|html but force type to keep TS happy
