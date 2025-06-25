@@ -2,23 +2,25 @@
 
 import {watch} from 'vue'
 import {PassageReference} from '@gracious.tech/fetch-client'
+import {BibleIndex} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
-import {content} from './content'
+import {content, search} from './content'
 import {post_message} from './post'
-import {wait} from './utils'
 
 
-export function apply_search(value:string){
-    // First see if value is itself a reference
-    // Otherwise look for a ref in the whole string (TODO Won't match entire books)
+// Apply search URL/message param
+export function apply_search_param(value:string){
+    // If a single ref, go to it, otherwise display search results
+    // May as well combine nav+search as a good way to provide fallback for malformed values
     const match = content.collection.string_to_reference(value, state.trans)
-        ?? content.collection.detect_references(value, state.trans).next().value?.ref
     if (match){
         state.book = match.book
         state.chapter = match.start_chapter
         state.verse = match.start_verse
         state.passage = match
+    } else {
+        state.search = value
     }
 }
 
@@ -27,6 +29,9 @@ export function enable_watches(){
 
     // Translation-related
     watch(() => state.trans, async () => {
+
+        // Clear search results which were based on previous translation
+        state.search = ''
 
         // Update displayed book names
         // NOTE Don't bother with English translations since already have English names
@@ -45,11 +50,17 @@ export function enable_watches(){
             }
         }
 
-        // Cache entire translation whenever it changes
-        await wait(3000)  // Avoid delaying render of whatever triggered this
-        // Trigger SW cache by fetching assets (and ignoring response)
+        // Generate search index whenever translation changes
+        // NOTE This also results in caching entire translation which is also needed
+        content.index = null  // Remove old so queries will wait for new one
+        const new_index = new BibleIndex(content.collection, state.trans[0])
+        void new_index.index_all_books().then(() => {
+            content.index = new_index
+        })
+
+        // For secondary translations, trigger SW cache by fetching assets (and ignoring response)
         void self.caches.open('fetch-collection').then(cache => {
-            for (const trans of state.trans){
+            for (const trans of state.trans.slice(1)){
                 for (const book of content.collection.get_books(trans)){
                     const url = content.collection.get_book_url(trans, book.id, 'html')
                     void cache.match(url).then(resp => {
@@ -169,8 +180,8 @@ export function enable_watches(){
                 state.trans = data['trans'].split(',') as [string, ...string[]]
             }
             if (typeof data['search'] === 'string'){
-                // NOTE Not setting state.search as would show toolbar and trigger duplicate load
-                apply_search(data['search'])
+                // NOTE state.search won't be set if value can be parsed as a reference
+                apply_search_param(data['search'])
             }
         }
     })
@@ -194,6 +205,12 @@ export function enable_watches(){
     })
 
 
-    // Try to navigate to verse when search changes
-    watch(() => state.search, () => apply_search(state.search ?? ''))
+    // Get search results when search changes
+    watch(() => state.search, async () => {
+        state.search_results = null
+        if (!state.search){
+            return
+        }
+        state.search_results = await search(state.search)
+    })
 }

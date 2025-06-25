@@ -4,12 +4,12 @@
 v-toolbar(:density='density')
 
     //- autocomplete=off tells browser not to show its own suggestions which would overlap own
-    v-combobox.input(v-model='state.search' hide-details autocomplete='off'
+    v-combobox.input(ref='combobox' v-model='state.search' hide-details autocomplete='off'
             density='compact' variant='outlined' autofocus :items='state.search_history')
         template(#prepend-inner)
             app-icon.placeholder(v-if='!state.search' name='search')
         template(#append-inner)
-            v-btn(v-if='state.search' @click='state.search = ""' icon size='small')
+            v-btn(v-if='state.search' @click='clear_search' icon size='small')
                 app-icon(name='close' small)
 
     v-btn-toggle(v-model='search_filter' color='primary' density='compact'
@@ -25,10 +25,15 @@ v-toolbar(:density='density')
 
 <script lang='ts' setup>
 
-import {computed} from 'vue'
+import {computed, useTemplateRef} from 'vue'
 
 import {density, state} from '@/services/state'
 import {current_book_abbrev} from '@/services/computes'
+
+import type {VCombobox} from 'vuetify/lib/components'
+
+
+const comboxbox = useTemplateRef<VCombobox>('combobox')
 
 
 // Proxy so save null rather than undefined
@@ -41,6 +46,12 @@ const search_filter = computed({
     },
 })
 
+
+const clear_search = () => {
+    state.search = ""
+    // Ensure don't start showing search suggestions if box still has focus
+    comboxbox.value?.blur()
+}
 
 </script>
 

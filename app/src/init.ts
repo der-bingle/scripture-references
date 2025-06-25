@@ -5,8 +5,8 @@ import {md3} from 'vuetify/blueprints'
 
 import AppRoot from './comp/AppRoot.vue'
 import AppIcon from '@/comp/AppIcon.vue'
-import {enable_watches, apply_search} from '@/services/watches'
-import {state, safe_hsl} from '@/services/state'
+import {enable_watches, apply_search_param} from '@/services/watches'
+import {state, safe_hsl, initial_search_param} from '@/services/state'
 import {content} from '@/services/content'
 import {post_message} from '@/services/post'
 
@@ -68,14 +68,14 @@ void content.client.fetch_collection().then(collection => {
     state.trans = valid_trans.length ? (valid_trans as [string, ...string[]])
         : [content.collection.get_preferred_translation().id]
 
-    // Parse initial search
-    if (state.search){
-        apply_search(state.search)
-        state.search = null
-    }
-
     // Enable watches
     enable_watches()
+
+    // Apply search param from hash if given
+    // NOTE Must come after `enable_watches()` as translation load will clear search value
+    if (initial_search_param){
+        apply_search_param(initial_search_param)
+    }
 
     // Tell parent ready to communicate (once a trans has been set)
     post_message('ready')

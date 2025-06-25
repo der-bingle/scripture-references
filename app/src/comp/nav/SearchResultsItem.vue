@@ -5,7 +5,7 @@ v-card(class='mb-4' density='compact' @click='go_to_ref')
     v-card-item
         v-card-title(class='text-subtitle-2 font-weight-bold') {{ ref_title }}
     v-card-text
-        div.scripture(v-html='result.html')
+        div.scripture(v-html='result.contents')
 
 </template>
 

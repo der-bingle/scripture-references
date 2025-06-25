@@ -5,7 +5,10 @@ div.results(class='pa-4')
 
     //- Show buttons to clear search/filter if no results
     div(v-if='!filtered_results.length' class='text-center mt-4')
-        template(v-if='state.search_results.length')
+        template(v-if='!state.search_results')
+            //- Will rapidly show/hide so make light weight to not cause any further delay
+            div . . .
+        template(v-else-if='state.search_results.length')
             div No results (some hidden)
             div(class='mt-4')
                 v-btn(@click='state.search_filter = null' color='' variant='tonal') Remove Filter
@@ -29,7 +32,7 @@ import {state} from '@/services/state'
 
 
 const filtered_results = computed(() => {
-    return state.search_results.filter(result => {
+    return (state.search_results ?? []).filter(result => {
         if (state.search_filter === 'ot'){
             return result.ref.ot
         } else if (state.search_filter === 'nt'){

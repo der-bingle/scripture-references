@@ -1,10 +1,11 @@
 
 import {reactive, computed, watch} from 'vue'
-
 import {IndividualVerse, BookCrossref, PassageReference, PassageArgs, BibleBookHtml,
     book_names_english, book_abbrev_english} from '@gracious.tech/fetch-client'
 
 import {parse_int} from './utils.js'
+
+import type {SearchResult} from '@gracious.tech/fetch-search'
 
 
 // LOCAL STORAGE
@@ -46,13 +47,15 @@ const wide_query = self.matchMedia('(min-width: 1000px)')
 
 // Parse initial config from URL fragment
 const params = new URLSearchParams(self.location.hash.slice(1))
+// Will process this in `init.ts` so have access to collection etc.
+export const initial_search_param = params.get('search')
 
 
 // Init default state
 const init_dark = params.get('dark') ?? local_storage.getItem('dark')
 export const state = reactive({
 
-    // CONFIGURABLE
+    // CONFIGURABLE BY THIRD-PARTY
     // NOTE Also update message listener in `watches.ts` if any of these change
 
     // Settings
@@ -70,12 +73,11 @@ export const state = reactive({
     // NOTE init.ts will ensure this has at least one translation before app loads
     trans: ((params.get('trans') ?? local_storage.getItem('trans'))?.split(',') ?? []
         ) as unknown as [string, ...string[]],
-    search: params.get('search') ?? local_storage.getItem('search') ?? null as null|string,
+    search: '',
 
-    // NOT CONFIGURABLE
+    // NOT DIRECTLY CONFIGURABLE BY THIRD-PARTY
 
     // Settings
-    // TODO Consider making configurable either by setting a default or disabling changing it
     show_headings: local_storage.getItem('show_headings') !== 'false',
     show_chapters: local_storage.getItem('show_chapters') !== 'false',
     show_verses: local_storage.getItem('show_verses') !== 'false',
@@ -83,7 +85,10 @@ export const state = reactive({
     show_redletter: local_storage.getItem('show_redletter') !== 'false',
     font_size: local_storage.getItem('font_size') ?? 'regular',
 
-    // State
+    // Preserved state
+    search_history: (local_storage.getItem('search_history') ?? '').split('\n').filter(i => i),
+
+    // Temporary state
     book: 'gen',
     chapter: 1,  // Currently being viewed
     verse: 1,  // Currently being viewed
@@ -102,6 +107,8 @@ export const state = reactive({
     crossref: null as BookCrossref|null,
     notes: null as Record<string, Record<string, string>>|null,
     original: null as BibleBookHtml|null,
+    search_filter: null as null|'ot'|'nt'|'book',
+    search_results: null as SearchResult[]|null,  // null = loading
 })
 
 
@@ -197,4 +204,7 @@ watch(() => state.show_redletter, () => {
 })
 watch(() => state.font_size, () => {
     local_storage.setItem('font_size', state.font_size)
+})
+watch(() => state.search_history, () => {
+    local_storage.setItem('search_history', state.search_history.join('\n'))
 })
