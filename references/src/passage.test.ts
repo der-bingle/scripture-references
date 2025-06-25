@@ -211,19 +211,6 @@ describe('constructor', () => {
             book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 1})
     })
 
-    it("Simplifies ranges", ({expect}) => {
-        // Simplify if range is really a single verse or a range of chapters
-        // NOTE book/chapter types are for navigating to a position rather than specifying a range
-        expect(new PassageReference(
-            {book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1}
-        )).toMatchObject({type: 'verse', range: false,
-            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 1, end_verse: 1})
-        expect(new PassageReference(
-            {book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17}
-        )).toMatchObject({type: 'range_chapters', range: true,
-            book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17})
-    })
-
     it("Interprets invalid range args", ({expect}) => {
         expect(new PassageReference(
             {book: '2th', start_chapter: 2, end_chapter: 1}
@@ -248,6 +235,75 @@ describe('constructor', () => {
             book: '2th', start_chapter: 1, start_verse: 1, end_chapter: 2, end_verse: 17})
     })
 
+    it("Produces consistent results for single chapter books", ({expect}) => {
+        expect(new PassageReference({book: 'jud'}))
+            .toMatchObject({type: 'book'})
+        expect(new PassageReference({book: 'jud', start_chapter: 1}))
+            .toMatchObject({type: 'book'})
+        expect(new PassageReference({book: 'jud', start_chapter: 1, start_verse: 1}))
+            .toMatchObject({type: 'verse'})
+        expect(new PassageReference({book: 'jud', start_chapter: 1, start_verse: 1, end_verse: 2}))
+            .toMatchObject({type: 'range_verses'})
+        // The following not actually valid but see if can force a range of chapters
+        expect(new PassageReference({book: 'jud', start_chapter: 1, end_chapter: 2}))
+            .toMatchObject({type: 'range_verses'})
+        expect(new PassageReference({book: 'jud', start_chapter: 1, start_verse: 2, end_chapter: 2, end_verse: 2}))
+            .toMatchObject({type: 'range_verses'})
+    })
+
+})
+
+
+describe('ranges', () => {
+    /* THEORY OF RANGES
+        When presented with "Titus", does it refer to the beginning of the book or whole contents?
+            E.g. When highlighting verses, should the whole book be highlighted or just first verse?
+        Likewise, does "Titus 1" refer to the start of the chapter or the whole chapter?
+
+        This module defaults to assuming "Titus" and "Titus 1" are _identifiers_ rather than ranges
+        And if a range is intended, then it should be presented as "Titus 1-3" or "Titus 1:1-16"
+
+        As for the other types, anything with a hyphen is obviously a range (1:1-2, 1-2, 1:1-2:2)
+        That only leaves single verses (1:1) which are identifiers and can never be a range
+        So it makes sense to consider books and chapters (no hyphens) as identifiers as well
+    */
+
+    it("Interprets ranges reliably", ({expect}) => {
+        const tests:[string, string, number, number, number, number, string?][] = [
+            // Each type
+            ["Titus", 'book', 1, 1, 1, 1],
+            ["Titus 1", 'chapter', 1, 1, 1, 1],
+            ["Titus 1:1", 'verse', 1, 1, 1, 1],
+            ["Titus 1:1-2", 'range_verses', 1, 1, 1, 2],
+            ["Titus 1-2", 'range_chapters', 1, 1, 2, 15],
+            ["Titus 1:1-2:2", 'range_multi', 1, 1, 2, 2],
+            // Ranges that should be simplified to a range of chapters
+            ["Titus 1:1-2:15", 'range_chapters', 1, 1, 2, 15, "Titus 1-2"],  // Range of entire chapters
+            ["Titus 1:1-3:15", 'range_chapters', 1, 1, 3, 15, "Titus 1-3"],  // Range of entire book
+            // Ranges that should NOT be simplified
+            // as would then cause ambiguity as to whether they represent a range or an identifier
+            ["Titus 1:1-16", 'range_verses', 1, 1, 1, 16],  // Whole chapter
+            ["Titus 1-3", 'range_chapters', 1, 1, 3, 15],  // Whole book
+
+            // Each type
+            ["Jude", 'book', 1, 1, 1, 1],
+            ["Jude 1", 'verse', 1, 1, 1, 1, "Jude 1:1"],
+            ["Jude 1:1", 'verse', 1, 1, 1, 1],
+            ["Jude 1:1-2", 'range_verses', 1, 1, 1, 2],
+            ["Jude 1-2", 'range_verses', 1, 1, 1, 2, "Jude 1:1-2"],
+            ["Jude 1:1-2:2", 'range_verses', 1, 1, 1, 25, "Jude 1:1-25"],  // Actually invalid but still test
+            // Ranges that should NOT be simplified
+            // as would then cause ambiguity as to whether they represent a range or an identifier
+            ["Jude 1:1-25", 'range_verses', 1, 1, 1, 25],  // Whole chapter
+        ]
+
+        for (const [string, type, start_chapter, start_verse, end_chapter, end_verse, new_string] of tests){
+            const ref_obj = PassageReference.from_string(string)!
+            expect(ref_obj).toMatchObject(
+                {type, start_chapter, start_verse, end_chapter, end_verse})
+            expect(ref_obj.toString()).toBe(new_string ?? string)
+        }
+    })
 })
 
 

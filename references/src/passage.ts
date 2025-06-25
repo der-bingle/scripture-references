@@ -18,6 +18,9 @@ export type ReferenceType = 'book'|'chapter'|'verse'|'range_verses'|'range_chapt
 export type BookNamesArg = Record<string, string>|[string, string][]
 
 
+const single_chapter_books = ['2jn', '3jn', 'jud', 'oba', 'phm']
+
+
 // Parse verses reference string into an object (but does not validate numbers)
 export function _verses_str_to_obj(ref:string){
 
@@ -242,6 +245,11 @@ export class PassageReference {
             this.type = 'range_chapters'
         }
 
+        // A chapter for a single chapter book is just the book
+        if (single_chapter_books.includes(this.book) && this.type === 'chapter'){
+            this.type = 'book'
+        }
+
         // Determine range and testament properties
         this.range = this.type.startsWith('range_')
         this.ot = books_ordered.indexOf(this.book) < 39
@@ -324,8 +332,7 @@ export class PassageReference {
         let verses = _verses_str_to_obj(verses_str)
 
         // Interpret single digits as verses for single chapter books
-        const single_chapter = ['2jn', '3jn', 'jud', 'oba', 'phm'].includes(book_code)
-        if (single_chapter && verses.start_chapter
+        if (single_chapter_books.includes(book_code) && verses.start_chapter
                 && verses.start_verse === undefined && verses.end_verse === undefined){
             verses = _verses_str_to_obj('1:' + verses_str)
         }
