@@ -83,7 +83,6 @@ const select_ch = (num:number) => {
     flex-wrap: wrap
     gap: 8px
     padding: 12px
-    justify-content: space-around
 
 .row
     display: flex
