@@ -14,7 +14,7 @@ v-card(class='mb-4' density='compact' @click='go_to_ref')
 
 import {computed} from 'vue'
 
-import {change_book, state} from '@/services/state'
+import {add_to_read_history, change_book, state} from '@/services/state'
 import {content} from '@/services/content'
 
 import type {SearchResult} from '@gracious.tech/fetch-search'
@@ -34,6 +34,7 @@ const go_to_ref = () => {
     // Since have made use of these search results, save the query to history
     const query = state.search.trim()
     state.search_history = [query, ...state.search_history.filter(q => q !== query)].slice(0, 10)
+    add_to_read_history(props.result.ref)
 }
 
 

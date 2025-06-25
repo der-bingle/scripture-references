@@ -1,6 +1,9 @@
 
 <template lang='pug'>
 
+div.recent
+    BookMenuRecent(v-for='reference of state.read_history' :key='reference' :reference='reference')
+
 v-list(density='compact' color='primary')
 
     //- Loop through OT books since has more than NT so indexes will still work
@@ -27,7 +30,8 @@ v-list(density='compact' color='primary')
 
 import {computed} from 'vue'
 
-import {state, change_book, change_passage} from '@/services/state'
+import BookMenuRecent from './BookMenuRecent.vue'
+import {state, change_book, change_passage, add_to_read_history} from '@/services/state'
 import {content} from '@/services/content'
 import {chapters} from '@/services/computes'
 
@@ -56,6 +60,7 @@ const select_book = (id?:string) => {
     change_book({book: id!})  // Only optional above to get around typings in template
     if (chapters.value.length === 1){
         state.show_nav = false
+        add_to_read_history(state.passage!)
     }
 }
 
@@ -64,6 +69,7 @@ const select_book = (id?:string) => {
 const select_ch = (num:number) => {
     change_passage(num)
     state.show_nav = false
+    add_to_read_history(state.passage!)
 }
 
 
@@ -71,6 +77,13 @@ const select_ch = (num:number) => {
 
 
 <style lang='sass' scoped>
+
+.recent
+    display: flex
+    flex-wrap: wrap
+    gap: 8px
+    padding: 12px
+    justify-content: space-around
 
 .row
     display: flex

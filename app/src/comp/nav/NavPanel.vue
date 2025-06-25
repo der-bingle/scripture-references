@@ -23,6 +23,9 @@ import {state} from '@/services/state'
 
 <style lang='sass' scoped>
 
+.panel
+    background-color: rgb(var(--v-theme-surface))
+
 .scrollable
     overflow-y: auto
     height: 100%

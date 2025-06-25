@@ -87,6 +87,7 @@ export const state = reactive({
 
     // Preserved state
     search_history: (local_storage.getItem('search_history') ?? '').split('\n').filter(i => i),
+    read_history: (local_storage.getItem('read_history') ?? '').split('\n').filter(i => i),
 
     // Temporary state
     book: 'gen',
@@ -172,6 +173,15 @@ export const change_book = (ref:PassageArgs) => {
 }
 
 
+// Save ref to read history
+// This should only be called upon notable navigation actions (not all chapter changes etc)
+export function add_to_read_history(ref:PassageReference){
+    const serialized = ref.to_serialized()
+    state.read_history =
+        [serialized, ...state.read_history.filter(r => r !== serialized)].slice(0, 8)
+}
+
+
 // WATCHES
 
 // Save some config to local_storage when it changes
@@ -207,4 +217,7 @@ watch(() => state.font_size, () => {
 })
 watch(() => state.search_history, () => {
     local_storage.setItem('search_history', state.search_history.join('\n'))
+})
+watch(() => state.read_history, () => {
+    local_storage.setItem('read_history', state.read_history.join('\n'))
 })
