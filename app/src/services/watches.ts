@@ -121,7 +121,7 @@ export function enable_watches(){
         const orig_trans = new PassageReference(state.book).ot ? 'hbo_sr' : 'grc_sr'
         if (content.collection.has_translation(orig_trans)
                 && content.collection.has_book(orig_trans, state.book)){
-            void content.collection.fetch_book(orig_trans, state.book).then(book => {
+            void content.collection.fetch_book(orig_trans, state.book, 'txt').then(book => {
                 state.original = book
             })
         }

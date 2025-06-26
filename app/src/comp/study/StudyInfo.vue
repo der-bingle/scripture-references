@@ -1,19 +1,16 @@
 
 <template lang='pug'>
 
-
-h3
-    span.ref(@click='return_to_verse') {{ verse_label }}
 template(v-if='crossrefs.length')
-    h5(class='mb-2') Cross references
+    h5(class='mt-0') Related passages
     div.crossrefs
         StudyCrossref(v-for='crossref of crossrefs' :key='crossref.to_serialized()'
             :reference='crossref')
 template(v-if='original')
     h5 Original language
-    div.orig(v-html='original'
-        class='fetch-bible no-verses no-chapters no-headings no-notes no-red-letter')
-div(v-if='variants_url' class='mb-4')
+    div.orig
+        StudyWord(v-for='(word, i) of original' :key='i' :word='word')
+div(v-if='variants_url')
     v-btn(:href='variants_url' target='variants' color='' size='small' variant='tonal' rounded)
         | Variants &amp; Manuscripts
         app-icon(name='arrow_outward' small class='ml-1')
@@ -29,6 +26,7 @@ template(v-if='notes && state.study_notes && has_english_translation')
 import {computed, watch, ref, nextTick} from 'vue'
 import {books_ordered, PassageReference} from '@gracious.tech/fetch-client'
 
+import StudyWord from './StudyWord.vue'
 import StudyCrossref from './StudyCrossref.vue'
 import {change_to_ref, state, add_to_read_history} from '@/services/state'
 
@@ -92,13 +90,18 @@ watch(() => state.study, () => {
 
 
 // WARN Using watch instead of compute so that only updated when `study` changes
-const original = ref('')
+const original = ref<string[]>([])
 watch(() => state.study, () => {
     if (!state.study || !state.original){
-        original.value = ''
+        original.value = []
         return
     }
-    original.value = state.original.get_passage_from_ref(state.study, {attribute: false})
+    original.value = state.original.get_passage_from_ref(state.study, {
+        attribute: false,
+        headings: false,
+        notes: false,
+        verse_nums: false,
+    }).replace(/\p{P}+/gu, '').split(' ')
 }, {immediate: true})
 
 
@@ -143,13 +146,19 @@ h3
     justify-content: space-between
 
 h5
-    margin-top: 12px
-    margin-bottom: 0
+    margin-top: 18px
+    margin-bottom: 6px
 
 .ref
     cursor: pointer
+    color: rgb(var(--v-theme-primary))
 
 .crossrefs
+    display: flex
+    flex-wrap: wrap
+    gap: 8px
+
+.orig
     display: flex
     flex-wrap: wrap
     gap: 8px
