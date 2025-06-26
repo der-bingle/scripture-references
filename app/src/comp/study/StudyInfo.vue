@@ -105,7 +105,7 @@ watch(() => state.study, () => {
         headings: false,
         notes: false,
         verse_nums: false,
-    }).replace(/\p{P}+/gu, '').split(' ')
+    }).replace(/\p{P}+/gu, '').split(' ').filter(w => w)
 }, {immediate: true})
 
 
