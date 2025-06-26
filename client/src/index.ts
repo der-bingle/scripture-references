@@ -39,7 +39,6 @@ export type {
 } from './collection.js'
 
 export type {
-    CrossrefItem,
     BookCrossref,
 } from './crossref.js'
 
