@@ -19,8 +19,6 @@ v-app(:style='{"max-width": max_width}' @mousemove='resize_study_move' @mouseup=
             div.resize(v-if='state.study' @mousedown='resize_study_start'
                     @touchstart.passive='resize_study_start')
                 div.handle
-                v-btn.close(icon variant='flat' color='' @click='state.study = null')
-                    app-icon(name='close')
             div.study(v-if='state.study' ref='study_div' class='pa-4 pt-0')
                 StudyInfo
 
@@ -161,10 +159,6 @@ onMounted(() => {
         height: 24px
         border-radius: 0 0 50% 50%
         background-color: hsl(0, 0%, 50%)
-
-    .close
-        position: absolute
-        right: 0
 
 .study
     min-height: 30%

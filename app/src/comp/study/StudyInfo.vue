@@ -1,8 +1,12 @@
 
 <template lang='pug'>
 
+h4.ref(@click='return_to_verse') {{ study_verse_label }}
+v-btn.close(icon variant='flat' color='' @click='state.study = null')
+    app-icon(name='close')
+
 template(v-if='crossrefs.length')
-    h5(class='mt-0') Related passages
+    h5(class='mt-2') Related passages
     div.crossrefs
         StudyCrossref(v-for='crossref of crossrefs' :key='crossref.to_serialized()'
             :reference='crossref')
@@ -31,7 +35,7 @@ import StudyCrossref from './StudyCrossref.vue'
 import {change_to_ref, state, add_to_read_history} from '@/services/state'
 
 
-const verse_label = computed(() => {
+const study_verse_label = computed(() => {
     if (!state.study){
         return ''
     }
@@ -140,6 +144,21 @@ const return_to_verse = () => {
 
 
 <style lang='sass' scoped>
+
+.close, .ref
+    position: absolute
+    z-index: 1
+    right: 0
+
+.close
+    margin-top: -14px  // Height of resize bar (less border)
+
+.ref
+    padding-right: 52px  // Width of .close button (48px) + some padding
+    padding-left: 8px
+    // So text doesn't scroll right under button
+    background-color: rgb(var(--v-theme-surface))
+    border-radius: 0 0 0 12px
 
 h3
     display: flex
