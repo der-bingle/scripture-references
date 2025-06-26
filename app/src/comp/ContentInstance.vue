@@ -375,7 +375,7 @@ const highlight_range = (passage:PassageReference, id:string) => {
 <style lang='sass' scoped>
 
 .content > *:last-child
-    margin-bottom: 90vh  // So can scroll last verse to very top and trigger state for it
+    margin-bottom: 85vh  // So can scroll last verse to very top and trigger state for it
 
 .fetch-bible
     // Custom font size settings
