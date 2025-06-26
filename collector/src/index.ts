@@ -14,7 +14,7 @@ import {gen_language_data} from './parts/languages.js'
 import {update_bmc} from './parts/bmc.js'
 import {init_config} from './parts/config.js'
 import {update_manifest} from './parts/manifest.js'
-import {notes_process} from './notes/notes.js'
+import {notes_process} from './resources/notes.js'
 import {crossref_process} from './data/crossref.js'
 
 import type {ServiceId} from './parts/types'
