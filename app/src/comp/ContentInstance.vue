@@ -217,9 +217,9 @@ const update_dom = () => {
     for (const node of Object.values(verse_nodes)){
         node.addEventListener('click', () => {
             const data_v = node.dataset['v']!.split(':').map(part => parseInt(part))
-            const new_study = [state.book, data_v[0]!, data_v[1]!] as [string, number, number]
+            const new_study = new PassageReference(state.book, data_v[0], data_v[1])
             // If clicking on verse already being studied, deselect it instead
-            if (state.study && state.study.join('-') === new_study.join('-')){
+            if (state.study && state.study.equals(new_study)){
                 state.study = null
             } else {
                 state.study = new_study
@@ -296,7 +296,7 @@ watch(() => state.study, study => {
 // Highlight (or clear) the verse being studied
 const highlight_study_verse = () => {
     if (state.study){
-        highlight_range(new PassageReference(...state.study), 'study')
+        highlight_range(state.study, 'study')
     } else {
         clear_highlight('study')
     }

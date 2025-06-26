@@ -34,7 +34,7 @@ v-dialog(v-model='state.show_style_dialog' :fullscreen='!state.wide' :max-width=
                 label="Show verse numbers")
 
             v-switch(v-model='state.show_notes' hide-details color='primary'
-                label="Show notes")
+                label="Show footnotes")
 
             v-switch(v-model='state.show_redletter' hide-details color='primary'
                 label="Show words of Jesus in red")

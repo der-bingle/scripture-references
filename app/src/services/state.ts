@@ -1,6 +1,6 @@
 
 import {reactive, computed, watch} from 'vue'
-import {IndividualVerse, BookCrossref, PassageReference, PassageArgs, BibleBookHtml,
+import {IndividualVerse, BookCrossref, PassageReference, BibleBookHtml,
     book_names_english, book_abbrev_english} from '@gracious.tech/fetch-client'
 
 import {parse_int} from './utils.js'
@@ -58,18 +58,19 @@ export const state = reactive({
     // CONFIGURABLE BY THIRD-PARTY
     // NOTE Also update message listener in `watches.ts` if any of these change
 
-    // Settings
+    // Control user settings
     dark: init_dark ? init_dark === 'true' : null,  // null = auto
 
-    // Customise
+    // Customise UI
     status: params.get('status') ?? '',
     hue: parse_int(params.get('hue') ?? '290'),
     saturation: parse_int(params.get('saturation') ?? '70'),
     back: (params.get('back') === 'true' || params.get('back')) ?? false,  // true|'url'|false
     button1_icon: params.get('button1_icon') ?? '',  // i.e. disabled
     button1_color: params.get('button1_color') ?? 'currentColor',
+    study_notes: params.get('study_notes') !== 'false',  // true|false (defaults to true)
 
-    // Passage
+    // Set passage
     // NOTE init.ts will ensure this has at least one translation before app loads
     trans: ((params.get('trans') ?? local_storage.getItem('trans'))?.split(',') ?? []
         ) as unknown as [string, ...string[]],
@@ -104,7 +105,7 @@ export const state = reactive({
     show_style_dialog: false,
     show_about_dialog: false,
     wide: wide_query.matches,
-    study: null as null|[string, number, number],
+    study: null as null|PassageReference,
     crossref: null as BookCrossref|null,
     notes: null as Record<string, Record<string, string>>|null,
     original: null as BibleBookHtml|null,

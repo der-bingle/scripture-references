@@ -174,6 +174,9 @@ export function enable_watches(){
             if (typeof data['button1_color'] === 'string'){
                 state.button1_color = data['button1_color']
             }
+            if (typeof data['study_notes'] === 'boolean'){
+                state.study_notes = data['study_notes']
+            }
             if (typeof data['trans'] === 'string'){
                 state.trans = data['trans'].split(',') as [string, ...string[]]
             }

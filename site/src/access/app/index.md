@@ -73,6 +73,7 @@ Param           | Type          | Default        | Description
 `back`          | `true\|URL`   | `false`        | Whether to show a back button in the toolbar (iframes should listen to click via postMessage, don't use URL if using an iframe/webview).
 `button1_icon`  | `coordinates` | `[disabled]`   | The icon to display for a custom button in the toolbar. It must be a string for an SVG `<path d="">` that must conform to a 48x48 viewport (any value from a [Material icon/symbol](https://fonts.google.com/icons) will work).
 `button1_color` | `CSS color`   | `currentColor` | A color for the button's fill.
+`study_notes`   | `true\|false` | `true`         | Whether to show Tyndale study notes, which are extra-biblical commentary (only displayed for English translations).
 `trans`         | `lll_ttt`     | `[auto]`       | A translation to force use of (comma-separate for multiple). Must be a fetch(bible) id ([preview any translation](/content/bibles/) to find the id in the url).
 `search`        | `string`      | `[auto]`       | A passage reference in the language of the given translations (English names and book codes always work, e.g. `Genesis 1:1`).
 
