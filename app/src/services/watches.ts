@@ -52,11 +52,9 @@ export function enable_watches(){
 
         // Generate search index whenever translation changes
         // NOTE This also results in caching entire translation which is also needed
-        content.index = null  // Remove old so queries will wait for new one
+        // NOTE Resolves to the index, but only after it has indexed all books
         const new_index = new BibleIndex(content.collection, state.trans[0])
-        void new_index.index_all_books().then(() => {
-            content.index = new_index
-        })
+        content.index = new_index.index_all_books().then(() => new_index)
 
         // For secondary translations, trigger SW cache by fetching assets (and ignoring response)
         void self.caches.open('fetch-collection').then(cache => {
