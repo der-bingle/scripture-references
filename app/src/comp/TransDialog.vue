@@ -36,11 +36,16 @@ v-dialog(v-model='state.show_trans_dialog' :fullscreen='!state.wide' :max-width=
                 | &nbsp;
                 | + {{ languages.length - languages_filtered.length }}
         v-list(v-else)
-            v-list-item(v-for='trans of translations' :key='trans.id' color='primary'
-                    :active='trans.id === selected_trans.id' density='compact'
-                    @click='confirm_trans(trans.id)')
-                v-list-item-title
-                    | {{ trans.name_abbrev }} &mdash; {{ trans.name_local || trans.name_english }}
+            template(v-for='trans of translations')
+                v-list-subheader(v-if='typeof trans === "string"' :key='trans' class='mt-4')
+                    | {{ trans }}
+                v-list-item(v-else :key='trans.id' color='primary'
+                        :active='trans.id === selected_trans.id' density='compact'
+                        @click='confirm_trans(trans.id)')
+                    v-list-item-title
+                        | {{ trans.name_abbrev }} &mdash; {{ trans.name }}
+                    v-list-item-subtitle(v-if='trans.name_english !== trans.name')
+                        | {{ trans.name_english }}
 
 </template>
 
@@ -51,6 +56,8 @@ import {computed, onUnmounted, reactive, ref, watch} from 'vue'
 
 import {state, langs, dialog_max_width} from '@/services/state'
 import {content} from '@/services/content'
+
+import type {GetTranslationsItem} from '@gracious.tech/fetch-client'
 
 
 // Contants
@@ -76,14 +83,28 @@ const selected_trans = computed(() => chosen_translations.value[selected_trans_i
 const displayed_language_name = computed(() => {
     return content.languages[displayed_language.value]!.name_local
 })
-const translations = computed(() => {
-    return content.collection.get_translations({language: displayed_language.value})
-})
 const languages_filtered = computed(() => {
     if (languages_search.value){
         return content.collection.get_languages({search: languages_search.value})
     }
     return languages_show_all.value ? languages : languages_by_pop
+})
+
+const translations = computed(() => {
+
+    // Get translations by category
+    const decent = content.collection.get_translations({language: displayed_language.value,
+        exclude_obsolete: true})
+    const niche = content.collection.get_translations({language: displayed_language.value})
+        .filter(i => !decent.find(di => di.id === i.id))
+
+    // Add in separate groups
+    const items:(GetTranslationsItem|string)[] = decent
+    if (niche.length){
+        items.push("Historical & Niche Translations")
+        items.push(...niche)
+    }
+    return items
 })
 
 
