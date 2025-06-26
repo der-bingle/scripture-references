@@ -11,7 +11,7 @@ v-chip(@click='go_to_ref' size='small' rounded) {{ ref_title }}
 import {computed} from 'vue'
 import {PassageReference} from '@gracious.tech/fetch-client'
 
-import {change_book, state} from '@/services/state'
+import {change_to_ref, state} from '@/services/state'
 import {content} from '@/services/content'
 
 
@@ -30,7 +30,7 @@ const ref_title = computed(() => {
 
 
 const go_to_ref = () => {
-    change_book(passage_ref.value)
+    change_to_ref(passage_ref.value)
     state.show_nav = false
 }
 

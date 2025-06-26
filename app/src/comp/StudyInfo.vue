@@ -29,15 +29,22 @@ import {computed, watch, ref, nextTick} from 'vue'
 
 import {books_ordered, PassageReference} from '@gracious.tech/fetch-client'
 
-import {change_book, state} from '@/services/state'
+import {change_to_ref, state, add_to_read_history} from '@/services/state'
+
+
+const study_ref = computed(() => {
+    if (!state.study){
+        return null
+    }
+    return new PassageReference(...state.study)
+})
 
 
 const verse_label = computed(() => {
-    if (!state.study){
+    if (!study_ref.value){
         return ''
     }
-    const [book, chapter, verse] = state.study
-    return new PassageReference(book, chapter, verse).toString(state.book_names)
+    return study_ref.value.toString(state.book_names)
 })
 
 
@@ -50,11 +57,13 @@ watch(() => state.study, () => {
         return
     }
     crossrefs.value = state.crossref.get_refs(state.study[1], state.study[2]).map(crossref => {
-        const ref = new PassageReference(crossref)
+        const crossref_ref = new PassageReference(crossref)
         return {
-            label: ref.toString(state.book_names),
+            label: crossref_ref.toString(state.book_names),
             view(){
-                change_book(crossref)
+                add_to_read_history(study_ref.value!)  // First save study verse that leaving from
+                add_to_read_history(crossref_ref)
+                change_to_ref(crossref_ref)
             },
         }
     })
@@ -79,7 +88,11 @@ watch(() => state.study, () => {
                 if (book){
                     const [start_chapter, start_verse, end_chapter, end_verse] = parts.slice(1)
                         .map(part => part === undefined ? undefined : parseInt(part))
-                    change_book({book, start_chapter, start_verse, end_chapter, end_verse})
+                    const note_ref = new PassageReference(
+                        {book, start_chapter, start_verse, end_chapter, end_verse})
+                    add_to_read_history(study_ref.value!)  // First save study verse leaving from
+                    add_to_read_history(note_ref)
+                    change_to_ref(note_ref)
                 }
             })
         }
@@ -125,8 +138,8 @@ watch(() => state.study, () => {
 
 
 const return_to_verse = () => {
-    const [book, start_chapter, start_verse] = state.study!
-    change_book({book, start_chapter, start_verse})
+    change_to_ref(study_ref.value!)
+    add_to_read_history(study_ref.value!)
 }
 
 

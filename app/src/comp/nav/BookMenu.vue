@@ -29,9 +29,10 @@ v-list(density='compact' color='primary')
 <script lang='ts' setup>
 
 import {computed} from 'vue'
+import {PassageReference} from '@gracious.tech/fetch-client'
 
 import BookMenuRecent from './BookMenuRecent.vue'
-import {state, change_book, change_passage, add_to_read_history} from '@/services/state'
+import {state, change_passage, add_to_read_history, change_to_ref} from '@/services/state'
 import {content} from '@/services/content'
 import {chapters} from '@/services/computes'
 
@@ -57,7 +58,8 @@ const nt_books = computed(() => {
 
 // Change book
 const select_book = (id?:string) => {
-    change_book({book: id!})  // Only optional above to get around typings in template
+    // NOTE Only optional above to get around typings in template
+    change_to_ref(new PassageReference({book: id!}))
     if (chapters.value.length === 1){
         state.show_nav = false
         add_to_read_history(state.passage!)

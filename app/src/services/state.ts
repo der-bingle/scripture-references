@@ -156,20 +156,21 @@ export const safe_hsl = computed(() => {
 // METHODS
 
 
-// Change passage within same book
-export const change_passage = (start_chapter:number, start_verse?:number|null,
-        end_chapter?:number|null, end_verse?:number|null) => {
+// Shortcut for changing passage within same book
+export const change_passage = (start_chapter:number, start_verse?:number) => {
     state.chapter = start_chapter
     state.verse = start_verse ?? 1
-    state.passage = new PassageReference(
-        {book: state.book, start_chapter, start_verse, end_chapter, end_verse})
+    state.passage = new PassageReference({book: state.book, start_chapter, start_verse})
 }
 
 
-// Change book
-export const change_book = (ref:PassageArgs) => {
+// Change to given ref
+export const change_to_ref = (ref:PassageReference) => {
     state.book = ref.book
-    change_passage(ref.start_chapter ?? 1, ref.start_verse, ref.end_chapter, ref.end_verse)
+    state.chapter = ref.start_chapter
+    state.verse = ref.start_verse
+    // Ensure always a new object so scrolling triggered etc. upon repeated clicks of same ref
+    state.passage = PassageReference.from_serialized(ref.to_serialized())
 }
 
 
