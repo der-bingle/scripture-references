@@ -37,7 +37,7 @@ import {watch, onMounted, computed, ref} from 'vue'
 import {useTheme} from 'vuetify'
 
 import NavPanel from './nav/NavPanel.vue'
-import StudyInfo from './StudyInfo.vue'
+import StudyInfo from './study/StudyInfo.vue'
 import BibleContent from './BibleContent.vue'
 import AppToolbar from './AppToolbar.vue'
 import TransDialog from './TransDialog.vue'

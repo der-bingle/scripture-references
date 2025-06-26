@@ -29,7 +29,7 @@ template(v-if='notes && state.study_notes && has_english_translation')
 import {computed, watch, ref, nextTick} from 'vue'
 import {books_ordered, PassageReference} from '@gracious.tech/fetch-client'
 
-import StudyCrossref from './study/StudyCrossref.vue'
+import StudyCrossref from './StudyCrossref.vue'
 import {change_to_ref, state, add_to_read_history} from '@/services/state'
 
 
