@@ -38,4 +38,10 @@ describe("reverse_usx", () => {
         expect(norm_whitespace(reverse_usx(mal))).toEqual(norm_whitespace(mal_done))
     })
 
+    it("Renumbers Romans correctly", async ({expect}) => {
+        const rom = readFileSync(join(samples_dir, 'rom.usx'), {encoding: 'utf8'})
+        const rom_done = readFileSync(join(samples_dir, 'rom_done.usx'), {encoding: 'utf8'})
+        expect(norm_whitespace(reverse_usx(rom))).toEqual(norm_whitespace(rom_done))
+    })
+
 })

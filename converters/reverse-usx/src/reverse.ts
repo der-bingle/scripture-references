@@ -29,7 +29,8 @@ export function reverse_usx(xml:string, parser=DOMParser, serializer=XMLSerializ
     // WARN This prevents reapplying same rules leading to potentially messy results
     let book_rules:BookRuleSet|undefined
     for (const possible_rules of (rules[book_code] ?? [])){
-        if (xml.includes(`sid="${possible_rules.test}"`)){
+        // NOTE Must match 'ROM 14:24' and 'ROM 14:24-25'
+        if (new RegExp(`sid="${possible_rules.test}["-]`).test(xml)){
             book_rules = possible_rules
             break
         }

@@ -18,6 +18,17 @@ export const default_rules:Record<string, BookRuleSet[]> = {
             'JHN 13:39': 'JHN 14:1',  // Some manuscripts have 13:39 that should be merged into 14:1
         },
     }],
+    'ROM': [{
+        // Some translations put Romans 16:25–27 at end of chapter 14 as Rom 14:24-26
+        // But only 1 of 6 early manuscripts support that, and only ~24 of 1000+ translations
+        // So best to append contents un-numbered to Rom 14:23 if it is included
+        test: 'ROM 14:24',
+        renumber: {
+            'ROM 14:24': 'ROM 14:23',
+            'ROM 14:25': 'ROM 14:23',
+            'ROM 14:26': 'ROM 14:23',
+        },
+    }],
     '1TI': [{
         test: '1TI 6:22',
         renumber: {

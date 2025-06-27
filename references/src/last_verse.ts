@@ -1,5 +1,6 @@
 
-// The number of verses for every chapter of the Bible
+// The number of the last verse for every chapter of the Bible
+// NOTE Since some verses may be missing contents, it's not the number of verses in that sense
 // WARN Chapters are zero-indexed (i.e chapter 1 is at index 0)
 export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
     '1ch': [
@@ -1280,7 +1281,10 @@ export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
         36,
         21,
         14,
-        26,
+        // Some translations put Romans 16:25–27 at end of chapter 14 as Rom 14:24-26
+        // But only 1 of 6 early manuscripts support that, and only ~24 of 1000+ translations
+        // So best to append contents un-numbered to Rom 14:23 if it is included
+        23,  // Chapter 14
         33,
         27,
     ],
