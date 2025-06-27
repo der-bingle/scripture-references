@@ -193,6 +193,15 @@ export class BibleCollection {
                 return filter_licenses(licenses, this._usage)
             }
 
+            // Resolve books data to list of books
+            const resolve_books = (ot:true|string[], nt:true|string[]) => {
+                // Work out exactly what books are included (interpret `true` for whole testament)
+                return {
+                    books_ot_list: ot === true ? books_ordered.slice(0, 39) : ot,
+                    books_nt_list: nt === true ? books_ordered.slice(39) : nt,
+                }
+            }
+
             // Loop through endpoint's translations
             for (const [trans, trans_data] of Object.entries(manifest.translations)){
 
@@ -204,17 +213,10 @@ export class BibleCollection {
                 // Ensure this translation's language's data is included
                 languages.add(trans.slice(0, 3))
 
-                // Work out exactly what books are included (interpret `true` for whole testament)
-                const ot = trans_data.books_ot === true
-                    ? books_ordered.slice(0, 39) : trans_data.books_ot
-                const nt = trans_data.books_nt === true
-                    ? books_ordered.slice(39) : trans_data.books_nt
-
                 // Add the translation to the combined collection
                 this._manifest.translations[trans] = {
                     ...trans_data,
-                    books_ot_list: ot,
-                    books_nt_list: nt,
+                    ...resolve_books(trans_data.books_ot, trans_data.books_nt),
                     copyright: {
                         ...trans_data.copyright,
                         licenses,
