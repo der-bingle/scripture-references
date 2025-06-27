@@ -8,7 +8,7 @@ import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
 import {TranslationExtra} from './translation.js'
 
-import type {BookNames, DistManifest, DistTranslationExtra, OneOrMore, TranslationLiteralness,
+import type {BookNames, DistManifest, DistTranslationExtra, MetaCopyright, OneOrMore, TranslationLiteralness,
     TranslationTag} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
@@ -169,11 +169,9 @@ export class BibleCollection {
         // Process manifests in reverse such that the first will have priority
         for (const [endpoint, manifest] of manifests.reverse()){
 
-            // Loop through endpoint's translations
-            for (const [trans, trans_data] of Object.entries(manifest.translations)){
-
-                // Resolve licenses
-                let licenses:RuntimeLicense[] = trans_data.copyright.licenses.map(item => {
+            // Resolve raw license data to usable form
+            const resolve_license_data = (copyright:MetaCopyright) => {
+                const licenses:RuntimeLicense[] = copyright.licenses.map(item => {
                     if (typeof item.license === 'string'){
                         return {
                             id: item.license,
@@ -192,10 +190,18 @@ export class BibleCollection {
                 })
 
                 // Remove licenses not compatible with the given usage restrictions
-                licenses = filter_licenses(licenses, this._usage)
+                return filter_licenses(licenses, this._usage)
+            }
+
+            // Loop through endpoint's translations
+            for (const [trans, trans_data] of Object.entries(manifest.translations)){
+
+                const licenses = resolve_license_data(trans_data.copyright)
                 if (!licenses.length){
                     continue  // No compatible licenses so exclude translation
                 }
+
+                // Ensure this translation's language's data is included
                 languages.add(trans.slice(0, 3))
 
                 // Work out exactly what books are included (interpret `true` for whole testament)
