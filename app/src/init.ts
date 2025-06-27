@@ -46,6 +46,11 @@ app.use(createVuetify({
                 },
             },
         },
+        variations: {
+            colors: ['primary'],
+            lighten: 1,
+            darken: 1,
+        },
     },
 }))
 
