@@ -25,8 +25,13 @@ export async function update_manifest(){
     // NOTE This only considers translations already output to dist dir
     console.info("Generating manifest...")
 
+    // Load language data
+    const language_data = get_language_data()
+
+    // Init manifest
     const manifest:DistManifest = {
         translations: {},
+        glosses: {},
         languages: {},
         language2to3: {},
         languages_most_spoken: [],
@@ -37,6 +42,9 @@ export async function update_manifest(){
 
     // Keep track of what languages are included
     const included_languages:Set<string> = new Set()
+
+    // Keep track of what languages have what direction
+    const directions:Record<string, 'rtl'|'ltr'> = {}
 
     // Loop through published translations in dist dir
     for (const trans of list_dirs(join('dist', 'bibles'))){
@@ -83,12 +91,58 @@ export async function update_manifest(){
         }
 
         // Record the language as being included
-        included_languages.add(trans.slice(0, 3))
+        const trans_lang = trans.slice(0, 3)
+        included_languages.add(trans_lang)
+
+        // Set direction for language if missing
+        directions[trans_lang] ??= meta.direction
+    }
+
+    // Loop through published glosses in dist dir
+    for (const trans of list_dirs(join('dist', 'glosses'))){
+
+        // Detect what books are available
+        const dist_dir = join('dist', 'glosses', trans)
+        const books = existsSync(dist_dir) ?
+            list_files(dist_dir).map(name => name.slice(0, 3)) : []
+        if (books.length === 0){
+            console.error(`IGNORING gloss ${trans} (no books)`)
+            continue
+        }
+
+        // Determine what books are included
+        const books_ot = books_ordered.slice(0, 39).filter(b => books.includes(b))
+        const books_nt = books_ordered.slice(39).filter(b => books.includes(b))
+
+        // Put it all together
+        // NOTE Currently only including glosses from GBT, so meta hardcoded
+        const trans_lang = trans.slice(0, 3)
+        const lang_meta = language_data.data.languages[trans_lang]!
+        manifest.glosses[trans] = {
+            name: {
+                english: `Global Bible Tools glosses (${lang_meta.english})`,
+                english_abbrev: `GBT${lang_meta.english[0]!}`,
+                local: '',
+                local_abbrev: '',
+            },
+            year: new Date().getFullYear(),
+            direction: directions[trans_lang] ?? 'ltr',
+            copyright: {
+                attribution: "Global Bible Tools",
+                attribution_url: 'https://globalbibletools.com/',
+                licenses: [{
+                    license: 'public',
+                    url: 'https://sellingjesus.org/free',
+                }],
+            },
+            // Record as `true` if whole testament to reduce data size
+            books_ot: books_ot.length === 39 ? true : books_ot,
+            books_nt: books_nt.length === 27 ? true : books_nt,
+        }
     }
 
     // Populate language data
     // NOTE Only included languages that have a translation
-    const language_data = get_language_data()
     manifest.languages = Object.fromEntries(Object.entries(language_data.data.languages)
         .filter(([code]) => included_languages.has(code)))
     manifest.language2to3 = Object.fromEntries(Object.entries(language_data.data.language2to3)

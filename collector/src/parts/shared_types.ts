@@ -111,8 +111,15 @@ export interface DistTranslation extends DistManifestItem {
 }
 
 
+export interface DistGloss extends DistManifestItem {
+    books_ot:true|string[]
+    books_nt:true|string[]
+}
+
+
 export interface DistManifest {
     translations:Record<string, DistTranslation>
+    glosses:Record<string, DistGloss>
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
     languages_most_spoken:string[]
