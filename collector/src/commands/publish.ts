@@ -36,7 +36,7 @@ export class Publisher extends PublisherAWS {
 }
 
 
-export async function publish(type?:'bible'|'notes'|'data', ids?:string){
+export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:string){
     // Publish files to server
     const publisher = new Publisher()
     const invalidations = []
@@ -45,6 +45,9 @@ export async function publish(type?:'bible'|'notes'|'data', ids?:string){
     }
     if (!type || type === 'notes'){
         invalidations.push(...await _publish_notes(publisher, ids))
+    }
+    if (!type || type === 'glosses'){
+        invalidations.push(...await _publish_glosses(publisher, ids))
     }
     if (!type || type === 'data'){
         invalidations.push(...await _publish_data(publisher, ids))
@@ -97,6 +100,13 @@ async function _publish_notes(publisher:Publisher, id?:string):Promise<string[]>
     // TODO Currently uploading everything as no manifest yet
     await publisher.upload_dir(join('dist', 'notes'))
     return ['/notes/*']
+}
+
+async function _publish_glosses(publisher:Publisher, id?:string):Promise<string[]>{
+    // Publish glosses and return paths for invalidation
+    // TODO Currently uploading everything as no manifest yet
+    await publisher.upload_dir(join('dist', 'glosses'))
+    return ['/glosses/*']
 }
 
 async function _publish_data(publisher:Publisher, id?:string):Promise<string[]>{
