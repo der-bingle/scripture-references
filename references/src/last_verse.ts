@@ -1255,7 +1255,7 @@ export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
         21,
         11,
         19,
-        18,  // 12:18 Many translations append 12:18 to 12:17 as the final verse
+        18, // 12:18 Half of translations merge 18 into 17 (NIV,ESV...) and half don't (NET,NLT...)
         18,
         20,
         8,
