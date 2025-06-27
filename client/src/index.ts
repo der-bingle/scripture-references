@@ -42,8 +42,8 @@ export type {
     BookCrossref,
 } from './crossref.js'
 
-export {  // TODO Should export as type only once have integrated into client
-    BookGlosses,
+export type {
+    GlossesBook,
 } from './glosses.js'
 
 export type {

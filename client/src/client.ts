@@ -2,6 +2,7 @@
 import {request} from './utils.js'
 import {BibleCollection} from './collection.js'
 import {BookCrossref} from './crossref.js'
+import {GlossesBook} from './glosses.js'
 
 import type {UsageOptions, UsageConfig} from './types'
 import type {CrossrefData, DistManifest, OneOrMore} from './shared_types'
@@ -113,6 +114,15 @@ export class BibleClient {
 
         // Return the promise
         return this._collection_promise
+    }
+
+    // Manually fetch glosses for book without needing to request BibleCollection
+    // Not supported: caching, book existance check, secondary endpoints
+    async fetch_glosses(gloss_id:string, book:string):Promise<GlossesBook>{
+        const url = this._data_endpoint + `glosses/${gloss_id}/${book}.json`
+        return request(url).then(json => {
+            return new GlossesBook(json)
+        })
     }
 
     // Fetch cross-reference data for a book

@@ -3,12 +3,12 @@ import type {PassageReference} from '@gracious.tech/bible-references'
 import type {GlossesData, GlossesDataWord} from './shared_types'
 
 
-export class BookGlosses {
+export class GlossesBook {
 
     _data:GlossesData
 
-    constructor(data:GlossesData){
-        this._data = data
+    constructor(json:string){
+        this._data = JSON.parse(json) as GlossesData
     }
 
     // Get words with glosses for given verse of book

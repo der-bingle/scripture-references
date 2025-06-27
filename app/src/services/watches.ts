@@ -1,7 +1,7 @@
 // Watches that mix data sources
 
 import {watch} from 'vue'
-import {BookGlosses, GlossesData} from '@gracious.tech/fetch-client'
+import {GlossesBook, GlossesData} from '@gracious.tech/fetch-client'
 import {BibleIndex} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
@@ -123,7 +123,7 @@ export function enable_watches(){
         const glosses_url = `${content.client._data_endpoint}glosses/eng_gbt/${state.book}.json`
         void fetch(glosses_url, {mode: 'cors'}).then(async resp => {
             if (resp.ok){
-                state.glosses = new BookGlosses(await resp.json() as GlossesData)
+                state.glosses = new GlossesBook(await resp.json() as GlossesData)
             }
         })
 

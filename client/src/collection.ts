@@ -154,6 +154,7 @@ export class BibleCollection {
         // Start with an empty manifest with common metadata extracted from first manifest
         this._manifest = {
             licenses: manifests[0][1].licenses,  // Still useful even if resolved within transl.s
+            glosses: {},  // TODO Not filled yet
             languages: {},
             language2to3: {},
             // NOTE If first manifest is sparse then may not include all possible codes
