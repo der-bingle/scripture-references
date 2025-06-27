@@ -264,7 +264,7 @@ export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
         22,
     ],
     '3jn': [
-        15,
+        15,  // Half of translations merge 15 into 14 (BSB,HCSB,etc) and half don't (NIV,ESV,etc)
     ],
     'act': [
         26,
