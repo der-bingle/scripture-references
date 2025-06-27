@@ -1,7 +1,6 @@
 // Watches that mix data sources
 
 import {watch} from 'vue'
-import {GlossesBook, GlossesData} from '@gracious.tech/fetch-client'
 import {BibleIndex} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
@@ -120,11 +119,8 @@ export function enable_watches(){
         })
 
         // Get glosses for book
-        const glosses_url = `${content.client._data_endpoint}glosses/eng_gbt/${state.book}.json`
-        void fetch(glosses_url, {mode: 'cors'}).then(async resp => {
-            if (resp.ok){
-                state.glosses = new GlossesBook(await resp.json() as GlossesData)
-            }
+        void content.client.fetch_glosses('eng_gbt', state.book).then(async glosses => {
+            state.glosses = glosses
         })
 
         // Get either plain HTML or separated verses
