@@ -83,7 +83,6 @@ export async function update_manifest(){
             year: meta.year as number,  // Verified to exist above
             direction: meta.direction,
             copyright: meta.copyright,
-            literalness: meta.literalness,
             tags: meta.tags,
             // Record as `true` if whole testament to reduce data size
             books_ot: books_ot.length === 39 ? true : books_ot,
@@ -127,6 +126,7 @@ export async function update_manifest(){
             },
             year: new Date().getFullYear(),
             direction: directions[trans_lang] ?? 'ltr',
+            tags: [],
             copyright: {
                 attribution: "Global Bible Tools",
                 attribution_url: 'https://globalbibletools.com/',

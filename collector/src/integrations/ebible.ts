@@ -223,7 +223,6 @@ export async function discover(existing:string[], discover_specific_id?:string):
                 updated: row['UpdateDate'],
                 revision: 0,  // Unused
             },
-            literalness: null,
             tags: [],
         }
 

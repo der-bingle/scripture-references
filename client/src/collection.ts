@@ -475,7 +475,6 @@ export class BibleCollection {
             attribution_url: trans.copyright.attribution_url,
             licenses: deep_copy(
                 filter_licenses(trans.copyright.licenses, {...this._usage, ...usage})),
-            liternalness: trans.literalness,
             tags: [...trans.tags],
         } as GetTranslationsItem
     }

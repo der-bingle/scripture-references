@@ -229,7 +229,6 @@ export async function discover(existing:string[], discover_specific_id?:string):
                 updated: item.dateUpdated.slice(0, 10),
                 revision: parseInt(item.revision),
             },
-            literalness: null,
             tags: [],
         }
 

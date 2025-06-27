@@ -192,7 +192,6 @@ async function _discover(subject:string, existing:string[], discover_specific_id
                     updated: format['modified'].split('T')[0]!,
                     revision: 0,  // Unused
                 },
-                literalness: null,
                 tags: [],
             }
 
