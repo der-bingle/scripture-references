@@ -140,6 +140,8 @@ export class BibleCollection {
     // @internal
     _endpoints:Record<string, string> = {}  // Map translation ids to endpoints
     // @internal
+    _endpoints_gloss:Record<string, string> = {}
+    // @internal
     _modern_year = new Date().getFullYear() - 70
 
     // @internal
@@ -225,6 +227,28 @@ export class BibleCollection {
 
                 // Remember which endpoint has which translation
                 this._endpoints[trans] = endpoint
+            }
+
+            // Loop through endpoint's glosses
+            for (const [gloss_id, gloss_data] of Object.entries(manifest.glosses)){
+
+                const licenses = resolve_license_data(gloss_data.copyright)
+                if (!licenses.length){
+                    continue  // No compatible licenses so exclude gloss
+                }
+
+                // Add the gloss to the combined collection
+                this._manifest.glosses[gloss_id] = {
+                    ...gloss_data,
+                    ...resolve_books(gloss_data.books_ot, gloss_data.books_nt),
+                    copyright: {
+                        ...gloss_data.copyright,
+                        licenses,
+                    },
+                }
+
+                // Remember which endpoint has which gloss
+                this._endpoints_gloss[gloss_id] = endpoint
             }
 
             // Only add languages that have translations (may have been excluded if usage config)
