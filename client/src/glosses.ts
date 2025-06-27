@@ -1,0 +1,27 @@
+
+import type {PassageReference} from '@gracious.tech/bible-references'
+import type {GlossesData, GlossesDataWord} from './shared_types'
+
+
+export class BookGlosses {
+
+    _data:GlossesData
+
+    constructor(data:GlossesData){
+        this._data = data
+    }
+
+    // Get words with glosses for given verse of book
+    get_words(reference:PassageReference):GlossesDataWord[]
+    get_words(chapter:number, verse:number):GlossesDataWord[]
+    get_words(ch_or_ref:number|PassageReference, verse=1):GlossesDataWord[]{
+
+        // Get chapter/verse from ref if given
+        if (typeof ch_or_ref !== 'number'){
+            verse = ch_or_ref.start_verse
+            ch_or_ref = ch_or_ref.start_chapter
+        }
+        // NOTE Clones objects before returning
+        return (this._data.contents[ch_or_ref]?.[verse] ?? []).map(w => ({...w}))
+    }
+}

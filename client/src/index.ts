@@ -42,6 +42,10 @@ export type {
     BookCrossref,
 } from './crossref.js'
 
+export {  // TODO Should export as type only once have integrated into client
+    BookGlosses,
+} from './glosses.js'
+
 export type {
     UsageConfig,
     UsageOptions,
@@ -58,4 +62,6 @@ export type {
     TxtNote,
     TxtContent,
     BibleJsonTxt,
+    GlossesData,
+    GlossesDataWord,
 } from './shared_types.js'
