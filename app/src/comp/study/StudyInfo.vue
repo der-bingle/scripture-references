@@ -10,7 +10,7 @@ template(v-if='crossrefs.length')
     div.crossrefs
         StudyCrossref(v-for='crossref of crossrefs' :key='crossref.to_serialized()'
             :reference='crossref')
-template(v-if='original')
+template(v-if='glosses.length')
     h5
         | Original language
         v-btn(v-if='state.study.ot' color='' size='small' variant='flat'
@@ -108,22 +108,6 @@ watch(() => state.study, () => {
         }
     })
 
-}, {immediate: true})
-
-
-// WARN Using watch instead of compute so that only updated when `study` changes
-const original = ref<string[]>([])
-watch(() => state.study, () => {
-    if (!state.study || !state.original){
-        original.value = []
-        return
-    }
-    original.value = state.original.get_passage_from_ref(state.study, {
-        attribute: false,
-        headings: false,
-        notes: false,
-        verse_nums: false,
-    }).replace(/\p{P}+/gu, '').split(' ').filter(w => w)
 }, {immediate: true})
 
 

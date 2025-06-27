@@ -12,8 +12,6 @@ v-dialog(v-model='state.show_about_dialog' :fullscreen='!state.wide' :max-width=
         v-card-text(class='pa-6')
             p This app is powered by the #[a(href='https://fetch.bible' target='_blank') fetch(bible)] platform.
             p(v-if='state.study_notes') Study notes are by #[a(href='https://tyndaleopenresources.com/' target='_blank') Tyndale House Publishers].
-            p #[strong Original languages:] #[a(href='https://github.com/jjmccollum/solid-rock-hb' target='_blank') Solid Rock Hebrew] is used for Old Testament, and #[a(href='https://greekcntr.org/' target='_blank') Statistical Restoration] for New Testament.
-
 
 </template>
 

@@ -1,7 +1,7 @@
 // Watches that mix data sources
 
 import {watch} from 'vue'
-import {BookGlosses, GlossesData, PassageReference} from '@gracious.tech/fetch-client'
+import {BookGlosses, GlossesData} from '@gracious.tech/fetch-client'
 import {BibleIndex} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
@@ -82,7 +82,6 @@ export function enable_watches(){
         state.crossref = null
         state.glosses = null
         state.notes = null
-        state.original = null
 
         // If first/primary trans doesn't have current book, change to a valid book
         if (!content.collection.has_book(state.trans[0], state.book)){
@@ -119,13 +118,6 @@ export function enable_watches(){
                 state.notes = (await resp.json() as RespJson)['verses']
             }
         })
-        const orig_trans = new PassageReference(state.book).ot ? 'hbo_sr' : 'grc_sr'
-        if (content.collection.has_translation(orig_trans)
-                && content.collection.has_book(orig_trans, state.book)){
-            void content.collection.fetch_book(orig_trans, state.book, 'txt').then(book => {
-                state.original = book
-            })
-        }
 
         // Get glosses for book
         const glosses_url = `${content.client._data_endpoint}glosses/eng_gbt/${state.book}.json`

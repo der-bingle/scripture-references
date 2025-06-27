@@ -110,7 +110,6 @@ export const state = reactive({
     crossref: null as BookCrossref|null,
     glosses: null as BookGlosses|null,
     notes: null as Record<string, Record<string, string>>|null,
-    original: null as BibleBookTxt|null,
     search_filter: null as null|'ot'|'nt'|'book',
     search_results: null as SearchResult[]|null,  // null = loading
 })
