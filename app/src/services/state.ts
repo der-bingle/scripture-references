@@ -1,7 +1,7 @@
 
 import {reactive, computed, watch} from 'vue'
 import {IndividualVerse, BookCrossref, PassageReference, BibleBookTxt,
-    book_names_english, book_abbrev_english} from '@gracious.tech/fetch-client'
+    book_names_english, book_abbrev_english, BookGlosses} from '@gracious.tech/fetch-client'
 
 import {parse_int} from './utils.js'
 
@@ -85,6 +85,7 @@ export const state = reactive({
     show_notes: local_storage.getItem('show_notes') !== 'false',
     show_redletter: local_storage.getItem('show_redletter') !== 'false',
     font_size: local_storage.getItem('font_size') ?? 'regular',
+    hebrew_ltr: local_storage.getItem('hebrew_ltr') !== 'false',
 
     // Preserved state
     search_history: (local_storage.getItem('search_history') ?? '').split('\n').filter(i => i),
@@ -107,6 +108,7 @@ export const state = reactive({
     wide: wide_query.matches,
     study: null as null|PassageReference,
     crossref: null as BookCrossref|null,
+    glosses: null as BookGlosses|null,
     notes: null as Record<string, Record<string, string>>|null,
     original: null as BibleBookTxt|null,
     search_filter: null as null|'ot'|'nt'|'book',
@@ -216,6 +218,9 @@ watch(() => state.show_redletter, () => {
 })
 watch(() => state.font_size, () => {
     local_storage.setItem('font_size', state.font_size)
+})
+watch(() => state.hebrew_ltr, () => {
+    local_storage.setItem('hebrew_ltr', String(state.hebrew_ltr))
 })
 watch(() => state.search_history, () => {
     local_storage.setItem('search_history', state.search_history.join('\n'))

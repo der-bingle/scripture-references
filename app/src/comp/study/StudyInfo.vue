@@ -11,9 +11,13 @@ template(v-if='crossrefs.length')
         StudyCrossref(v-for='crossref of crossrefs' :key='crossref.to_serialized()'
             :reference='crossref')
 template(v-if='original')
-    h5 Original language
-    div.orig
-        StudyWord(v-for='(word, i) of original' :key='i' :word='word')
+    h5
+        | Original language
+        v-btn(v-if='state.study.ot' color='' size='small' variant='flat'
+                @click='state.hebrew_ltr = !state.hebrew_ltr')
+            | {{ state.hebrew_ltr ? '⟼' : '⟻' }}
+    div.orig(:class='{flex_ltr: state.hebrew_ltr}')
+        StudyWord(v-for='(word, i) of glosses' :key='i' :word='word')
 div(v-if='variants_url')
     v-btn(:href='variants_url' target='variants' color='' size='small' variant='tonal' rounded)
         | Variants &amp; Manuscripts
@@ -33,6 +37,8 @@ import {books_ordered, PassageReference} from '@gracious.tech/fetch-client'
 import StudyWord from './StudyWord.vue'
 import StudyCrossref from './StudyCrossref.vue'
 import {change_to_ref, state, add_to_read_history} from '@/services/state'
+
+import type {GlossesDataWord} from '@gracious.tech/fetch-client'
 
 
 const study_verse_label = computed(() => {
@@ -59,6 +65,18 @@ watch(() => state.study, () => {
     }
     // NOTE Don't show more than 8 to not overwhelm users
     crossrefs.value = state.crossref.get_refs(state.study).slice(0, 8)
+}, {immediate: true})
+
+
+// WARN Using watch instead of compute so that only updated when `study` changes
+// Otherwise `state.glosses` will refer to the wrong book since study is disconnected from main
+const glosses = ref<GlossesDataWord[]>([])
+watch(() => state.study, () => {
+    if (!state.study || !state.glosses){
+        glosses.value = []
+        return
+    }
+    glosses.value = state.glosses.get_words(state.study)
 }, {immediate: true})
 
 
@@ -181,6 +199,9 @@ h5
     display: flex
     flex-wrap: wrap
     gap: 8px
+
+    &:not(.flex_ltr)
+        flex-direction: row-reverse
 
 .notes :deep() span[data-ref]
     color: rgb(var(--v-theme-primary))
