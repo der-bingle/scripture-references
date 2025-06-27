@@ -15,6 +15,7 @@ import {update_bmc} from './parts/bmc.js'
 import {init_config} from './parts/config.js'
 import {update_manifest} from './parts/manifest.js'
 import {notes_process} from './resources/notes.js'
+import {update_glosses} from './resources/gloss.js'
 import {crossref_process} from './data/crossref.js'
 
 import type {ServiceId} from './parts/types'
@@ -74,8 +75,10 @@ await yargs(process.argv.slice(2))
     .command('report-unprocessed [type]', "Report translations yet to be processed", {},
         argv => report_unprocessed(argv['type'] as 'usfmx'|'other'|undefined))
 
-    // Notes
+    // Language-based resources
     .command('notes-process', "Convert study notes to standard format", {}, argv => notes_process())
+    .command('gloss-update', "Redownload and update glosses", {redownload: {type: 'boolean'}},
+        argv => update_glosses(!!argv['redownload']))
 
     // Data
     .command('data-crossref', "Generate cross-references data", {}, argv => crossref_process())

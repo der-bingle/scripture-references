@@ -186,3 +186,15 @@ export interface BibleJsonTxt {
 export type CrossrefSingle = [string, number, number]
 export type CrossrefRange = [...CrossrefSingle, number, number]
 export type CrossrefData = Record<string, Record<string, (CrossrefSingle|CrossrefRange)[]>>
+
+export interface GlossesDataWord {
+    word:string
+    gloss:string
+    strong:string
+}
+
+export interface GlossesData {
+    trans_id:string
+    book:string
+    contents:GlossesDataWord[][][]
+}
