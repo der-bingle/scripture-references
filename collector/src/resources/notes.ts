@@ -4,11 +4,9 @@ import {join} from 'node:path'
 import {convert as html_to_text} from 'html-to-text'
 
 import * as tyndale from '../integrations/tyndale.js'
-import {clean_dir, list_dirs, mkdir_exist, read_json, write_json} from '../parts/utils.js'
+import {clean_dir, list_dirs, mkdir_exist, write_json} from '../parts/utils.js'
 
 import type {StudyNotes} from '../integrations/tyndale.js'
-import type {NotesSourceMeta} from '../parts/types.js'
-import type {DistNotesManifest} from '../parts/shared_types.js'
 
 
 // Process available notes in sources dir and convert to publishable formats
@@ -17,8 +15,6 @@ export function notes_process(){
     // Clean existing notes dir in dist
     // NOTE Would find a way to append instead if many notes available
     clean_dir(join('dist', 'notes'))
-
-    const manifest:DistNotesManifest = {notes: {}}
 
     // Loop through available notes
     for (const id of list_dirs(join('sources', 'notes'))){
@@ -40,19 +36,8 @@ export function notes_process(){
                 // Also write plain text version
                 write_json(join(txt_dir, `${book}.json`), notes_to_txt(notes[book]!))
             }
-
-            // Load meta from file
-            const meta = read_json<NotesSourceMeta>(join('sources', 'notes', id, 'meta.json'))
-            manifest.notes[id] = {
-                ...meta,
-                year: meta.year ?? new Date().getFullYear(),
-                books: Object.keys(notes),
-            }
         }
     }
-
-    // Save the notes manifest
-    write_json(join('dist', 'notes', 'manifest.json'), manifest)
 }
 
 

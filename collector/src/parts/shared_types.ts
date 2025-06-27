@@ -75,23 +75,25 @@ export interface MetaCopyright {
 // DIST
 
 
-// Common to bibles/notes/etc
+// Common to bibles/glosses/notes/etc
 export interface DistManifestItem {
     name:MetaTranslationName
     year:number
-    direction:'ltr'|'rtl'
+    books_ot:true|string[]
+    books_nt:true|string[]
     copyright:MetaCopyright
+    direction:'ltr'|'rtl'
+    tags:MetaTag[]
 }
 
+export interface DistTranslation extends DistManifestItem {
+}
 
-/* Literalness score from 1 (high) to 5 (low)
-    1: So literal that it is not gramatically correct at times (e.g. LSV)
-    2: Readable English but awkward and hard to understand at times (e.g. ESV/NASB)
-    3: Easily readable with rephrasing only when necessary (e.g. BSB/NIV)
-    4: Frequent rephrasing to help modern readers (e.g. NLT)
-    5: Constant rephrasing that is highly interpretive (e.g. MSG)
-*/
-export type TranslationLiteralness = 1|2|3|4|5|null
+export interface DistGloss extends DistManifestItem {
+}
+
+export interface DistNotes extends DistManifestItem {
+}
 
 
 /* Tags:
@@ -99,27 +101,22 @@ export type TranslationLiteralness = 1|2|3|4|5|null
     archaic: Uses old language (only used when year is modern as can assume all old are archaic)
     questionable: Substantial criticism or concerning origins
     niche: Only useful for academic study or for people with a certain ideology
+
+    Literalness score from 1 (high) to 5 (low)
+    1: So literal that it is not gramatically correct at times (e.g. LSV)
+    2: Readable English but awkward and hard to understand at times (e.g. ESV/NASB)
+    3: Easily readable with rephrasing only when necessary (e.g. BSB/NIV)
+    4: Frequent rephrasing to help modern readers (e.g. NLT)
+    5: Constant rephrasing that is highly interpretive (e.g. MSG)
 */
-export type TranslationTag = 'recommended'|'archaic'|'questionable'|'niche'
-
-
-export interface DistTranslation extends DistManifestItem {
-    literalness:TranslationLiteralness
-    tags:TranslationTag[]
-    books_ot:true|string[]
-    books_nt:true|string[]
-}
-
-
-export interface DistGloss extends DistManifestItem {
-    books_ot:true|string[]
-    books_nt:true|string[]
-}
+export type MetaTag = 'recommended'|'archaic'|'questionable'|'niche'
+    |'literal1'|'literal2'|'literal3'|'literal4'|'literal5'
 
 
 export interface DistManifest {
     translations:Record<string, DistTranslation>
     glosses:Record<string, DistGloss>
+    notes:Record<string, DistNotes>
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
     languages_most_spoken:string[]
@@ -142,16 +139,6 @@ export interface DistTranslationExtra {
     book_names:Record<string, BookNames>
     chapter_headings:Record<string, string[]>
     sections:Record<string, BookSection[]>
-}
-
-
-export interface DistNotes extends DistManifestItem {
-    books:string[]
-}
-
-
-export interface DistNotesManifest {
-    notes:Record<string, DistNotes>
 }
 
 

@@ -1,8 +1,7 @@
 
 // General types specific to the client
 
-import type {MetaCopyright, DistManifest, DistTranslation, MetaRestrictions, DistGloss,
-} from './shared_types'
+import type {MetaCopyright, DistManifest, MetaRestrictions, DistManifestItem} from './shared_types'
 
 
 export interface UsageConfig {
@@ -29,20 +28,20 @@ export type RuntimeCopyright = Omit<MetaCopyright, 'licenses'> & {
     licenses:RuntimeLicense[]
 }
 
-export type RuntimeTranslation = Omit<DistTranslation, 'copyright'> & {
+export type RuntimeManifestItem = Omit<DistManifestItem, 'copyright'> & {
+    // These fields have refined types during runtime
     copyright:RuntimeCopyright
     books_ot_list:string[]
     books_nt_list:string[]
 }
 
-export type RuntimeGloss = Omit<DistGloss, 'copyright'> & {
-    copyright:RuntimeCopyright
-    books_ot_list:string[]
-    books_nt_list:string[]
-}
+export type RuntimeTranslation = RuntimeManifestItem
+export type RuntimeGloss = RuntimeManifestItem
+export type RuntimeNotes = RuntimeManifestItem
 
-export type RuntimeManifest =
-        Omit<DistManifest, 'translations'|'glosses'|'books_ordered'|'book_names_english'> & {
+export type RuntimeManifest = Omit<DistManifest,
+        'translations'|'glosses'|'notes'|'books_ordered'|'book_names_english'> & {
     translations:Record<string, RuntimeTranslation>
     glosses:Record<string, RuntimeGloss>
+    notes:Record<string, RuntimeNotes>
 }

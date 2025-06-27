@@ -8,8 +8,8 @@ import {filter_licenses} from './licenses.js'
 import {deep_copy, fuzzy_search, request} from './utils.js'
 import {TranslationExtra} from './translation.js'
 
-import type {BookNames, DistManifest, DistTranslationExtra, MetaCopyright, OneOrMore, TranslationLiteralness,
-    TranslationTag} from './shared_types'
+import type {BookNames, DistManifest, DistTranslationExtra, MetaCopyright, OneOrMore,
+    MetaTag} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
 
 
@@ -58,8 +58,7 @@ export interface GetTranslationsItem {
     attribution:string
     attribution_url:string
     licenses:RuntimeLicense[]
-    tags:TranslationTag[]
-    liternalness:TranslationLiteralness
+    tags:MetaTag[]
     // Local name of translation (falls back to English)
     name:string
     // Local abbreviation of translation (falls back to English)
@@ -142,6 +141,8 @@ export class BibleCollection {
     // @internal
     _endpoints_gloss:Record<string, string> = {}
     // @internal
+    _endpoints_notes:Record<string, string> = {}
+    // @internal
     _modern_year = new Date().getFullYear() - 70
 
     // @internal
@@ -156,13 +157,14 @@ export class BibleCollection {
         // Start with an empty manifest with common metadata extracted from first manifest
         this._manifest = {
             licenses: manifests[0][1].licenses,  // Still useful even if resolved within transl.s
-            glosses: {},  // TODO Not filled yet
             languages: {},
             language2to3: {},
             // NOTE If first manifest is sparse then may not include all possible codes
             //      But this is a non-essential array just used to slightly improve sorting
             languages_most_spoken: manifests[0][1].languages_most_spoken,
             translations: {},
+            glosses: {},
+            notes: {},
         }
 
         // Keep track of included languages as may be less than in collection due to usage config
@@ -249,6 +251,28 @@ export class BibleCollection {
 
                 // Remember which endpoint has which gloss
                 this._endpoints_gloss[gloss_id] = endpoint
+            }
+
+            // Loop through endpoint's notes
+            for (const [notes_id, notes_data] of Object.entries(manifest.notes)){
+
+                const licenses = resolve_license_data(notes_data.copyright)
+                if (!licenses.length){
+                    continue  // No compatible licenses so exclude notes
+                }
+
+                // Add the notes to the combined collection
+                this._manifest.notes[notes_id] = {
+                    ...notes_data,
+                    ...resolve_books(notes_data.books_ot, notes_data.books_nt),
+                    copyright: {
+                        ...notes_data.copyright,
+                        licenses,
+                    },
+                }
+
+                // Remember which endpoint has which notes
+                this._endpoints_notes[notes_id] = endpoint
             }
 
             // Only add languages that have translations (may have been excluded if usage config)
@@ -485,7 +509,7 @@ export class BibleCollection {
             }
 
             // Then try filter out obsolete-like tags
-            for (const tag of ['archaic', 'questionable', 'niche'] as TranslationTag[]){
+            for (const tag of ['archaic', 'questionable', 'niche'] as MetaTag[]){
                 const reduced_list = list.filter(item => !item.tags.includes(tag))
                 if (reduced_list.length){
                     list = reduced_list

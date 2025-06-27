@@ -1,8 +1,7 @@
 
 // Types specific to collector
 
-import type {MetaTranslationName, MetaCopyright, TranslationLiteralness,
-    TranslationTag} from './shared_types'
+import type {MetaTranslationName, MetaCopyright, MetaTag} from './shared_types'
 
 
 export interface CollectionConfig {
@@ -33,16 +32,15 @@ export interface CommonSourceMeta {
     year:number|null
     direction:'ltr'|'rtl'
     copyright:MetaCopyright
-    tags:TranslationTag[]
+    tags:MetaTag[]
+    notes?:string  // Notes relevant to sourcing the translation and any issues that came up
+    modified?:boolean  // Whether have modified source files (e.g. to fix bugs)
 }
 
 
 export interface TranslationSourceMeta extends CommonSourceMeta {
     ids:Partial<Record<ServiceId, string>>
-    literalness:TranslationLiteralness
     source:TranslationSource
-    notes?:string  // Notes relevant to sourcing the translation and any issues that came up
-    modified?:boolean  // Whether have modified source files (e.g. to fix bugs)
 }
 
 
