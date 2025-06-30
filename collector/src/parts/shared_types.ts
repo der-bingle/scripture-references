@@ -12,6 +12,7 @@ export interface MetaLanguage {
     local:string
     english:string
     pop:number|null  // Null for confirmed dead languages
+    direction:'ltr'|'rtl'
 }
 
 export interface MetaTranslationName {

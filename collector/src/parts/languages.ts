@@ -19,6 +19,18 @@ interface CLDRLanguages {
     }
 }
 
+interface CLDRMisc {
+    main:{
+        [code:string]:{
+            layout:{
+                orientation:{
+                    characterOrder:'left-to-right'|'right-to-left'|null
+                }
+            }
+        }
+    }
+}
+
 interface LanguageData {
     languages:Record<string, MetaLanguage>
     language2to3:Record<string, string>
@@ -56,11 +68,15 @@ const overrides:LanguageDataPartial = {
 export async function gen_language_data(){
     // Generate a language data file from CLDR resources
 
+    // Identify location of CLDR data
     let cldr_path = join(PKG_PATH, 'node_modules', 'cldr-localenames-full', 'main')
     if (!existsSync(cldr_path)){
         // Will be in repo root during dev due to workspaces
         cldr_path = join(PKG_PATH, '..', 'node_modules', 'cldr-localenames-full', 'main')
     }
+    const cldr_path_misc = cldr_path.replace('cldr-localenames-full', 'cldr-misc-full')
+
+    // Init data object
     const data:LanguageData = {languages: {}, language2to3: {}}
 
     // Setup access to English names of languages
@@ -90,6 +106,7 @@ export async function gen_language_data(){
             local: population[three]?.local || english_name,
             english: english_name,
             pop,
+            direction: 'ltr',  // Will be overriden later if data available
         }
         if (two.length === 2){
             data.language2to3[two] = three
@@ -105,6 +122,14 @@ export async function gen_language_data(){
         if (existsSync(lang_path)){
             data.languages[three]!.local = read_json<CLDRLanguages>(lang_path)
                 .main[cldr_code]!.localeDisplayNames.languages[cldr_code]!
+        }
+
+        // Get script direction if available
+        const misc_path = join(cldr_path_misc, cldr_code, 'layout.json')
+        if (existsSync(misc_path)){
+            const cldr_direction = read_json<CLDRMisc>(misc_path)
+                .main[cldr_code]!.layout.orientation.characterOrder
+            data.languages[three]!.direction = cldr_direction === 'right-to-left' ? 'rtl' : 'ltr'
         }
     }
 
