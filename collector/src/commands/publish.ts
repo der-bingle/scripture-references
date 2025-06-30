@@ -41,7 +41,7 @@ export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:strin
     const publisher = new Publisher()
     const invalidations = []
     if (!type || type === 'bible'){
-        invalidations.push(...await _publish_bible(publisher, ids))
+        invalidations.push(...await _publish_bibles(publisher, ids))
     }
     if (!type || type === 'notes'){
         invalidations.push(...await _publish_notes(publisher, ids))
@@ -72,7 +72,7 @@ export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:strin
 }
 
 
-async function _publish_bible(publisher:Publisher, translations?:string):Promise<string[]>{
+async function _publish_bibles(publisher:Publisher, translations?:string):Promise<string[]>{
     // Publish bibles and return paths needing invalidation
 
     // Detect translations from manifest so know they passed review
