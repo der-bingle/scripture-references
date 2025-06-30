@@ -4,9 +4,9 @@ import {Dirent, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSy
 import {dirname, join} from 'path'
 
 /**
- * Files to ignore when reading a directory
+ * Files/dirs to ignore when reading a directory
  */
-const IGNORE_FILES = ['.DS_Store']
+const IGNORE_NAMES = ['.DS_Store', '.git']
 
 /**
  * An interface for directory entries
@@ -86,7 +86,7 @@ export function clean_dir(path:string):void{
  * @returns The entry names
  */
 export function read_dir(path:string):string[] {
-    return readdirSync(path).filter(item => !IGNORE_FILES.includes(item))
+    return readdirSync(path).filter(item => !IGNORE_NAMES.includes(item))
 }
 
 
@@ -99,7 +99,7 @@ export function read_dir(path:string):string[] {
  */
 export function get_dir_entries(path:string):DirectoryEntry[] {
     return readdirSync(path, {withFileTypes: true})
-        .filter((item: Dirent) => !IGNORE_FILES.includes(item.name))
+        .filter((item: Dirent) => !IGNORE_NAMES.includes(item.name))
         .map((item: Dirent) => {
             const name = item.name
             const isDirectory = item.isDirectory()
@@ -120,7 +120,7 @@ export function get_dir_entries(path:string):DirectoryEntry[] {
 export function list_files(directory:string):string[]{
     return readdirSync(directory, {withFileTypes: true})
         .filter((entity: Dirent) => entity.isFile())
-        .filter((entity: Dirent) => !IGNORE_FILES.includes(entity.name))
+        .filter((entity: Dirent) => !IGNORE_NAMES.includes(entity.name))
         .map((entity: Dirent) => entity.name)
 }
 
@@ -144,7 +144,7 @@ export function read_dir_deep(directory:string):{dirs: string[], files: string[]
             dirs.push(...subdir_results.dirs)
             files.push(...subdir_results.files)
             continue
-        } else if (!entry.isFile() || IGNORE_FILES.includes(entry.name)){
+        } else if (!entry.isFile() || IGNORE_NAMES.includes(entry.name)){
             continue
         }
         files.push(entry_path)
