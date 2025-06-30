@@ -6,14 +6,14 @@ import * as ebible from '../integrations/ebible.js'
 import * as dbl from '../integrations/dbl.js'
 import {list_dirs, read_json} from '../parts/utils.js'
 
-import type {ServiceId, TranslationSourceMeta} from '../parts/types.js'
+import type {TransServiceId, TranslationSourceMeta} from '../parts/types.js'
 
 
-export async function discover_translations(service:ServiceId, discover_specific_id?:string){
+export async function discover_translations(service:TransServiceId, discover_specific_id?:string){
     // Discover translations and save their meta data
 
     // Warn if service arg invalid
-    const services:ServiceId[] = ['door43', 'ebible', 'dbl']
+    const services:TransServiceId[] = ['door43', 'ebible', 'dbl']
     if (service && !services.includes(service)){
         console.error(`Service must be one of: ` + services.join(', '))
         return
@@ -21,10 +21,10 @@ export async function discover_translations(service:ServiceId, discover_specific
 
     // Get service ids for all existing translations so know if already discovered
     const ids = Object.fromEntries(services.map(
-        service => [service, [] as string[]])) as Record<ServiceId, string[]>
+        service => [service, [] as string[]])) as Record<TransServiceId, string[]>
     for (const trans of list_dirs(join('sources', 'bibles'))){
         const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', trans, 'meta.json'))
-        for (const service of Object.keys(meta.ids) as ServiceId[]){
+        for (const service of Object.keys(meta.ids) as TransServiceId[]){
             ids[service].push(meta.ids[service]!)
         }
     }

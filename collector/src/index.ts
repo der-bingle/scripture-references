@@ -18,7 +18,7 @@ import {notes_process} from './resources/notes.js'
 import {update_glosses} from './resources/gloss.js'
 import {crossref_process} from './data/crossref.js'
 
-import type {ServiceId} from './parts/types'
+import type {TranslationServiceId} from './parts/types'
 
 import './parts/console_colors.js'
 
@@ -36,7 +36,8 @@ await yargs(process.argv.slice(2))
 
     // Bibles
     .command('discover [service] [id]', "Discover what translations are available", {},
-        argv => discover_translations(argv['service'] as ServiceId, argv['id'] as string))
+        argv => discover_translations(
+            argv['service'] as TranslationServiceId, argv['id'] as string))
 
     .command('download [id]', "Download source files (--recheck for updating existing)",
         {recheck: {type: 'boolean'}, force: {type: 'boolean'}},
