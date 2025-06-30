@@ -104,14 +104,16 @@ export async function download_glosses(){
         }
 
         // Get properties from path
-        let [ , lang, book] = /^data-main\/(\w+)\/\d+-(\w+)/.exec(entry.name) ?? []
+        let [ , lang, book] = /^data-main\/([^/]+)\/\d+-(\w+)/.exec(entry.name) ?? []
         if (!lang || !book){
             continue
         }
 
         // Verify lang code
         const lang_id = lang
-        if (lang === 'hbo+grc'){
+        if (lang === 'test'){
+            continue
+        } else if (lang === 'hbo+grc'){
             lang = '.original'  // Put in special dir as will combine data with glosses later
         } else if (lang === 'idn'){
             lang = 'ind'  // Bug https://github.com/globalbibletools/data/issues/1
@@ -130,14 +132,18 @@ export async function download_glosses(){
             continue
         }
 
-        // Extract file
+        // Ensure dirs exist
         const out_dir = join(gbt_source_dir, lang, 'json')
         mkdir_exist(out_dir)
+
+        // Write meta file if doesn't exist
         const meta_path = join(gbt_source_dir, lang, 'meta.json')
-        if (!existsSync(meta_path)){
+        if (!existsSync(meta_path) && lang !== '.original'){
             const meta_data = _generate_meta(lang_id, language_data.data.languages[lang]!, url)
             write_json(meta_path, meta_data, true)
         }
+
+        // Extract file
         await extractor.extract(entry, join(out_dir, `${book}.json`))
     }
 }
@@ -147,7 +153,7 @@ export async function sources_to_dist(){
 
     // Get original language data
     const original_books:Record<string, GbtDataOriginal> = {}
-    const originals_path = join(gbt_source_dir, '.original')
+    const originals_path = join(gbt_source_dir, '.original', 'json')
     for (const filename of list_files(originals_path)){
         const book = filename.slice(0, 3)
         original_books[book] = read_json(join(originals_path, filename))
@@ -166,7 +172,7 @@ export async function sources_to_dist(){
         }
 
         // Process each book
-        const lang_path = join(gbt_source_dir, lang)
+        const lang_path = join(gbt_source_dir, lang, 'json')
         for (const filename of list_files(lang_path)){
 
             // Read data
