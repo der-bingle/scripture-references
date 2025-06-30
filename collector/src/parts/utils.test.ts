@@ -33,7 +33,7 @@ describe('get_dir_entries', () => {
     })
 
     it('should return a correct file entry', ({expect}) => {
-        const expected_size = statSync(path.join('dist', 'bibles', 'manifest.json')).size
+        const expected_size = statSync(path.join('dist', 'manifest.json')).size
         expect(contents.length).not.toEqual(0)
         const manifest = contents.find((item: DirectoryEntry) => item.name === 'manifest.json')
         expect(manifest).not.toEqual(undefined)

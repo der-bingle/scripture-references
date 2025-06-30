@@ -1,6 +1,6 @@
 
-import {join} from 'path'
-import {existsSync} from 'fs'
+import {join} from 'node:path'
+import {existsSync, rmSync} from 'node:fs'
 
 import {book_names_english, books_ordered} from './bible.js'
 import {languages_by_total_speakers} from '../data/languages.js'
@@ -49,8 +49,10 @@ export async function update_manifest(){
     // Loop through published translations in dist dir
     for (const trans of list_dirs(join('dist', 'bibles'))){
 
+        // Remove manifest from old location if present
         if (trans === 'manifest.json'){
-            continue  // Ignore self
+            rmSync(join('dist', 'bibles', 'manifest.json'))
+            continue
         }
 
         // Load the meta data for the translation
@@ -151,5 +153,5 @@ export async function update_manifest(){
         languages_by_total_speakers.filter(l => included_languages.has(l))
 
     // Save the manifest to dist dir
-    write_json(join('dist', 'bibles', 'manifest.json'), manifest)
+    write_json(join('dist', 'manifest.json'), manifest)
 }

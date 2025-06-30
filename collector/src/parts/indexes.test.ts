@@ -48,7 +48,7 @@ describe('generate_index_content', () => {
 
     describe("Handling files", () => {
 
-        const html = generate_index_content(path.join('dist', 'bibles'))
+        const html = generate_index_content(path.join('dist'))
         const actual = html.toLowerCase()
 
         it("Contains links to the different available files", ({expect}) => {
@@ -56,7 +56,7 @@ describe('generate_index_content', () => {
         })
 
         it("Contains the number of files", ({expect}) => {
-            const expected_size = statSync(path.join('dist', 'bibles', 'manifest.json')).size
+            const expected_size = statSync(path.join('dist', 'manifest.json')).size
             expect(actual).toContain(`<span data-entry-name="manifest.json">${expected_size.toLocaleString()} bytes</span>`)
         })
 

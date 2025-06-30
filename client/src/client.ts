@@ -98,7 +98,7 @@ export class BibleClient {
         this._collection_promise = Promise.all(this._endpoints.map(async endpoint => {
             return [
                 endpoint,
-                JSON.parse(await request(endpoint + 'bibles/manifest.json')) as DistManifest,
+                JSON.parse(await request(endpoint + 'manifest.json')) as DistManifest,
             ]
         })).then(manifests => {
             // Store instance in `this.collection` for synchronous access

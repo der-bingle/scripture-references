@@ -4,7 +4,7 @@
 It's recommended to use the official client if able to save you a lot of time, but fetch(bible) can also be accessed manually if the need arises. For example, you may want to access the collection via a language other than Javascript.
 
 ## Manifest
-There is a single JSON document that contains all the metadata for all Bible translations. You can [inspect the structure](https://v1.fetch.bible/bibles/manifest.json) and parse it as needed.
+There is a single JSON document that contains all the metadata for all Bible translations and other resources. You can [inspect the structure](https://v1.fetch.bible/manifest.json) and parse it as needed.
 
 ## Sources
 If you need the original source files for Bible translations they are available in the [official collection](https://github.com/gracious-tech/fetch_collection) repository.
@@ -22,3 +22,6 @@ The HTML and plain text formats are broken into verses and stored within a JSON 
 The HTML is standard HTML with custom classes which are designed to be used with the [fetch(bible) client's stylesheet](https://github.com/gracious-tech/fetch/tree/master/client/src/css). The classes are based on the USX elements the HTML was converted from.
 
 Book ids [match the USX standard](https://ubsicap.github.io/usx/vocabularies.html#usx-vocab-bookcode) but are lowercase only.
+
+## Other resources
+There isn't a standard format for other resources such as glosses and study notes. They are stored in JSON and it is best to simply inspect the structure yourself by [browsing the collection](https://v1.fetch.bible/).

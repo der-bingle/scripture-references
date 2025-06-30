@@ -53,6 +53,17 @@ export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:strin
         invalidations.push(...await _publish_data(publisher, ids))
     }
 
+    // Always upload manifest in case any changes, and do last so assets are ready before it is used
+    const manifest_path = join('dist', 'manifest.json')
+    await publisher.upload_file(manifest_path)
+    invalidations.push('/manifest.json')
+
+    // Also upload manifest to old location for clients < 1.1.0
+    // This won't be listed in index.html
+    await publisher.upload('bibles/manifest.json', fs.readFileSync(manifest_path),
+        'application/json')
+    invalidations.push('/bibles/manifest.json')
+
     // Always update root index file, just in case
     await publisher.upload('index.html', generate_index_content('dist'), 'text/html')
     invalidations.push('/')
@@ -65,8 +76,7 @@ async function _publish_bible(publisher:Publisher, translations?:string):Promise
     // Publish bibles and return paths needing invalidation
 
     // Detect translations from manifest so know they passed review
-    const manifest_path = join('dist', 'bibles', 'manifest.json')
-    const manifest = read_json<DistManifest>(manifest_path)
+    const manifest = read_json<DistManifest>(join('dist', 'manifest.json'))
 
     // Add translations if not published yet
     const trans_ids = translations ? translations.split(',') : null
@@ -81,11 +91,6 @@ async function _publish_bible(publisher:Publisher, translations?:string):Promise
         await publisher.upload_dir(join('dist', 'bibles', id))
         invalidations.push(`/bibles/${id}/*`)
     }
-
-    // Upload manifest last so assets are ready before it is used
-    // NOTE Always uploaded so no changes are missed with included translations
-    await publisher.upload_file(manifest_path)
-    invalidations.push('/bibles/manifest.json')
 
     // Also always republish bibles dir index in case any changes
     await publisher.upload('bibles/index.html', generate_index_content('dist/bibles'), 'text/html')
