@@ -2,7 +2,7 @@
 // https://github.com/globalbibletools
 
 import {join} from 'node:path'
-import {writeFileSync} from 'node:fs'
+import {existsSync, writeFileSync} from 'node:fs'
 
 import StreamZip from 'node-stream-zip'
 import {last_verse} from '@gracious.tech/bible-references'
@@ -11,7 +11,8 @@ import {list_dirs, list_files, mkdir_exist, read_json, request, write_json} from
 import {books_ordered} from '../parts/bible.js'
 import {get_language_data} from '../parts/languages.js'
 
-import type {GlossesData, GlossesDataWord} from '../parts/shared_types.js'
+import type {GlossesData, GlossesDataWord, MetaLanguage} from '../parts/shared_types.js'
+import type {CommonSourceMeta} from '../parts/types.js'
 
 
 interface GbtWordOriginal {
@@ -46,34 +47,109 @@ interface GbtDataGloss {
 export const gbt_source_dir = join('sources', 'glosses', 'gbt')
 
 
+// Generate the meta.json for a new language that is discovered
+function _generate_meta(id:string, language:MetaLanguage, source_url:string):CommonSourceMeta{
+    return {
+        name: {
+            english: `Global Bible Tools glosses (${language.english})`,
+            english_abbrev: `GBT${language.english[0]!}`,
+            local: '',
+            local_abbrev: '',
+        },
+        year: new Date().getFullYear(),
+        direction: language.direction,
+        copyright: {
+            attribution: "Global Bible Tools",
+            attribution_url: 'https://globalbibletools.com/',
+            licenses: [{
+                license: 'public',
+                url: 'https://sellingjesus.org/free',
+            }],
+        },
+        ids: {
+            'gbt': id,
+        },
+        source: {
+            service: 'gbt',
+            format: null,  // A proprietary format
+            revision: 0,  // Unused
+            updated: new Date().toISOString().slice(0, 10),
+            url: source_url,
+        },
+        tags: [],
+    }
+}
+
+
 // Download
 export async function download_glosses(){
 
     // Download zip
-    const zip_file_path = join(gbt_source_dir, 'git.zip')
+    const zip_file_path = join(gbt_source_dir, 'source.zip')
     const url = 'https://github.com/globalbibletools/data/archive/refs/heads/main.zip'
     const zip_buffer = await request(url, 'arrayBuffer')
     mkdir_exist(gbt_source_dir)
     writeFileSync(zip_file_path, Buffer.from(zip_buffer))
 
-    // Extract to dir
-    await new StreamZip.async({file: zip_file_path}).extract('data-main', gbt_source_dir)
+    // Need access to language data later
+    const language_data = get_language_data()
+
+    // Extract
+    const extractor = new StreamZip.async({file: zip_file_path})
+    for (const entry of Object.values(await extractor.entries())){
+
+        // Only extract book files
+        if (!entry.name.startsWith('data-main/') || !entry.name.endsWith('.json')){
+            continue
+        }
+
+        // Get properties from path
+        let [ , lang, book] = /^data-main\/(\w+)\/\d+-(\w+)/.exec(entry.name) ?? []
+        if (!lang || !book){
+            continue
+        }
+
+        // Verify lang code
+        const lang_id = lang
+        if (lang === 'hbo+grc'){
+            lang = '.original'  // Put in special dir as will combine data with glosses later
+        } else if (lang === 'idn'){
+            lang = 'ind'  // Bug https://github.com/globalbibletools/data/issues/1
+        } else {
+            lang = language_data.normalise(lang) ?? undefined
+            if (!lang){
+                console.error(`Skipping unknown glosses language (${lang_id})`)
+                continue
+            }
+        }
+
+        // Verify book code
+        book = book.toLowerCase()
+        if (!books_ordered.includes(book)){
+            console.error(`Unexpected book "${book}" for glosses language ${lang_id}`)
+            continue
+        }
+
+        // Extract file
+        const out_dir = join(gbt_source_dir, lang, 'json')
+        mkdir_exist(out_dir)
+        const meta_path = join(gbt_source_dir, lang, 'meta.json')
+        if (!existsSync(meta_path)){
+            const meta_data = _generate_meta(lang_id, language_data.data.languages[lang]!, url)
+            write_json(meta_path, meta_data, true)
+        }
+        await extractor.extract(entry, join(out_dir, `${book}.json`))
+    }
 }
 
 
 export async function sources_to_dist(){
 
-    // Access to language data
-    const language_data = get_language_data()
-
     // Get original language data
     const original_books:Record<string, GbtDataOriginal> = {}
-    const originals_path = join(gbt_source_dir, 'hbo+grc')
+    const originals_path = join(gbt_source_dir, '.original')
     for (const filename of list_files(originals_path)){
-        const book = filename.slice(3, 6).toLowerCase()
-        if (!books_ordered.includes(book)){
-            throw new Error("Unexpected book id: " + book)
-        }
+        const book = filename.slice(0, 3)
         original_books[book] = read_json(join(originals_path, filename))
     }
     if (Object.keys(original_books).length !== books_ordered.length){
@@ -85,24 +161,16 @@ export async function sources_to_dist(){
         const trans_id = lang + '_gbt'
 
         // Deal with exceptions
-        if (['test', 'hbo+grc', 'idn'].includes(lang)){  // TODO idn meant to be ind?
-            continue  // Skip special dirs
-        }
-        if (language_data.normalise(lang) !== lang){
-            throw new Error("Unexpected language id: " + lang)
+        if (lang === '.original'){
+            continue  // Skip special dir
         }
 
         // Process each book
         const lang_path = join(gbt_source_dir, lang)
         for (const filename of list_files(lang_path)){
 
-            // Get USX book id
-            const book = filename.slice(3, 6).toLowerCase()
-            if (!books_ordered.includes(book)){
-                throw new Error("Unexpected book id: " + book)
-            }
-
             // Read data
+            const book = filename.slice(0, 3)
             const book_words = original_books[book]!
             const book_glosses = read_json<GbtDataGloss>(join(lang_path, filename))
 
