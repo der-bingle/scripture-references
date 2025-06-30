@@ -90,6 +90,10 @@ await yargs(process.argv.slice(2))
     .demandCommand()
     .strict()
     .help()
+    .fail((msg, error) => {
+        // Output whole stack, not just message
+        console.error(error.stack ?? msg)
+    })
 
     // Trigger processing
     .argv
