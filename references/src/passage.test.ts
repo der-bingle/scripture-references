@@ -416,6 +416,22 @@ describe('serialized', () => {
 })
 
 
+describe('total_verses', () => {
+
+    it("Sums for each verse type", ({expect}) => {
+        expect(PassageReference.from_string('2 Tim')!.total_verses()).toBe(18 + 26 + 17 + 22)
+        expect(PassageReference.from_string('2 Tim 2')!.total_verses()).toBe(26)
+        expect(PassageReference.from_string('2 Tim 2:4')!.total_verses()).toBe(1)
+        expect(PassageReference.from_string('2 Tim 2:4-5')!.total_verses()).toBe(2)
+        expect(PassageReference.from_string('2 Tim 2-3')!.total_verses()).toBe(26 + 17)
+        expect(PassageReference.from_string('2 Tim 2:2-3:3')!.total_verses()).toBe(25 + 3)
+        // Also test with multiple middle chapters
+        expect(PassageReference.from_string('2 Tim 1:2-4:3')!.total_verses()).toBe(17 + 26 + 17 + 3)
+    })
+
+})
+
+
 const book_name_abbreviations = {
     "gen": ["Gen.", "Ge.", "Gn."],
     "exo": ["Ex.", "Exod.", "Exo."],

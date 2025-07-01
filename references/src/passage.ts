@@ -438,6 +438,30 @@ export class PassageReference {
         return !this.is_before(chapter, verse) && !this.is_after(chapter, verse)
     }
 
+    // Get the total number of verses included in the range
+    total_verses(){
+
+        // If a book or chapter, will expect range even though they are identifiers
+        const {end_chapter, end_verse} = this.get_end()
+
+        // Handle same chapter case
+        if (this.start_chapter === end_chapter){
+            return end_verse - this.start_verse + 1
+        }
+
+        // First add verses from first chapter
+        const last_verse_book = last_verse[this.book]!
+        let count = last_verse_book[this.start_chapter-1]! - this.start_verse + 1
+
+        // Then add verses from middle chapters
+        for (let ch=this.start_chapter+1; ch < end_chapter; ch++){
+            count += last_verse_book[ch-1]!
+        }
+
+        // Finally add verses from last chapter
+        return count + end_verse
+    }
+
     // Get a reference for just the start verse of this reference (no effect if single verse)
     get_start(){
         return new PassageReference({
@@ -461,8 +485,8 @@ export class PassageReference {
             // User will expect end of chapter, even though this type is an identifier and not range
             return new PassageReference({
                 book: this.book,
-                start_chapter: last_verse_book.length,
-                start_verse: last_verse_book[last_verse_book.length-1],
+                start_chapter: this.start_chapter,
+                start_verse: last_verse_book[this.start_chapter-1],
             })
         }
         return new PassageReference({
