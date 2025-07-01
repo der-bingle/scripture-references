@@ -1,3 +1,16 @@
+/* THEORY OF RANGES
+    When presented with "Titus", does it refer to the beginning of the book or whole contents?
+        E.g. When highlighting verses, should the whole book be highlighted or just first verse?
+    Likewise, does "Titus 1" refer to the start of the chapter or the whole chapter?
+
+    This module defaults to assuming "Titus" and "Titus 1" are _identifiers_ rather than ranges
+    And if a range is intended, then it should be presented as "Titus 1-3" or "Titus 1:1-16"
+
+    As for the other types, anything with a hyphen is obviously a range (1:1-2, 1-2, 1:1-2:2)
+    That only leaves single verses (1:1) which are identifiers and can never be a range
+    So it makes sense to consider books and chapters (no hyphens) as identifiers as well
+*/
+
 
 import {parse_int} from './utils.js'
 import {books_ordered, book_names_english, english_abbrev_include,
