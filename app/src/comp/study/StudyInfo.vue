@@ -13,7 +13,7 @@ template(v-if='crossrefs.length')
 template(v-if='glosses.length')
     h5
         | Original language
-        v-btn(v-if='state.study.ot' color='' size='small' variant='flat'
+        v-btn(v-if='state.study?.ot' color='' size='small' variant='flat'
                 @click='state.hebrew_ltr = !state.hebrew_ltr')
             | {{ state.hebrew_ltr ? '⟼' : '⟻' }}
     div.orig(:class='{flex_ltr: state.hebrew_ltr}')

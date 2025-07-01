@@ -42,7 +42,6 @@ import TransDialog from './TransDialog.vue'
 import SettingsDialog from './SettingsDialog.vue'
 import AboutDialog from './AboutDialog.vue'
 import {state, safe_hsl} from '@/services/state'
-import {chapter_display} from '@/services/computes'
 
 
 // Increase max width of app depending on number of translations being shown

@@ -107,6 +107,11 @@ const translations = computed(() => {
     return items
 })
 
+// Access to translation choices while excluding headings
+const translations_selectable = computed(() => {
+    return translations.value.filter(t => typeof t !== 'string')
+})
+
 
 // Watches
 watch(selected_trans_index, () => {
@@ -123,8 +128,8 @@ watch(languages_show_all, () => {
 
 const change_lang = (code:string) => {
     displayed_language.value = code
-    if (translations.value.length === 1){
-        confirm_trans(translations.value[0]!.id)
+    if (translations_selectable.value.length === 1){
+        confirm_trans(translations_selectable.value[0]!.id)
     }
     show_languages.value = false
 }

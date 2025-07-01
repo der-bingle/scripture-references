@@ -2,7 +2,7 @@
 <template lang='pug'>
 
 div.column
-    div.word(@click='search_original' :class='{ot: state.study.ot}') {{ word.word }}
+    div.word(@click='search_original' :class='{ot: state.study?.ot}') {{ word.word }}
     a.gloss(:href='research_url' target='research') {{ gloss }}
 
 </template>
