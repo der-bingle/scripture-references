@@ -9,23 +9,7 @@ import {select} from 'xpath'
 import {mkdir_exist, request, write_json} from '../parts/utils.js'
 
 import type {CommonSourceMeta} from '../parts/types'
-
-
-// Types
-
-interface MultiVerseNote {
-    start_chapter:number
-    start_verse:number
-    end_chapter:number
-    end_verse:number
-    contents:string  // HTML
-}
-
-export interface StudyNotes {
-    verses:Record<string, Record<string, string>>  // Single verses organised by chapter and verse
-    // NOTE No separate prop for chapters as more logical to break down by section than chapter
-    ranges:MultiVerseNote[]  // Notes that span multiple verses and/or chapters
-}
+import type {NotesData, MultiVerseNote} from '../parts/shared_types'
 
 
 export const tyndale_source_dir = join('sources', 'notes', 'tyndale')
@@ -92,13 +76,13 @@ export async function download_notes(){
 
 
 // Extract study notes from Tyndale XML and convert to standard HTML/JSON
-export function sources_to_dist():Record<string, StudyNotes> {
+export function sources_to_dist():Record<string, NotesData> {
 
     const notes_path = join(tyndale_source_dir, 'eng_tyndale', 'StudyNotes.xml')
     const xml = readFileSync(notes_path, {encoding: 'utf8'})
 
     // Set up the intial data with empty values
-    const output:Record<string, StudyNotes> = {}
+    const output:Record<string, NotesData> = {}
     for (const usx_book of Object.values(tyndale_to_usx_book)) {
         // Result is keyed by USX book ids, not Tyndale's
         output[usx_book] = {

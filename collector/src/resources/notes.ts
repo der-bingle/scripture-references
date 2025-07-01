@@ -7,7 +7,7 @@ import {convert as html_to_text} from 'html-to-text'
 import * as tyndale from '../integrations/tyndale.js'
 import {clean_dir, list_dirs, mkdir_exist, write_json} from '../parts/utils.js'
 
-import type {StudyNotes} from '../integrations/tyndale.js'
+import type {NotesData} from '../parts/shared_types'
 
 
 // At the moment only have support for Tyndale notes
@@ -48,9 +48,9 @@ export function notes_process(){
 
 
 // Convert HTML notes to plain text
-function notes_to_txt(notes:StudyNotes):StudyNotes{
+function notes_to_txt(notes:NotesData):NotesData{
 
-    const plain:StudyNotes = {verses: {}, ranges: []}
+    const plain:NotesData = {verses: {}, ranges: []}
 
     for (const range of notes.ranges){
         plain.ranges.push({

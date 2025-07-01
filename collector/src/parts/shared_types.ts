@@ -193,3 +193,17 @@ export interface GlossesData {
     book:string
     contents:GlossesDataWord[][][]
 }
+
+export interface MultiVerseNote {
+    start_chapter:number
+    start_verse:number
+    end_chapter:number
+    end_verse:number
+    contents:string
+}
+
+export interface NotesData {
+    verses:Record<string, Record<string, string>>  // Single verses organised by chapter and verse
+    // NOTE No separate prop for chapters as more logical to break down by section than chapter
+    ranges:MultiVerseNote[]  // Notes that span multiple verses and/or chapters
+}
