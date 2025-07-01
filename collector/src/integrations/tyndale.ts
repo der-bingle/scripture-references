@@ -18,6 +18,7 @@ interface MultiVerseNote {
 
 export interface StudyNotes {
     verses:Record<string, Record<string, string>>  // Single verses organised by chapter and verse
+    // NOTE No separate prop for chapters as more logical to break down by section than chapter
     ranges:MultiVerseNote[]  // Notes that span multiple verses and/or chapters
 }
 
