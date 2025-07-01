@@ -48,7 +48,7 @@ export const gbt_source_dir = join('sources', 'glosses', 'gbt')
 
 
 // Generate the meta.json for a new language that is discovered
-function _generate_meta(id:string, language:MetaLanguage, source_url:string):CommonSourceMeta{
+function _generate_meta(gbt_id:string, language:MetaLanguage, source_url:string):CommonSourceMeta{
     return {
         name: {
             english: `Global Bible Tools glosses (${language.english})`,
@@ -67,7 +67,7 @@ function _generate_meta(id:string, language:MetaLanguage, source_url:string):Com
             }],
         },
         ids: {
-            'gbt': id,
+            'gbt': gbt_id,
         },
         source: {
             service: 'gbt',
@@ -104,42 +104,47 @@ export async function download_glosses(){
         }
 
         // Get properties from path
-        let [ , lang, book] = /^data-main\/([^/]+)\/\d+-(\w+)/.exec(entry.name) ?? []
-        if (!lang || !book){
+        let [ , gbt_id, book] = /^data-main\/([^/]+)\/\d+-(\w+)/.exec(entry.name) ?? []
+        if (!gbt_id || !book){
             continue
         }
 
+        // Actual language code may differ from gbt_id, as will own_id
+        let lang = gbt_id
+        let own_id = gbt_id
+
         // Verify lang code
-        const lang_id = lang
         if (lang === 'test'){
             continue
         } else if (lang === 'hbo+grc'){
-            lang = '.original'  // Put in special dir as will combine data with glosses later
-        } else if (lang === 'idn'){
-            lang = 'ind'  // Bug https://github.com/globalbibletools/data/issues/1
+            own_id = '.original'  // Put in special dir as will combine data with glosses later
         } else {
-            lang = language_data.normalise(lang) ?? undefined
+            if (gbt_id === 'idn'){
+                lang = 'ind'  // Bug https://github.com/globalbibletools/data/issues/1
+            }
+            lang = language_data.normalise(lang) ?? ''
             if (!lang){
-                console.error(`Skipping unknown glosses language (${lang_id})`)
+                console.error(`Skipping unknown glosses language (${gbt_id})`)
                 continue
             }
+            own_id = lang + '_gbt'
         }
 
         // Verify book code
         book = book.toLowerCase()
         if (!books_ordered.includes(book)){
-            console.error(`Unexpected book "${book}" for glosses language ${lang_id}`)
+            console.error(`Unexpected book "${book}" for glosses language ${gbt_id}`)
             continue
         }
 
         // Ensure dirs exist
-        const out_dir = join(gbt_source_dir, lang, 'json')
+        const out_dir = join(gbt_source_dir, own_id, 'json')
         mkdir_exist(out_dir)
 
         // Write meta file if doesn't exist
-        const meta_path = join(gbt_source_dir, lang, 'meta.json')
-        if (!existsSync(meta_path) && lang !== '.original'){
-            const meta_data = _generate_meta(lang_id, language_data.data.languages[lang]!, url)
+        const meta_path = join(gbt_source_dir, own_id, 'meta.json')
+        if (!existsSync(meta_path) && own_id !== '.original'){
+            const meta_data = _generate_meta(gbt_id, language_data.data.languages[lang]!, url)
             write_json(meta_path, meta_data, true)
         }
 
@@ -163,16 +168,15 @@ export async function sources_to_dist(){
     }
 
     // Combine with glosses and put in dist dir
-    for (const lang of list_dirs(gbt_source_dir)){
-        const trans_id = lang + '_gbt'
+    for (const trans_id of list_dirs(gbt_source_dir)){
 
         // Deal with exceptions
-        if (lang === '.original'){
+        if (trans_id === '.original'){
             continue  // Skip special dir
         }
 
         // Process each book
-        const lang_path = join(gbt_source_dir, lang, 'json')
+        const lang_path = join(gbt_source_dir, trans_id, 'json')
         for (const filename of list_files(lang_path)){
 
             // Read data
@@ -195,14 +199,14 @@ export async function sources_to_dist(){
             for (const gbt_data of [book_words, book_glosses]){
                 const last_verses_for_book = last_verse[book]!
                 if (last_verses_for_book.length !== gbt_data.chapters.length){
-                    throw new Error(`Different number of chapters for ${lang} ${book}`)
+                    throw new Error(`Different number of chapters for ${trans_id} ${book}`)
                 }
                 for (let i = 0; i < last_verses_for_book.length; i++){
                     const num_verses = gbt_data.chapters[i]!.verses.length
                     const num_verses_expected = last_verses_for_book[i]!
                     if (num_verses !== num_verses_expected){
                         throw new Error(`Chapter has ${num_verses} verses but expected`
-                            + ` ${num_verses_expected} (${lang} ${book} ch${i+1})`)
+                            + ` ${num_verses_expected} (${trans_id} ${book} ch${i+1})`)
                     }
                 }
             }
@@ -260,7 +264,7 @@ export async function sources_to_dist(){
             // Save book's data if almost complete
             // NOTE When can't translate, will be '-' so still counts as glossed
             if (percent_glossed > 95){
-                const lang_dist_dir = join('dist', 'glosses', trans_id)
+                const lang_dist_dir = join('dist', 'glosses', trans_id, 'json')
                 mkdir_exist(lang_dist_dir)
                 write_json(join(lang_dist_dir, `${book}.json`), processed_data)
             }
