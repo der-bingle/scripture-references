@@ -1,6 +1,6 @@
 
 import {reactive, computed, watch} from 'vue'
-import {IndividualVerse, BookCrossref, PassageReference, BibleBookTxt,
+import {IndividualVerse, BookCrossref, PassageReference,
     book_names_english, book_abbrev_english, GlossesBook} from '@gracious.tech/fetch-client'
 
 import {parse_int} from './utils.js'
