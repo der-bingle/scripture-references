@@ -11,6 +11,7 @@ export type * from '@gracious.tech/bible-references'
 // NOTE Don't export classes not meant to be initiated directly, export them as types instead
 export {BibleClient} from './client.js'
 export {substantial_poetry} from './data.js'
+export {FetchNetworkError} from './request.js'
 
 
 // Types (only expose those relevant to the user and willing to support going forward)
@@ -65,3 +66,7 @@ export type {
     GlossesData,
     GlossesDataWord,
 } from './shared_types.js'
+
+export type {
+    RequestHandler,
+} from './request.js'

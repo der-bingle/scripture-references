@@ -1,7 +1,21 @@
 
-// General types specific to the client
+
+import type {fetch} from 'undici-types'
 
 import type {MetaCopyright, DistManifest, MetaRestrictions, DistManifestItem} from './shared_types'
+
+
+// fetch API is available in both browser and Node but types seem to require one or the other
+// See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/60924
+// undici-types is the actual dependency of @types/node's implementation of the fetch API anyway
+declare global {
+    interface GlobalFetch {
+        fetch:typeof fetch
+    }
+}
+
+
+// General types specific to the client
 
 
 export interface UsageConfig {

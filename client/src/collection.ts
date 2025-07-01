@@ -5,12 +5,13 @@ import {book_names_english, books_ordered, PassageReference, detect_references,
 
 import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
 import {filter_licenses} from './licenses.js'
-import {deep_copy, fuzzy_search, request} from './utils.js'
+import {deep_copy, fuzzy_search} from './utils.js'
 import {TranslationExtra} from './translation.js'
 
 import type {BookNames, DistManifest, DistTranslationExtra, MetaCopyright, OneOrMore,
     MetaTag} from './shared_types'
 import type {UsageOptions, UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
+import type {RequestHandler} from './request'
 
 
 // No browser types since may be running in Node, so define as possibly existing
@@ -127,12 +128,6 @@ export class BibleCollection {
     // @internal
     _usage:UsageConfig
     // @internal
-    _remember_fetches:boolean
-    // @internal
-    _fetch_book_cache:Record<string, Promise<BibleBook>> = {}
-    // @internal
-    _fetch_extras_cache:Record<string, Promise<TranslationExtra>> = {}
-    // @internal
     _local_book_names:Record<string, Record<string, BookNames>> = {}
     // @internal
     _manifest:RuntimeManifest
@@ -145,14 +140,16 @@ export class BibleCollection {
     // @internal
     _modern_year = new Date().getFullYear() - 70
 
+    requester:RequestHandler
+
     // @internal
-    constructor(usage:UsageConfig, remember_fetches:boolean,
+    constructor(usage:UsageConfig, requester:RequestHandler,
             manifests:OneOrMore<[string, DistManifest]>){
         // Merge the manifests given into a combined collection while remembering endpoints
         // WARN Original manifests are not dereferenced and assumed to not be used outside here
 
         this._usage = usage
-        this._remember_fetches = remember_fetches
+        this.requester = requester
 
         // Start with an empty manifest with common metadata extracted from first manifest
         this._manifest = {
@@ -697,14 +694,9 @@ export class BibleCollection {
         // Check args valid
         this._ensure_book_exists(translation, book)
 
-        // Don't fetch if already have a result or request pending
-        const key = `${translation} ${book} ${format}`
-        if (key in this._fetch_book_cache){
-            return this._fetch_book_cache[key]!
-        }
-
         // Fetch book in desired format
-        const promise = request(this.get_book_url(translation, book, format)).then(contents => {
+        const url = this.get_book_url(translation, book, format)
+        return this.requester.request(url).then(contents => {
             const format_class = {
                 html: BibleBookHtml,
                 usx: BibleBookUsx,
@@ -713,16 +705,6 @@ export class BibleCollection {
             }[format]
             return new format_class(contents, this._manifest.translations[translation]!.copyright)
         })
-
-        // Cache request promise if desired
-        if (this._remember_fetches){
-            this._fetch_book_cache[key] = promise
-            // Clear if unsuccessful so can retry if desired
-            promise.catch(() => {
-                delete this._fetch_book_cache[key]
-            })
-        }
-        return promise
     }
 
     // Make request for extra metadata for a translation (such as book names and section headings).
@@ -732,30 +714,14 @@ export class BibleCollection {
         // Check args valid
         this._ensure_trans_exists(translation)
 
-        // Don't fetch if already have a result or request pending
-        if (translation in this._fetch_extras_cache){
-            return this._fetch_extras_cache[translation]!
-        }
-
         // Fetch data
         const url = `${this._endpoints[translation]!}bibles/${translation}/extra.json`
-        const promise = request(url).then(contents => {
+        return this.requester.request(url).then(contents => {
             const data = JSON.parse(contents) as DistTranslationExtra
             // Extract local book names when done (regardless of `remember_fetches` setting)
             this._local_book_names[translation] = data.book_names
             return new TranslationExtra(data)
         })
-
-        // Cache request promise if desired
-        if (this._remember_fetches){
-            this._fetch_extras_cache[translation] = promise
-            // Clear if unsuccessful so can retry if desired
-            promise.catch(() => {
-                delete this._fetch_book_cache[translation]
-            })
-        }
-
-        return promise
     }
 
     // @internal Auto-prepare args for from_string/detect_references based on translation

@@ -1,10 +1,10 @@
 
-import {request} from './utils.js'
 import {BibleCollection} from './collection.js'
 import {BookCrossref} from './crossref.js'
 import {GlossesBook} from './glosses.js'
 import {TranslationExtra} from './translation.js'
 import {BibleBook, BibleBookHtml, BibleBookTxt, BibleBookUsfm, BibleBookUsx} from './book.js'
+import {RequestHandler} from './request.js'
 
 import type {UsageOptions, UsageConfig} from './types'
 import type {CrossrefData, DistManifest, DistTranslationExtra, OneOrMore} from './shared_types'
@@ -41,17 +41,19 @@ export interface BibleClientConfig {
      */
     usage?:UsageOptions
 
-    /* Whether to store internally the results of `fetch_*` methods (default true).
+    /* Whether to preserve in memory the results of `fetch_*` methods (default true).
 
     This client will auto-preserve the results of `fetch_*` methods to avoid duplicate network
-    requests. This is convenient for most users but may result in a large use of memory if a
+    requests. It preserves them in memory so that caching works even if service workers or other
+    browser features are unimplemented or unavailable (such as in some iframes).
+
+    This is convenient for most users but may result in a large use of memory if a
     significant amount of resources are requested. In such cases it is best to rely on service
-    worker caching, or self-preserving frequently used results of requests.
+    worker caching, or self-preserving frequently used results of requests. Though it's unlikely
+    to be an issue as a whole bible is only around 14MB of memory (2MB compressed, 7MB disk space)
 
-    It is best practice to use service worker caching either way, as this will not only speed up
-    runtime execution but also revisits to your app.
-
-    Note that `fetch_collection()` results will always be preserved due to its frequency of use.
+    It is best practice to use service worker caching for browsers either way, as this will not
+    only speed up runtime execution but also revisits to your app.
     */
     remember_fetches?:boolean
 }
@@ -71,51 +73,36 @@ export class BibleClient {
         derivatives: false,
         limitless: true,  // Defaults to true since most apps will display entire bibles
     }
-    // @internal
-    _remember_fetches:boolean
-    // @internal
-    _collection_promise:Promise<BibleCollection>|undefined
-    // @internal
-    _crossref_cache:Record<string, Promise<BookCrossref>> = {}
+
     // Synchronous access to collection if it has already been fetched with `fetch_collection()`
     collection:BibleCollection|undefined
+    // Access to request handler and its caching methods
+    requester:RequestHandler
 
     // Create a new BibleClient, defaulting to the official fetch(bible) collection
     constructor(config:BibleClientConfig={}){
         this._endpoints = config.endpoints ?? ['https://v1.fetch.bible/']
         this._data_endpoint = config.data_endpoint ?? this._endpoints[0]!
         this._usage = {...this._usage, ...config.usage}
-        this._remember_fetches = config.remember_fetches !== false
+        this.requester = new RequestHandler(config.remember_fetches !== false)
     }
 
     // Fetch the collection's manifest and return a BibleCollection object for interacting with it
     async fetch_collection():Promise<BibleCollection>{
 
-        // If have already requested, return previous promise (this.collection may not be ready yet)
-        if (this._collection_promise){
-            return this._collection_promise
-        }
-
         // Request all manifests and combine into a single BibleCollection instance
-        this._collection_promise = Promise.all(this._endpoints.map(async endpoint => {
+        return Promise.all(this._endpoints.map(async endpoint => {
+            const manifest_str = await this.requester.request(endpoint + 'manifest.json')
             return [
                 endpoint,
-                JSON.parse(await request(endpoint + 'manifest.json')) as DistManifest,
+                JSON.parse(manifest_str) as DistManifest,
             ]
         })).then(manifests => {
             // Store instance in `this.collection` for synchronous access
-            this.collection = new BibleCollection(this._usage, this._remember_fetches,
+            this.collection = new BibleCollection(this._usage, this.requester,
                 manifests as OneOrMore<[string, DistManifest]>)
             return this.collection
         })
-
-        // Clear promise var if unsuccessful so can retry if desired
-        this._collection_promise.catch(() => {
-            this._collection_promise = undefined
-        })
-
-        // Return the promise
-        return this._collection_promise
     }
 
     // Manually fetch contents of book for a translation without needing to request BibleCollection
@@ -128,7 +115,7 @@ export class BibleClient {
             Promise<BibleBook>{
         const ext = ['html', 'txt'].includes(format) ? 'json' : format
         const url = `${this._data_endpoint}bibles/${translation}/${format}/${book}.${ext}`
-        return request(url).then(contents => {
+        return this.requester.request(url).then(contents => {
             const format_class = {
                 html: BibleBookHtml,
                 usx: BibleBookUsx,
@@ -143,7 +130,7 @@ export class BibleClient {
     // Not supported: caching, book existance check, secondary endpoints
     async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
         const url = `${this._data_endpoint}bibles/${translation}/extra.json`
-        return request(url).then(contents => {
+        return this.requester.request(url).then(contents => {
             const data = JSON.parse(contents) as DistTranslationExtra
             return new TranslationExtra(data)
         })
@@ -153,34 +140,16 @@ export class BibleClient {
     // Not supported: caching, book existance check, secondary endpoints
     async fetch_glosses(gloss_id:string, book:string):Promise<GlossesBook>{
         const url = this._data_endpoint + `glosses/${gloss_id}/${book}.json`
-        return request(url).then(json => {
+        return this.requester.request(url).then(json => {
             return new GlossesBook(json)
         })
     }
 
     // Fetch cross-reference data for a book
     async fetch_crossref(book:string, size:'small'|'medium'|'large'='medium'):Promise<BookCrossref>{
-
-        // If existing request, return that
-        const key = `${book} ${size}`
-        if (key in this._crossref_cache){
-            return this._crossref_cache[key]!
-        }
-
-        // Initiate request
         const url = this._data_endpoint + `crossref/${size}/${book}.json`
-        const promise = request(url).then(data => {
+        return this.requester.request(url).then(data => {
             return new BookCrossref(JSON.parse(data) as CrossrefData)
         })
-
-        // Cache request promise if desired
-        if (this._remember_fetches){
-            this._crossref_cache[key] = promise
-            // Clear if unsuccessful so can retry if desired
-            promise.catch(() => {
-                delete this._crossref_cache[key]
-            })
-        }
-        return promise
     }
 }
