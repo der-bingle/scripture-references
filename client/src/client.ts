@@ -2,6 +2,7 @@
 import {BibleCollection} from './collection.js'
 import {BookCrossref} from './crossref.js'
 import {GlossesBook} from './glosses.js'
+import {NotesBook} from './notes.js'
 import {TranslationExtra} from './translation.js'
 import {BibleBook, BibleBookHtml, BibleBookTxt, BibleBookUsfm, BibleBookUsx} from './book.js'
 import {RequestHandler} from './request.js'
@@ -136,10 +137,16 @@ export class BibleClient {
 
     // Manually fetch glosses for book without needing to request BibleCollection
     async fetch_glosses(gloss_id:string, book:string):Promise<GlossesBook>{
-        const url = this._data_endpoint + `glosses/${gloss_id}/${book}.json`
-        return this.requester.request(url).then(json => {
-            return new GlossesBook(json)
-        })
+        const url = this._data_endpoint + `glosses/${gloss_id}/json/${book}.json`
+        const json = await this.requester.request(url)
+        return new GlossesBook(json)
+    }
+
+    // Manually fetch study notes for book without needing to request BibleCollection
+    async fetch_notes(notes_id:string, book:string, format:'html'|'txt'='html'):Promise<NotesBook>{
+        const url = this._data_endpoint + `notes/${notes_id}/${format}/${book}.json`
+        const json = await this.requester.request(url)
+        return new NotesBook(json)
     }
 
     // Fetch cross-reference data for a book

@@ -78,7 +78,8 @@ export async function download_notes(){
 // Extract study notes from Tyndale XML and convert to standard HTML/JSON
 export function sources_to_dist():Record<string, NotesData> {
 
-    const notes_path = join(tyndale_source_dir, 'eng_tyndale', 'StudyNotes.xml')
+    const notes_id = 'eng_tyndale'
+    const notes_path = join(tyndale_source_dir, notes_id, 'StudyNotes.xml')
     const xml = readFileSync(notes_path, {encoding: 'utf8'})
 
     // Set up the intial data with empty values
@@ -86,6 +87,8 @@ export function sources_to_dist():Record<string, NotesData> {
     for (const usx_book of Object.values(tyndale_to_usx_book)) {
         // Result is keyed by USX book ids, not Tyndale's
         output[usx_book] = {
+            notes_id,
+            book: usx_book,
             verses: {},
             ranges: [],
         }

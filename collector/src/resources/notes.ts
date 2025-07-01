@@ -50,7 +50,12 @@ export function notes_process(){
 // Convert HTML notes to plain text
 function notes_to_txt(notes:NotesData):NotesData{
 
-    const plain:NotesData = {verses: {}, ranges: []}
+    const plain:NotesData = {
+        notes_id: notes.notes_id,
+        book: notes.book,
+        verses: {},
+        ranges: [],
+    }
 
     for (const range of notes.ranges){
         plain.ranges.push({
