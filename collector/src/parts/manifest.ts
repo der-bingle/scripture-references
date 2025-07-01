@@ -7,16 +7,94 @@ import {languages_by_total_speakers} from '../data/languages.js'
 import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
 import {read_json, write_json, list_dirs, list_files} from './utils.js'
-import type {DistManifest} from './shared_types'
+import type {DistManifest, DistManifestItem} from './shared_types'
 import type {TranslationSourceMeta} from './types'
 
 
+// See if any important meta data missing
 export function _missing_meta(meta:TranslationSourceMeta){
-    // True if important meta data missing (and so shouldn't publish)
+    // True if missing (and so shouldn't publish)
     return !meta.year
         || !meta.copyright.licenses.length
         || !(meta.name.local || meta.name.english)
         || !(meta.name.local_abbrev || meta.name.english_abbrev)
+}
+
+
+// Get the meta data for a resource that is to be added to the manifest
+function _process_resource_meta(sources_path:string, dist_path:string){
+
+    // Load the meta data for the translation
+    const meta = read_json<TranslationSourceMeta>(join(sources_path, 'meta.json'))
+
+    // Skip if meta data missing
+    if (_missing_meta(meta)){
+        console.error(`IGNORING ${sources_path} (missing year, license, name, etc)`)
+        return
+    }
+
+    // Detect what books are available (must be in all formats)
+    let available_books:string[]|null = null
+    for (const format of list_dirs(dist_path)){
+        const format_dir = join(dist_path, format)
+        const format_books = list_files(format_dir).map(name => name.slice(0, 3))
+        if (available_books === null){
+            available_books = format_books  // First format checked
+        } else if (available_books.length !== format_books.length){
+            console.error(`IGNORING ${sources_path} (not all formats available)`)
+            return
+        }
+    }
+    if (!available_books || !available_books.length){
+        console.error(`IGNORING ${sources_path} (no books)`)
+        return
+    }
+
+    // Determine what books are included
+    const books_ot = books_ordered.slice(0, 39).filter(b => available_books.includes(b))
+    const books_nt = books_ordered.slice(39).filter(b => available_books.includes(b))
+
+    // Put it all together
+    // NOTE Not including meta data that client doesn't need (users can still check git repo)
+    return {
+        name: meta.name,
+        year: meta.year as number,  // Verified to exist above
+        direction: meta.direction,
+        copyright: meta.copyright,
+        tags: meta.tags,
+        // Record as `true` if whole testament to reduce data size
+        books_ot: books_ot.length === 39 ? true : books_ot,
+        books_nt: books_nt.length === 27 ? true : books_nt,
+    } as DistManifestItem
+}
+
+
+// Add all resources of given category to manifest
+function _add_resources(manifest:DistManifest, category:'translations'|'glosses'|'notes'){
+
+    // Bible translations are 'translations' in manifest but 'bibles' in paths
+    const category_path = category === 'translations' ? 'bibles' : category
+
+    // Get list of service dirs (bibles don't have and are flat)
+    const service_dirs =
+        category === 'translations' ? [''] : list_dirs(join('sources', category_path))
+
+    for (const service_dir of service_dirs){
+        for (const id of list_dirs(join('sources', category_path, service_dir))){
+            if (id === '.original'){
+                continue  // Skip special dir in glosses
+            }
+            const sources_path = join('sources', category_path, service_dir, id)
+            const dist_path = join('dist', category_path, id)
+            if (!existsSync(dist_path)){
+                continue  // Haven't processed dist files yet
+            }
+            const processed_meta = _process_resource_meta(sources_path, dist_path)
+            if (processed_meta){
+                manifest[category][id] = processed_meta
+            }
+        }
+    }
 }
 
 
@@ -32,6 +110,7 @@ export async function update_manifest(){
     const manifest:DistManifest = {
         translations: {},
         glosses: {},
+        notes: {},
         languages: {},
         language2to3: {},
         languages_most_spoken: [],
@@ -43,105 +122,24 @@ export async function update_manifest(){
     // Keep track of what languages are included
     const included_languages:Set<string> = new Set()
 
-    // Keep track of what languages have what direction
-    const directions:Record<string, 'rtl'|'ltr'> = {}
+    // Ensure manifest does not exist at old location
+    rmSync(join('dist', 'bibles', 'manifest.json'), {force: true})
 
-    // Loop through published translations in dist dir
-    for (const trans of list_dirs(join('dist', 'bibles'))){
+    // Detect and add translations
+    _add_resources(manifest, 'translations')
 
-        // Remove manifest from old location if present
-        if (trans === 'manifest.json'){
-            rmSync(join('dist', 'bibles', 'manifest.json'))
-            continue
-        }
-
-        // Load the meta data for the translation
-        const meta = read_json<TranslationSourceMeta>(join('sources', 'bibles', trans, 'meta.json'))
-
-        // Skip if meta data missing
-        if (_missing_meta(meta)){
-            console.error(`IGNORING ${trans} (missing year, license, name, etc)`)
-            continue
-        }
-
-        // Detect what books are available
-        // TODO Ensure all formats available, not just HTML
-        const html_dir = join('dist', 'bibles', trans, 'html')
-        const html_books = existsSync(html_dir) ?
-            list_files(html_dir).map(name => name.slice(0, 3)) : []
-        if (html_books.length === 0){
-            console.error(`IGNORING ${trans} (no books)`)
-            continue
-        }
-
-        // Determine what books are included
-        const books_ot = books_ordered.slice(0, 39).filter(b => html_books.includes(b))
-        const books_nt = books_ordered.slice(39).filter(b => html_books.includes(b))
-
-        // Put it all together
-        // NOTE Not including meta data that client doesn't need (users can still check git repo)
-        manifest.translations[trans] = {
-            name: meta.name,
-            year: meta.year as number,  // Verified to exist above
-            direction: meta.direction,
-            copyright: meta.copyright,
-            tags: meta.tags,
-            // Record as `true` if whole testament to reduce data size
-            books_ot: books_ot.length === 39 ? true : books_ot,
-            books_nt: books_nt.length === 27 ? true : books_nt,
-        }
-
+    // Add languages based on included translations
+    // As client language methods are for listing languages of available bibles
+    // If other resources are included with languages without bibles, apps need to handle it
+    for (const trans in manifest.translations){
         // Record the language as being included
         const trans_lang = trans.slice(0, 3)
         included_languages.add(trans_lang)
-
-        // Set direction for language if missing
-        directions[trans_lang] ??= meta.direction
     }
 
-    // Loop through published glosses in dist dir
-    for (const trans of list_dirs(join('dist', 'glosses'))){
-
-        // Detect what books are available
-        const dist_dir = join('dist', 'glosses', trans)
-        const books = existsSync(dist_dir) ?
-            list_files(dist_dir).map(name => name.slice(0, 3)) : []
-        if (books.length === 0){
-            console.error(`IGNORING gloss ${trans} (no books)`)
-            continue
-        }
-
-        // Determine what books are included
-        const books_ot = books_ordered.slice(0, 39).filter(b => books.includes(b))
-        const books_nt = books_ordered.slice(39).filter(b => books.includes(b))
-
-        // Put it all together
-        // NOTE Currently only including glosses from GBT, so meta hardcoded
-        const trans_lang = trans.slice(0, 3)
-        const lang_meta = language_data.data.languages[trans_lang]!
-        manifest.glosses[trans] = {
-            name: {
-                english: `Global Bible Tools glosses (${lang_meta.english})`,
-                english_abbrev: `GBT${lang_meta.english[0]!}`,
-                local: '',
-                local_abbrev: '',
-            },
-            year: new Date().getFullYear(),
-            direction: directions[trans_lang] ?? 'ltr',
-            tags: [],
-            copyright: {
-                attribution: "Global Bible Tools",
-                attribution_url: 'https://globalbibletools.com/',
-                licenses: [{
-                    license: 'public',
-                    url: 'https://sellingjesus.org/free',
-                }],
-            },
-            // Record as `true` if whole testament to reduce data size
-            books_ot: books_ot.length === 39 ? true : books_ot,
-            books_nt: books_nt.length === 27 ? true : books_nt,
-        }
-    }
+    // Detect and add other resources
+    _add_resources(manifest, 'glosses')
+    _add_resources(manifest, 'notes')
 
     // Populate language data
     // NOTE Only included languages that have a translation
