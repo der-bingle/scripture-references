@@ -14,7 +14,7 @@ import {gen_language_data} from './parts/languages.js'
 import {update_bmc} from './parts/bmc.js'
 import {init_config} from './parts/config.js'
 import {update_manifest} from './parts/manifest.js'
-import {notes_process} from './resources/notes.js'
+import {update_notes} from './resources/notes.js'
 import {update_glosses} from './resources/gloss.js'
 import {crossref_process} from './data/crossref.js'
 
@@ -79,8 +79,9 @@ await yargs(process.argv.slice(2))
         argv => report_unprocessed(argv['type'] as 'usfmx'|'other'|undefined))
 
     // Language-based resources
-    .command('notes-process', "Convert study notes to standard format", {}, argv => notes_process())
-    .command('gloss-update', "Redownload and update glosses", {redownload: {type: 'boolean'}},
+    .command('notes-update', "Download and update study notes", {redownload: {type: 'boolean'}},
+        argv => update_notes(!!argv['redownload']))
+    .command('gloss-update', "Download and update glosses", {redownload: {type: 'boolean'}},
         argv => update_glosses(!!argv['redownload']))
 
     // Data

@@ -1,5 +1,6 @@
 
 import {join} from 'node:path'
+import {existsSync} from 'node:fs'
 
 import {convert as html_to_text} from 'html-to-text'
 
@@ -7,6 +8,15 @@ import * as tyndale from '../integrations/tyndale.js'
 import {clean_dir, list_dirs, mkdir_exist, write_json} from '../parts/utils.js'
 
 import type {StudyNotes} from '../integrations/tyndale.js'
+
+
+// At the moment only have support for Tyndale notes
+export async function update_notes(redownload:boolean){
+    if (!existsSync(tyndale.tyndale_source_dir) || redownload){
+        await tyndale.download_notes()
+    }
+    notes_process()
+}
 
 
 // Process available notes in sources dir and convert to publishable formats
@@ -17,13 +27,9 @@ export function notes_process(){
     clean_dir(join('dist', 'notes'))
 
     // Loop through available notes
-    for (const id of list_dirs(join('sources', 'notes'))){
-
-        // See if a Tyndale format
-        const notes = tyndale.get_notes(id)
-        // NOTE If notes null then would try other processors here...
-
-        // If managed to process the notes, store them in dist
+    // NOTE So far hardcoded to just check for tyndale notes
+    for (const id of list_dirs(join('sources', 'notes', 'tyndale'))){
+        const notes = tyndale.sources_to_dist()
         if (notes){
 
             // Separate into individual books

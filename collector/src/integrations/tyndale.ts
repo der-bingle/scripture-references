@@ -1,9 +1,14 @@
 
 import {join} from 'node:path'
-import {existsSync, readFileSync} from 'node:fs'
+import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 
+import StreamZip from 'node-stream-zip'
 import {DOMParser, XMLSerializer} from '@xmldom/xmldom'
 import {select} from 'xpath'
+
+import {mkdir_exist, request, write_json} from '../parts/utils.js'
+
+import type {CommonSourceMeta} from '../parts/types'
 
 
 // Types
@@ -23,25 +28,74 @@ export interface StudyNotes {
 }
 
 
-// Get notes if determined to be in Tyndale format
-export function get_notes(id:string){
-    const notes_path = join('sources', 'notes', id, 'StudyNotes.xml')
-    if (!existsSync(notes_path)){
-        return null  // Not a Tyndale format
+export const tyndale_source_dir = join('sources', 'notes', 'tyndale')
+
+
+// Generate the meta.json
+function _generate_meta(url:string, revision:number):CommonSourceMeta{
+    return {
+        name: {
+            english: "Tyndale Open Study Notes",
+            english_abbrev: "TOSN",
+            local: '',
+            local_abbrev: '',
+        },
+        year: 2022,
+        direction: 'ltr',
+        copyright: {
+            attribution: "Tyndale House Publishers",
+            attribution_url: 'https://tyndaleopenresources.com/',
+            licenses: [{
+                license: 'cc-by-sa',
+                url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+            }],
+        },
+        ids: {},
+        source: {
+            service: 'manual',
+            format: null,  // A proprietary format
+            revision,
+            updated: new Date().toISOString().slice(0, 10),
+            url,
+        },
+        tags: [],
     }
-    return study_notes_to_json(readFileSync(notes_path, {encoding: 'utf8'}))
 }
 
 
-/**
- * Extract study notes from Tyndale XML and convert to standard HTML/JSON
- * Source: StudyNotes.xml from https://tyndaleopenresources.com/
- *
- * @param xml The XML to parse
- *
- * @returns The data to be converted to JSON
- */
-export function study_notes_to_json(xml:string):Record<string, StudyNotes> {
+// Download latest copy of Tyndale English study notes
+export async function download_notes(){
+
+    // WARN This URL will probably change...
+    const url = 'https://tyndaleopenresources.com/wp-content/themes/tyndale-openresources/files/tyndale_open-studynotes.zip'
+
+    // Download zip
+    const zip_buffer = await request(url, 'arrayBuffer')
+    mkdir_exist(join(tyndale_source_dir, 'eng_tyndale'))
+    const zip_path = join(tyndale_source_dir, 'eng_tyndale', 'source.zip')
+    writeFileSync(zip_path, Buffer.from(zip_buffer))
+
+    // Extract
+    const extractor = new StreamZip.async({file: zip_path})
+    const xml_file_out = join(tyndale_source_dir, 'eng_tyndale', 'StudyNotes.xml')
+    await extractor.extract('Tyndale Open Study Notes/StudyNotes.xml', xml_file_out)
+
+    // Create meta file if doesn't exist yet
+    const meta_path = join(tyndale_source_dir, 'eng_tyndale', 'meta.json')
+    if (!existsSync(meta_path)){
+        const xml = readFileSync(xml_file_out, {encoding: 'utf8'})
+        const revision = parseFloat(/^<items release="(.*?)">/.exec(xml.trim())?.[1] ?? '')
+        const meta_data = _generate_meta(url, revision)
+        write_json(meta_path, meta_data, true)
+    }
+}
+
+
+// Extract study notes from Tyndale XML and convert to standard HTML/JSON
+export function sources_to_dist():Record<string, StudyNotes> {
+
+    const notes_path = join(tyndale_source_dir, 'eng_tyndale', 'StudyNotes.xml')
+    const xml = readFileSync(notes_path, {encoding: 'utf8'})
 
     // Set up the intial data with empty values
     const output:Record<string, StudyNotes> = {}
