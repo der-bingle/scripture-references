@@ -106,7 +106,6 @@ export class BibleClient {
     }
 
     // Manually fetch contents of book for a translation without needing to request BibleCollection
-    // Not supported: caching, book existance check, secondary endpoints
     async fetch_book(translation:string, book:string, format?:'html'):Promise<BibleBookHtml>
     async fetch_book(translation:string, book:string, format:'usx'):Promise<BibleBookUsx>
     async fetch_book(translation:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
@@ -127,7 +126,6 @@ export class BibleClient {
     }
 
     // Manually fetch extra metadata for a translation without needing to request BibleCollection
-    // Not supported: caching, book existance check, secondary endpoints
     async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
         const url = `${this._data_endpoint}bibles/${translation}/extra.json`
         return this.requester.request(url).then(contents => {
@@ -137,7 +135,6 @@ export class BibleClient {
     }
 
     // Manually fetch glosses for book without needing to request BibleCollection
-    // Not supported: caching, book existance check, secondary endpoints
     async fetch_glosses(gloss_id:string, book:string):Promise<GlossesBook>{
         const url = this._data_endpoint + `glosses/${gloss_id}/${book}.json`
         return this.requester.request(url).then(json => {
