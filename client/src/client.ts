@@ -3,9 +3,11 @@ import {request} from './utils.js'
 import {BibleCollection} from './collection.js'
 import {BookCrossref} from './crossref.js'
 import {GlossesBook} from './glosses.js'
+import {TranslationExtra} from './translation.js'
+import {BibleBook, BibleBookHtml, BibleBookTxt, BibleBookUsfm, BibleBookUsx} from './book.js'
 
 import type {UsageOptions, UsageConfig} from './types'
-import type {CrossrefData, DistManifest, OneOrMore} from './shared_types'
+import type {CrossrefData, DistManifest, DistTranslationExtra, OneOrMore} from './shared_types'
 
 
 // The options available for configuring a BibleClient
@@ -114,6 +116,37 @@ export class BibleClient {
 
         // Return the promise
         return this._collection_promise
+    }
+
+    // Manually fetch contents of book for a translation without needing to request BibleCollection
+    // Not supported: caching, book existance check, secondary endpoints
+    async fetch_book(translation:string, book:string, format?:'html'):Promise<BibleBookHtml>
+    async fetch_book(translation:string, book:string, format:'usx'):Promise<BibleBookUsx>
+    async fetch_book(translation:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
+    async fetch_book(translation:string, book:string, format:'txt'):Promise<BibleBookTxt>
+    async fetch_book(translation:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'):
+            Promise<BibleBook>{
+        const ext = ['html', 'txt'].includes(format) ? 'json' : format
+        const url = `${this._data_endpoint}bibles/${translation}/${format}/${book}.${ext}`
+        return request(url).then(contents => {
+            const format_class = {
+                html: BibleBookHtml,
+                usx: BibleBookUsx,
+                usfm: BibleBookUsfm,
+                txt: BibleBookTxt,
+            }[format]
+            return new format_class(contents)
+        })
+    }
+
+    // Manually fetch extra metadata for a translation without needing to request BibleCollection
+    // Not supported: caching, book existance check, secondary endpoints
+    async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
+        const url = `${this._data_endpoint}bibles/${translation}/extra.json`
+        return request(url).then(contents => {
+            const data = JSON.parse(contents) as DistTranslationExtra
+            return new TranslationExtra(data)
+        })
     }
 
     // Manually fetch glosses for book without needing to request BibleCollection
