@@ -449,6 +449,22 @@ export class PassageReference {
 
     // Get a reference for just the end verse of this reference (no effect if single verse)
     get_end(){
+        const last_verse_book = last_verse[this.book]!
+        if (this.type === 'book'){
+            // User will expect end of book, even though this type is an identifier and not range
+            return new PassageReference({
+                book: this.book,
+                start_chapter: last_verse_book.length,
+                start_verse: last_verse_book[last_verse_book.length-1],
+            })
+        } else if (this.type === 'chapter'){
+            // User will expect end of chapter, even though this type is an identifier and not range
+            return new PassageReference({
+                book: this.book,
+                start_chapter: last_verse_book.length,
+                start_verse: last_verse_book[last_verse_book.length-1],
+            })
+        }
         return new PassageReference({
             book: this.book,
             start_chapter: this.end_chapter,
