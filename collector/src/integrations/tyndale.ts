@@ -9,10 +9,10 @@ import {select} from 'xpath'
 // Types
 
 interface MultiVerseNote {
-    start_c:number
-    start_v:number
-    end_c:number
-    end_v:number
+    start_chapter:number
+    start_verse:number
+    end_chapter:number
+    end_verse:number
     contents:string  // HTML
 }
 
@@ -76,10 +76,10 @@ export function study_notes_to_json(xml:string):Record<string, StudyNotes> {
         } else {
             // Range of verses
             const note: MultiVerseNote = {
-                start_c: reference.start_chapter,
-                start_v: reference.start_verse,
-                end_c: reference.end_chapter,
-                end_v: reference.end_verse,
+                start_chapter: reference.start_chapter,
+                start_verse: reference.start_verse,
+                end_chapter: reference.end_chapter,
+                end_verse: reference.end_verse,
                 contents: body,
             }
             output[reference.usx]!.ranges.push(note)
@@ -96,7 +96,7 @@ export function study_notes_to_json(xml:string):Record<string, StudyNotes> {
     // Sort our ranges
     for (const key in output) {
         output[key]!.ranges.sort((a: MultiVerseNote, b: MultiVerseNote) => {
-            return ((a.start_c - b.start_c) || (a.start_v - b.start_v))
+            return ((a.start_chapter - b.start_chapter) || (a.start_verse - b.start_verse))
         })
     }
     return output

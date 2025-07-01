@@ -79,10 +79,10 @@ describe('study_notes_to_json', () => {
         expect(JSON.stringify(notes['gen']!.verses)).toBe('{}')
         expect(notes['gen']!.ranges).toHaveLength(2)
         expect(notes['gen']!.ranges.find(note => {
-            return note.start_c === 1 && note.start_v === 3 && note.end_c === 1 && note.end_v === 13
+            return note.start_chapter === 1 && note.start_verse === 3 && note.end_chapter === 1 && note.end_verse === 13
         })).toBeDefined()
         expect(notes['gen']!.ranges.find(note => {
-            return note.start_c === 2 && note.start_v === 8 && note.end_c === 2 && note.end_v === 14
+            return note.start_chapter === 2 && note.start_verse === 8 && note.end_chapter === 2 && note.end_verse === 14
         })).toBeDefined()
     })
 
@@ -90,17 +90,17 @@ describe('study_notes_to_json', () => {
         expect(JSON.stringify(notes['1co']!.verses)).toBe('{}')
         expect(notes['1co']!.ranges).toHaveLength(1)
         expect(notes['1co']!.ranges.find(note => {
-            return note.start_c === 1 && note.start_v === 10
-                && note.end_c === 15 && note.end_v === 58
+            return note.start_chapter === 1 && note.start_verse === 10
+                && note.end_chapter === 15 && note.end_verse === 58
         })).toBeDefined()
     })
 
-    it('should sort the ranges by start_c and start_v', ({expect}) => {
+    it('should sort the ranges by start_chapter and start_verse', ({expect}) => {
         expect(notes['gen']!.ranges).toHaveLength(2)
-        expect(notes['gen']!.ranges[0]!.start_c).toEqual(1)
-        expect(notes['gen']!.ranges[0]!.start_v).toEqual(3)
-        expect(notes['gen']!.ranges[1]!.start_c).toEqual(2)
-        expect(notes['gen']!.ranges[1]!.start_v).toEqual(8)
+        expect(notes['gen']!.ranges[0]!.start_chapter).toEqual(1)
+        expect(notes['gen']!.ranges[0]!.start_verse).toEqual(3)
+        expect(notes['gen']!.ranges[1]!.start_chapter).toEqual(2)
+        expect(notes['gen']!.ranges[1]!.start_verse).toEqual(8)
     })
 
     it("Should store multiple notes per chapter", ({expect}) => {
