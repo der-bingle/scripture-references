@@ -26,7 +26,7 @@ export type {RequestHandler} from './assets/request.js'
 
 
 export type {BookCrossref} from './book/crossref.js'
-export type {GlossesBook} from './book/glosses.js'
+export type {GlossesBook, GlossesWord} from './book/glosses.js'
 export type {
     GetPassageOptions,
     GetTxtOptions,

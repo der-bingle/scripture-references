@@ -2,7 +2,7 @@
 <template lang='pug'>
 
 div.column
-    div.word(@click='search_original' :class='{ot: state.study?.ot}') {{ word.word }}
+    div.word(@click='search_original' :class='{ot: state.study?.ot}') {{ word.original }}
     a.gloss(:href='research_url' target='research') {{ gloss }}
 
 </template>
@@ -14,10 +14,10 @@ import {computed} from 'vue'
 
 import {state} from '@/services/state'
 
-import type {GlossesDataWord} from '@gracious.tech/fetch-client'
+import type {GlossesWord} from '@gracious.tech/fetch-client'
 
 
-const props = defineProps<{word:GlossesDataWord}>()
+const props = defineProps<{word:GlossesWord}>()
 
 const gloss = computed(() => {
     // If blank or hyphen, replace with mdash so easier to click
