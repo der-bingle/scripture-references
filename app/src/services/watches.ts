@@ -110,12 +110,8 @@ export function enable_watches(){
         void content.client.fetch_crossref(state.book, 'small').then(crossref => {
             state.crossref = crossref
         })
-        const url = `${content.client._data_endpoint}notes/eng_tyndale/html/${state.book}.json`
-        void fetch(url, {mode: 'cors'}).then(async resp => {
-            type RespJson = {verses: Record<string, Record<string, string>>}
-            if (resp.ok){
-                state.notes = (await resp.json() as RespJson)['verses']
-            }
+        void content.client.fetch_notes('eng_tyndale', state.book).then(notes => {
+            state.notes = notes
         })
 
         // Get glosses for book

@@ -1,7 +1,8 @@
 
 import {reactive, computed, watch} from 'vue'
 import {IndividualVerse, BookCrossref, PassageReference,
-    book_names_english, book_abbrev_english, GlossesBook} from '@gracious.tech/fetch-client'
+    book_names_english, book_abbrev_english, GlossesBook, NotesBook}
+    from '@gracious.tech/fetch-client'
 
 import {parse_int} from './utils.js'
 
@@ -109,7 +110,7 @@ export const state = reactive({
     study: null as null|PassageReference,
     crossref: null as BookCrossref|null,
     glosses: null as GlossesBook|null,
-    notes: null as Record<string, Record<string, string>>|null,
+    notes: null as NotesBook|null,
     search_filter: null as null|'ot'|'nt'|'book',
     search_results: null as SearchResult[]|null,  // null = loading
 })

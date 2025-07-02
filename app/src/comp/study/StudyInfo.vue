@@ -24,7 +24,10 @@ div(v-if='variants_url')
         app-icon(name='arrow_outward' small class='ml-1')
 template(v-if='notes && state.study_notes && has_english_translation')
     h5 Tyndale Open Study Notes
-    div.notes(ref='notes_div' class='text-body-2 fetch-bible' v-html='notes')
+    div.notes(ref='notes_div' class='text-body-2 fetch-bible')
+        template(v-for='(note, i) of notes' :key='i')
+            h4(v-if='note.reference.range') {{ note.reference.toString(state.book_names) }}
+            div(v-html='note.contents')
 
 </template>
 
@@ -38,7 +41,7 @@ import StudyWord from './StudyWord.vue'
 import StudyCrossref from './StudyCrossref.vue'
 import {change_to_ref, state, add_to_read_history} from '@/services/state'
 
-import type {GlossesDataWord} from '@gracious.tech/fetch-client'
+import type {GlossesWord, RelevantNotes} from '@gracious.tech/fetch-client'
 
 
 const study_verse_label = computed(() => {
@@ -70,7 +73,7 @@ watch(() => state.study, () => {
 
 // WARN Using watch instead of compute so that only updated when `study` changes
 // Otherwise `state.glosses` will refer to the wrong book since study is disconnected from main
-const glosses = ref<GlossesDataWord[]>([])
+const glosses = ref<GlossesWord[]>([])
 watch(() => state.study, () => {
     if (!state.study || !state.glosses){
         glosses.value = []
@@ -81,14 +84,19 @@ watch(() => state.study, () => {
 
 
 // WARN Using watch instead of compute so that only updated when `study` changes
-const notes = ref<string|undefined>('')
+const notes = ref<RelevantNotes[]>([])
 const notes_div = ref<HTMLDivElement>()
 watch(() => state.study, () => {
     if (!state.notes || !state.study){
-        notes.value = undefined
+        notes.value = []
         return
     }
-    notes.value = state.notes[state.study.start_chapter]?.[state.study.start_verse]
+
+    // Get relevant notes and limit ranges to max 100 verses
+    // As e.g. Chapters 1-5 is not a helpful note when clicking on individual verse
+    notes.value = state.notes.get_relevant_notes(state.study.start_chapter, state.study.start_verse)
+        .filter(note => note.reference.total_verses() < 100)
+
     // Make all passage references in notes clickable
     void nextTick(() => {
         for (const ref_span of notes_div.value?.querySelectorAll('span[data-ref]') ?? []){
@@ -187,9 +195,14 @@ h5
     &:not(.flex_ltr)
         flex-direction: row-reverse
 
-.notes :deep() span[data-ref]
-    color: rgb(var(--v-theme-primary))
-    cursor: pointer
+.notes
+    h4
+        margin-top: 6px !important
+        margin-bottom: 2px !important
+
+    :deep() span[data-ref]
+        color: rgb(var(--v-theme-primary))
+        cursor: pointer
 
 .orig
     margin-bottom: 8px
