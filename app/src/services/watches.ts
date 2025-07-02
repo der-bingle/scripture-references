@@ -4,7 +4,7 @@ import {watch} from 'vue'
 import {BibleIndex} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
-import {content, search} from './content'
+import {content, search, update_trans} from './content'
 import {post_message} from './post'
 
 
@@ -175,7 +175,7 @@ export function enable_watches(){
                 state.study_notes = data['study_notes']
             }
             if (typeof data['trans'] === 'string'){
-                state.trans = data['trans'].split(',') as [string, ...string[]]
+                update_trans(data['trans'].split(','))
             }
             if (typeof data['search'] === 'string'){
                 // NOTE state.search won't be set if value can be parsed as a reference

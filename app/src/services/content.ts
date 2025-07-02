@@ -1,6 +1,8 @@
 
 import {FetchClient} from '@gracious.tech/fetch-client'
 
+import {state} from './state'
+
 import type {BibleIndex} from '@gracious.tech/fetch-search'
 import type {FetchCollection, GetResourcesItem, GetLanguagesItem,
 } from '@gracious.tech/fetch-client'
@@ -24,4 +26,16 @@ export const content = {
 export async function search(query:string){
     const index = await content.index
     return index.search(query)
+}
+
+
+// Change the translations in use while ensuring ids are valid
+export function update_trans(requested:string[]):void{
+
+    // Filter down to only valid ids
+    const valid_trans = requested.filter(code => code in content.translations)
+
+    // Update state with valid ids, or otherwise the default preferred translation
+    state.trans = valid_trans.length ? (valid_trans as [string, ...string[]])
+        : [content.collection.bibles.get_preferred_resource().id]
 }

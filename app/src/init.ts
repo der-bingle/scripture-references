@@ -7,7 +7,7 @@ import AppRoot from './comp/AppRoot.vue'
 import AppIcon from '@/comp/AppIcon.vue'
 import {enable_watches, apply_search_param} from '@/services/watches'
 import {state, safe_hsl, initial_search_param} from '@/services/state'
-import {content} from '@/services/content'
+import {content, update_trans} from '@/services/content'
 import {post_message} from '@/services/post'
 
 
@@ -67,13 +67,10 @@ void content.client.fetch_collection().then(collection => {
     content.translations = collection.bibles.get_resources({object: true})
     content.languages = collection.bibles.get_languages({object: true})
 
-    // Ensure all trans codes are valid
-    // NOTE Changing also triggers content to load for the first time
-    const valid_trans = state.trans.filter(code => code in content.translations)
-    state.trans = valid_trans.length ? (valid_trans as [string, ...string[]])
-        : [content.collection.bibles.get_preferred_resource().id]
+    // Ensure all trans codes are valid before trying to load for first time
+    update_trans(state.trans)
 
-    // Enable watches
+    // Enable watches (triggers initial load of books)
     enable_watches()
 
     // Apply search param from hash if given
