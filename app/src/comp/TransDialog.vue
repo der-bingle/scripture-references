@@ -94,9 +94,9 @@ const languages_filtered = computed(() => {
 const translations = computed(() => {
 
     // Get translations by category
-    const decent = content.collection.bibles.get_translations({language: displayed_language.value,
+    const decent = content.collection.bibles.get_resources({language: displayed_language.value,
         exclude_obsolete: true})
-    const niche = content.collection.bibles.get_translations({language: displayed_language.value})
+    const niche = content.collection.bibles.get_resources({language: displayed_language.value})
         .filter(i => !decent.find(di => di.id === i.id))
 
     // Add in separate groups

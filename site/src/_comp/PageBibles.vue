@@ -96,7 +96,7 @@ const exclude_obsolete = ref(false)
 
 // Expose bibles list
 const bibles = computed(() => {
-    return collection.bibles.get_translations({
+    return collection.bibles.get_resources({
         language: language.value,
         sort_by_year: true,
         usage: {

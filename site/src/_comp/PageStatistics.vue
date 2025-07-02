@@ -65,7 +65,7 @@ import {collection} from './collection'
 
 
 // Get translations
-const translations = collection.bibles.get_translations()
+const translations = collection.bibles.get_resources()
 
 
 // Util for getting count as a percentage string of total translations
@@ -133,23 +133,23 @@ owners.push({name: "* Unable to auto-detect * ", count: all_owners.length - owne
 const usages = [
     {
         name: "Can use commercially",
-        count: per(collection.bibles.get_translations({usage: {commercial: true}}).length),
+        count: per(collection.bibles.get_resources({usage: {commercial: true}}).length),
     },
     {
         name: "Attribution not required",
-        count: per(collection.bibles.get_translations({usage: {attributionless: true}}).length),
+        count: per(collection.bibles.get_resources({usage: {attributionless: true}}).length),
     },
     {
         name: "No quotation limits",
-        count: per(collection.bibles.get_translations({usage: {limitless: true}}).length),
+        count: per(collection.bibles.get_resources({usage: {limitless: true}}).length),
     },
     {
         name: "Can modify",
-        count: per(collection.bibles.get_translations({usage: {derivatives: true}}).length),
+        count: per(collection.bibles.get_resources({usage: {derivatives: true}}).length),
     },
     {
         name: "Can modify if same license",
-        count: per(collection.bibles.get_translations({usage: {derivatives: 'same-license'}}).length),
+        count: per(collection.bibles.get_resources({usage: {derivatives: 'same-license'}}).length),
     },
 ]
 

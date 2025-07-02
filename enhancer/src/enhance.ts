@@ -111,7 +111,7 @@ export class BibleEnhancer {
 
         // If translation hasn't been set yet, choose sensible default
         if (!this._translations.length){
-            this._translations = [collection.bibles.get_preferred_translation().id]
+            this._translations = [collection.bibles.get_preferred_resource().id]
         }
 
         let html = ''
@@ -233,7 +233,7 @@ export class BibleEnhancer {
         // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
         if (!this._translations.length){
-            this._translations = [collection.bibles.get_preferred_translation().id]
+            this._translations = [collection.bibles.get_preferred_resource().id]
         }
 
         // Ensure existing links are active (SPAs might reattach without event listeners)
@@ -255,7 +255,7 @@ export class BibleEnhancer {
         // NOTE Repeat calls ok since will cache results
         for (const trans of this._translations){
             // NOTE Skip for English to speed up execution since already have English names
-            if (!collection.bibles.has_translation(trans) || trans.startsWith('eng_')){
+            if (!collection.bibles.has_resource(trans) || trans.startsWith('eng_')){
                 continue
             }
             await collection.bibles.fetch_translation_extras(trans)

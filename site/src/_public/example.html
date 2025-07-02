@@ -100,7 +100,7 @@ function update_select_language(){
 
 // Method for populating the translation <select> element
 function update_select_translation(){
-    const translations = collection.bibles.get_translations({
+    const translations = collection.bibles.get_resources({
         language: select_language.value,
     })
     update_options(select_translation, translations.map(translation => {

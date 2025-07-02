@@ -33,7 +33,7 @@ const client = new FetchClient()
 const collection = await client.fetch_collection()
 
 // Get what translations are available
-const translations = collection.bibles.get_translations()
+const translations = collection.bibles.get_resources()
 
 // Get the id of the first translation available
 const translation_id = translations[0].id

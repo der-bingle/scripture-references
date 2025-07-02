@@ -64,14 +64,14 @@ void content.client.fetch_collection().then(collection => {
 
     // Init content state
     content.collection = collection
-    content.translations = collection.bibles.get_translations({object: true})
+    content.translations = collection.bibles.get_resources({object: true})
     content.languages = collection.bibles.get_languages({object: true})
 
     // Ensure all trans codes are valid
     // NOTE Changing also triggers content to load for the first time
     const valid_trans = state.trans.filter(code => code in content.translations)
     state.trans = valid_trans.length ? (valid_trans as [string, ...string[]])
-        : [content.collection.bibles.get_preferred_translation().id]
+        : [content.collection.bibles.get_preferred_resource().id]
 
     // Enable watches
     enable_watches()
