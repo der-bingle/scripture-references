@@ -36,7 +36,6 @@ export class NotesBook {
         }
 
         // Also add any ranges that include the verse
-        let added_range = false
         for (const range of this._data.ranges){
             const reference = new PassageReference({book: this._data.book, ...range})
             if (reference.includes(chapter, verse)){
@@ -44,13 +43,11 @@ export class NotesBook {
                     reference,
                     contents: range.contents,
                 })
-                added_range = true
-            } else if (added_range){
-                // Previously added a range but this isn't matching so future ones won't either
-                // Assuming they are in correct order...
-                break
             }
         }
+
+        // Sort by range size
+        relevant.sort((a, b) => a.reference.total_verses() - b.reference.total_verses())
 
         return relevant
     }
