@@ -1,10 +1,10 @@
 
 import {PassageReference} from '@gracious.tech/bible-references'
 
-import {escape_html, num_to_letters} from './utils.js'
+import {escape_html, num_to_letters} from '../assets/utils.js'
 
-import type {RuntimeLicense, RuntimeCopyright} from './types'
-import type {BibleJsonHtml, BibleJsonTxt, TxtContent} from './shared_types'
+import type {RuntimeLicense, RuntimeCopyright} from '../assets/types.js'
+import type {BibleJsonHtml, BibleJsonTxt, TxtContent} from '../assets/shared_types.js'
 
 
 export interface GetPassageOptions {

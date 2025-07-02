@@ -1,14 +1,15 @@
 
-import {FetchCollection} from './collection.js'
-import {BookCrossref} from './crossref.js'
-import {GlossesBook} from './glosses.js'
-import {NotesBook} from './notes.js'
-import {TranslationExtra} from './translation.js'
-import {BibleBook, BibleBookHtml, BibleBookTxt, BibleBookUsfm, BibleBookUsx} from './book.js'
-import {RequestHandler} from './request.js'
+import {FetchCollection} from './collection/collection.js'
+import {BookCrossref} from './book/crossref.js'
+import {GlossesBook} from './book/glosses.js'
+import {NotesBook} from './book/notes.js'
+import {TranslationExtra} from './collection/bibles_extra.js'
+import {BibleBook, BibleBookHtml, BibleBookTxt, BibleBookUsfm, BibleBookUsx} from './book/bible.js'
+import {RequestHandler} from './assets/request.js'
 
-import type {UsageOptions, UsageConfig} from './types'
-import type {CrossrefData, DistManifest, DistTranslationExtra, OneOrMore} from './shared_types'
+import type {UsageOptions, UsageConfig} from './assets/types'
+import type {CrossrefData, DistManifest, DistTranslationExtra, OneOrMore}
+    from './assets/shared_types'
 
 
 // The options available for configuring a FetchClient

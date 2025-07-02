@@ -1,8 +1,8 @@
 
-import {rm_diacritics} from './utils.js'
+import {rm_diacritics} from '../assets/utils.js'
 
 import type {PassageReference} from '@gracious.tech/bible-references'
-import type {GlossesData, GlossesDataWord} from './shared_types'
+import type {GlossesData, GlossesDataWord} from '../assets/shared_types'
 
 
 interface GlossesWord extends GlossesDataWord {

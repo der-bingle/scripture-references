@@ -3,12 +3,13 @@
 import {book_names_english, books_ordered, book_abbrev_english,
 } from '@gracious.tech/bible-references'
 
-import {filter_licenses} from './licenses.js'
-import {deep_copy, fuzzy_search} from './utils.js'
+import {filter_licenses} from '../assets/licenses.js'
+import {deep_copy, fuzzy_search} from '../assets/utils.js'
 
-import type {BookNames, MetaTag, MetaLanguage} from './shared_types'
-import type {UsageOptions, UsageConfig, RuntimeLicense, RuntimeManifestItem} from './types'
-import type {RequestHandler} from './request'
+import type {BookNames, MetaTag, MetaLanguage} from '../assets/shared_types.js'
+import type {UsageOptions, UsageConfig, RuntimeLicense, RuntimeManifestItem}
+    from '../assets/types.js'
+import type {RequestHandler} from '../assets/request.js'
 
 
 // No browser types since may be running in Node, so define as possibly existing
@@ -119,7 +120,7 @@ export interface GetCompletionReturn {
 }
 
 
-export class ResourceCollection {
+export class GenericCollection {
 
     // @internal
     _items:Record<string, RuntimeManifestItem>

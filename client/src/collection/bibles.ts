@@ -2,14 +2,14 @@
 import {book_names_english, PassageReference, detect_references, english_abbrev_include,
     english_abbrev_exclude, book_abbrev_english} from '@gracious.tech/bible-references'
 
-import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from './book.js'
-import {TranslationExtra} from './translation.js'
-import {ResourceCollection} from './resource.js'
+import {BibleBook, BibleBookHtml, BibleBookUsx, BibleBookUsfm, BibleBookTxt} from '../book/bible.js'
+import {TranslationExtra} from './bibles_extra.js'
+import {GenericCollection} from './generic.js'
 
-import type {DistTranslationExtra} from './shared_types'
+import type {DistTranslationExtra} from '../assets/shared_types'
 
 
-export class BibleCollection extends ResourceCollection {
+export class BibleCollection extends GenericCollection {
 
     // Get the URL for a book's content (useful for caching and manual retrieval)
     get_book_url(translation:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'){

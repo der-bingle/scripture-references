@@ -1,7 +1,7 @@
 
 import {books_ordered} from '@gracious.tech/bible-references'
 
-import type {DistTranslationExtra} from './shared_types'
+import type {DistTranslationExtra} from '../assets/shared_types'
 
 
 // Access to local book names, sections, and chapter headings for a translation

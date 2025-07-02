@@ -2,19 +2,30 @@
 // Export everything intended for direct use (code and types)
 
 
+// CODE
+
+
 // Re-export everything from bible-references for convenience
 export * from '@gracious.tech/bible-references'
 export type * from '@gracious.tech/bible-references'
 
 
-// Code
+// Internal code
 // NOTE Don't export classes not meant to be initiated directly, export them as types instead
 export {FetchClient} from './client.js'
-export {substantial_poetry} from './data.js'
-export {FetchNetworkError} from './request.js'
+export {substantial_poetry} from './assets/data.js'
+export {FetchNetworkError} from './assets/request.js'
 
 
-// Types (only expose those relevant to the user and willing to support going forward)
+// TYPES
+// Only expose those relevant to the user and willing to support going forward)
+
+export type {FetchClientConfig} from './client.js'
+export type {RequestHandler} from './assets/request.js'
+
+
+export type {BookCrossref} from './book/crossref.js'
+export type {GlossesBook} from './book/glosses.js'
 export type {
     GetPassageOptions,
     GetTxtOptions,
@@ -24,12 +35,11 @@ export type {
     BibleBookTxt,
     BibleBookUsfm,
     BibleBookUsx,
-} from './book.js'
+} from './book/bible.js'
 
-export type {FetchClientConfig} from './client.js'
 
-export type {FetchCollection} from './collection.js'
-
+export type {FetchCollection} from './collection/collection.js'
+export type {BibleCollection} from './collection/bibles.js'
 export type {
     GetLanguagesOptions,
     GetLanguagesItem,
@@ -38,15 +48,8 @@ export type {
     GetBooksOptions,
     GetBooksItem,
     GetCompletionReturn,
-} from './resource.js'
+} from './collection/generic.js'
 
-export type {
-    BookCrossref,
-} from './crossref.js'
-
-export type {
-    GlossesBook,
-} from './glosses.js'
 
 export type {
     UsageConfig,
@@ -55,7 +58,8 @@ export type {
     RuntimeCopyright,
     RuntimeTranslation,
     RuntimeManifest,
-} from './types.js'
+} from './assets/types.js'
+
 
 export type {
     BookNames,
@@ -66,8 +70,4 @@ export type {
     BibleJsonTxt,
     GlossesData,
     GlossesDataWord,
-} from './shared_types.js'
-
-export type {
-    RequestHandler,
-} from './request.js'
+} from './assets/shared_types.js'

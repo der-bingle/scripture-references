@@ -1,7 +1,7 @@
 
 import {PassageReference} from '@gracious.tech/bible-references'
 
-import type {CrossrefData} from './shared_types'
+import type {CrossrefData} from '../assets/shared_types'
 
 
 // Access to cross-reference data for a book

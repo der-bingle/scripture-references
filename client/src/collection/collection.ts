@@ -1,12 +1,13 @@
 
 import {books_ordered} from '@gracious.tech/bible-references'
 
-import {filter_licenses} from './licenses.js'
+import {filter_licenses} from '../assets/licenses.js'
 import {BibleCollection} from './bibles.js'
 
-import type {DistManifest, MetaCopyright, MetaStandardLicense, OneOrMore} from './shared_types'
-import type {UsageConfig, RuntimeManifest, RuntimeLicense} from './types'
-import type {RequestHandler} from './request'
+import type {DistManifest, MetaCopyright, MetaStandardLicense, OneOrMore}
+    from '../assets/shared_types.js'
+import type {UsageConfig, RuntimeManifest, RuntimeLicense} from '../assets/types.js'
+import type {RequestHandler} from '../assets/request.js'
 
 
 // Access to a collection's meta data, including languages and translations available

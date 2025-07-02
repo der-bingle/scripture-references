@@ -1,7 +1,7 @@
 
 import {PassageReference} from '@gracious.tech/bible-references'
 
-import type {NotesData} from './shared_types'
+import type {NotesData} from '../assets/shared_types'
 
 
 export interface RelevantNotes {
