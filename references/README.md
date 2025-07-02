@@ -55,4 +55,4 @@ inspecting and manipulating references. The [fetch(bible) client](https://fetch.
  * `BibleCollection.string_to_reference(string, translation_id)`
  * `BibleCollection.reference_to_string(ref, translation_id)`
 
-Note that `BibleCollection.fetch_translation_extras(translation_id)` is required to complete beforehand.
+Note that `fetch_translation_extras(translation_id)` is required to be called and complete beforehand.
