@@ -165,7 +165,7 @@ export class BibleEnhancer {
         const rm_hover_box = () => {
             if (remove_timeout_id === undefined){  // Prevent creating multiple timeouts
                 hover_box.style.opacity = '0'  // Start fading (via transition)
-                remove_timeout_id = setTimeout(() => {
+                remove_timeout_id = self.setTimeout(() => {
                     if (hover_box.parentNode){  // Ensure actually attached when time to rm
                         hover_box.parentNode.removeChild(hover_box)
                     }
