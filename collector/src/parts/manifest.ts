@@ -70,7 +70,8 @@ function _process_resource_meta(sources_path:string, dist_path:string){
 
 
 // Add all resources of given category to manifest
-function _add_resources(manifest:DistManifest, category:'translations'|'glosses'|'notes'){
+function _add_resources(manifest:DistManifest, included_languages:Set<string>,
+        category:'translations'|'glosses'|'notes'){
 
     // Bible translations are 'translations' in manifest but 'bibles' in paths
     const category_path = category === 'translations' ? 'bibles' : category
@@ -92,6 +93,9 @@ function _add_resources(manifest:DistManifest, category:'translations'|'glosses'
             const processed_meta = _process_resource_meta(sources_path, dist_path)
             if (processed_meta){
                 manifest[category][id] = processed_meta
+                // Language is to be added to manifest
+                // NOTE Languages for certain resource types will be filtered in client
+                included_languages.add(id.slice(0, 3))
             }
         }
     }
@@ -125,24 +129,13 @@ export async function update_manifest(){
     // Ensure manifest does not exist at old location
     rmSync(join('dist', 'bibles', 'manifest.json'), {force: true})
 
-    // Detect and add translations
-    _add_resources(manifest, 'translations')
-
-    // Add languages based on included translations
-    // As client language methods are for listing languages of available bibles
-    // If other resources are included with languages without bibles, apps need to handle it
-    for (const trans in manifest.translations){
-        // Record the language as being included
-        const trans_lang = trans.slice(0, 3)
-        included_languages.add(trans_lang)
-    }
-
-    // Detect and add other resources
-    _add_resources(manifest, 'glosses')
-    _add_resources(manifest, 'notes')
+    // Detect and add resources
+    _add_resources(manifest, included_languages, 'translations')
+    _add_resources(manifest, included_languages, 'glosses')
+    _add_resources(manifest, included_languages, 'notes')
 
     // Populate language data
-    // NOTE Only included languages that have a translation
+    // NOTE Only include languages that have a resource
     manifest.languages = Object.fromEntries(Object.entries(language_data.data.languages)
         .filter(([code]) => included_languages.has(code)))
     manifest.language2to3 = Object.fromEntries(Object.entries(language_data.data.language2to3)
