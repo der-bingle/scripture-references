@@ -58,10 +58,11 @@ export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:strin
     await publisher.upload_file(manifest_path)
     invalidations.push('/manifest.json')
 
-    // Also upload manifest to old location for clients < 1.1.0
+    // Also upload manifest to old location for clients < 1.1.0 with old prop name for bibles
     // This won't be listed in index.html
-    await publisher.upload('bibles/manifest.json', fs.readFileSync(manifest_path),
-        'application/json')
+    const manifest = fs.readFileSync(manifest_path, {encoding: 'utf8'})
+        .replace('"bibles":{', '"translations":{')
+    await publisher.upload('bibles/manifest.json', manifest, 'application/json')
     invalidations.push('/bibles/manifest.json')
 
     // Always update root index file, just in case
