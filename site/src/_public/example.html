@@ -60,7 +60,7 @@
 
 // Import the fetch(bible) client
 // Normally you would import from '@gracious.tech/fetch-client' rather than a static file
-import {BibleClient, get_chapters} from './client.mjs'
+import {FetchClient, get_chapters} from './client.mjs'
 
 
 // Locate UI elements
@@ -72,7 +72,7 @@ const div_content = self.document.querySelector('.content')
 
 
 // Fetch collection
-const client = new BibleClient()
+const client = new FetchClient()
 const collection = await client.fetch_collection()
 
 

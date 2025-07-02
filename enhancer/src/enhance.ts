@@ -1,12 +1,12 @@
 
-import {BibleClient, PassageReference} from '@gracious.tech/fetch-client'
+import {FetchClient, PassageReference} from '@gracious.tech/fetch-client'
 
 import {markup_references} from './markup'
 
 
 interface ConstructorOptions {
     default_theme?:boolean
-    client?:BibleClient
+    client?:FetchClient
     app_origin?:string
     app_args?:Record<string, string>
     history?:boolean
@@ -18,7 +18,7 @@ interface ConstructorOptions {
 
 export class BibleEnhancer {
 
-    client:BibleClient
+    client:FetchClient
     _app_origin:string
     _app_args:string
     _app_div:HTMLDivElement
@@ -39,7 +39,7 @@ export class BibleEnhancer {
         }
 
         // Set defaults
-        this.client = options.client ?? new BibleClient()
+        this.client = options.client ?? new FetchClient()
         this._app_origin = options.app_origin ?? 'https://app.fetch.bible'
         this._app_args = new URLSearchParams(options.app_args ?? {}).toString()
         this._history = options.history !== false

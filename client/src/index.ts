@@ -9,7 +9,7 @@ export type * from '@gracious.tech/bible-references'
 
 // Code
 // NOTE Don't export classes not meant to be initiated directly, export them as types instead
-export {BibleClient} from './client.js'
+export {FetchClient} from './client.js'
 export {substantial_poetry} from './data.js'
 export {FetchNetworkError} from './request.js'
 
@@ -26,7 +26,7 @@ export type {
     BibleBookUsx,
 } from './book.js'
 
-export type {BibleClientConfig} from './client.js'
+export type {FetchClientConfig} from './client.js'
 
 export type {FetchCollection} from './collection.js'
 

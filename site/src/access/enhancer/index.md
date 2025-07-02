@@ -111,7 +111,7 @@ const enhancer = new BibleEnhancer({
     default_theme: false,  // Disable default styling of links
     translations: ['eng_bsb', 'grc_sr'],  // Set the translations to be used
     always_detect_english: false,  // Disable auto-detection of English refs
-    client: new BibleClient(),  // Provide a custom fetch(bible) client
+    client: new FetchClient(),  // Provide a custom fetch(bible) client
     app_origin: 'https://app.fetch.bible',  // Use a custom fetch app
     app_args: {hue: '120'},  // Pass args to embedded app (see app docs)
     history: false,  // Don't intercept browser "back" to hide app modal

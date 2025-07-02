@@ -1,5 +1,5 @@
 
-import {BibleClient} from '@gracious.tech/fetch-client'
+import {FetchClient} from '@gracious.tech/fetch-client'
 
 
 // Use localhost endpoint during dev
@@ -7,7 +7,7 @@ const endpoint = import.meta.env.PROD ? 'https://v1.fetch.bible/' : 'http://loca
 
 
 // Get collection
-const client = new BibleClient({endpoints: [endpoint]})
+const client = new FetchClient({endpoints: [endpoint]})
 const collection = await client.fetch_collection()
 
 

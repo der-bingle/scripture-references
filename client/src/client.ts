@@ -11,8 +11,8 @@ import type {UsageOptions, UsageConfig} from './types'
 import type {CrossrefData, DistManifest, DistTranslationExtra, OneOrMore} from './shared_types'
 
 
-// The options available for configuring a BibleClient
-export interface BibleClientConfig {
+// The options available for configuring a FetchClient
+export interface FetchClientConfig {
 
     /* A list of CDN endpoints to connect to that defaults to the official CDN
         (https://v1.fetch.bible/).
@@ -61,7 +61,7 @@ export interface BibleClientConfig {
 
 
 // A client for interacting with a fetch(bible) CDN
-export class BibleClient {
+export class FetchClient {
 
     // @internal
     _endpoints:string[]
@@ -80,8 +80,8 @@ export class BibleClient {
     // Access to request handler and its caching methods
     requester:RequestHandler
 
-    // Create a new BibleClient, defaulting to the official fetch(bible) collection
-    constructor(config:BibleClientConfig={}){
+    // Create a new FetchClient, defaulting to the official fetch(bible) collection
+    constructor(config:FetchClientConfig={}){
         this._endpoints = config.endpoints ?? ['https://v1.fetch.bible/']
         this._data_endpoint = config.data_endpoint ?? this._endpoints[0]!
         this._usage = {...this._usage, ...config.usage}
