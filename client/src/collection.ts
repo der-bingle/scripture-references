@@ -31,7 +31,7 @@ export class FetchCollection {
 
         // Start with an empty manifest with common metadata extracted from first manifest
         this._manifest = {
-            translations: {},
+            bibles: {},
             glosses: {},
             notes: {},
             languages: {},
@@ -50,7 +50,7 @@ export class FetchCollection {
             Object.assign(this._manifest.language2to3, manifest.language2to3)
 
             // Loop through endpoint's resources
-            const resource_types = ['translations', 'glosses', 'notes'] as const
+            const resource_types = ['bibles', 'glosses', 'notes'] as const
             for (const type of resource_types){
                 for (const [trans, trans_data] of Object.entries(manifest[type])){
 
@@ -77,7 +77,7 @@ export class FetchCollection {
 
         // Init resource subcollections
         this.bibles = new BibleCollection(
-            this._manifest.translations,
+            this._manifest.bibles,
             this.requester,
             this._manifest.languages,
             this._manifest.language2to3,

@@ -55,8 +55,8 @@ export type RuntimeGloss = RuntimeManifestItem
 export type RuntimeNotes = RuntimeManifestItem
 
 export type RuntimeManifest = Omit<DistManifest,
-        'translations'|'glosses'|'notes'|'books_ordered'|'book_names_english'> & {
-    translations:Record<string, RuntimeTranslation>
+        'bibles'|'glosses'|'notes'|'books_ordered'|'book_names_english'> & {
+    bibles:Record<string, RuntimeTranslation>
     glosses:Record<string, RuntimeGloss>
     notes:Record<string, RuntimeNotes>
 }

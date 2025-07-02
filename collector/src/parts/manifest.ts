@@ -71,22 +71,18 @@ function _process_resource_meta(sources_path:string, dist_path:string){
 
 // Add all resources of given category to manifest
 function _add_resources(manifest:DistManifest, included_languages:Set<string>,
-        category:'translations'|'glosses'|'notes'){
-
-    // Bible translations are 'translations' in manifest but 'bibles' in paths
-    const category_path = category === 'translations' ? 'bibles' : category
+        category:'bibles'|'glosses'|'notes'){
 
     // Get list of service dirs (bibles don't have and are flat)
-    const service_dirs =
-        category === 'translations' ? [''] : list_dirs(join('sources', category_path))
+    const service_dirs = category === 'bibles' ? [''] : list_dirs(join('sources', category))
 
     for (const service_dir of service_dirs){
-        for (const id of list_dirs(join('sources', category_path, service_dir))){
+        for (const id of list_dirs(join('sources', category, service_dir))){
             if (id === '.original'){
                 continue  // Skip special dir in glosses
             }
-            const sources_path = join('sources', category_path, service_dir, id)
-            const dist_path = join('dist', category_path, id)
+            const sources_path = join('sources', category, service_dir, id)
+            const dist_path = join('dist', category, id)
             if (!existsSync(dist_path)){
                 continue  // Haven't processed dist files yet
             }
@@ -112,7 +108,7 @@ export async function update_manifest(){
 
     // Init manifest
     const manifest:DistManifest = {
-        translations: {},
+        bibles: {},
         glosses: {},
         notes: {},
         languages: {},
@@ -130,7 +126,7 @@ export async function update_manifest(){
     rmSync(join('dist', 'bibles', 'manifest.json'), {force: true})
 
     // Detect and add resources
-    _add_resources(manifest, included_languages, 'translations')
+    _add_resources(manifest, included_languages, 'bibles')
     _add_resources(manifest, included_languages, 'glosses')
     _add_resources(manifest, included_languages, 'notes')
 

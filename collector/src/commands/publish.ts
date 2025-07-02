@@ -81,7 +81,7 @@ async function _publish_bibles(publisher:Publisher, translations?:string):Promis
     // Add translations if not published yet
     const trans_ids = translations ? translations.split(',') : null
     const invalidations:string[] = []
-    for (const id in manifest.translations){
+    for (const id in manifest.bibles){
         if (trans_ids && !trans_ids.includes(id)){
             continue  // Only publishing certain translations
         }

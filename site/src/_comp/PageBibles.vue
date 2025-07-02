@@ -69,7 +69,7 @@ const app = import.meta.env.PROD ? 'https://app.fetch.bible/' : 'http://localhos
 
 
 // Expose total number of translations before filtering
-const unfiltered_total = Object.keys(collection._manifest.translations).length
+const unfiltered_total = Object.keys(collection._manifest.bibles).length
 
 
 // Get list of languages for <select> filter

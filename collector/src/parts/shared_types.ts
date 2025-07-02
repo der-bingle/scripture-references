@@ -115,7 +115,7 @@ export type MetaTag = 'recommended'|'archaic'|'questionable'|'niche'
 
 
 export interface DistManifest {
-    translations:Record<string, DistTranslation>
+    bibles:Record<string, DistTranslation>
     glosses:Record<string, DistGloss>
     notes:Record<string, DistNotes>
     languages:Record<string, MetaLanguage>
