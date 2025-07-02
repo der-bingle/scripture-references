@@ -696,15 +696,16 @@ export class BibleCollection {
 
         // Fetch book in desired format
         const url = this.get_book_url(translation, book, format)
-        return this.requester.request(url).then(contents => {
-            const format_class = {
-                html: BibleBookHtml,
-                usx: BibleBookUsx,
-                usfm: BibleBookUsfm,
-                txt: BibleBookTxt,
-            }[format]
-            return new format_class(contents, this._manifest.translations[translation]!.copyright)
-        })
+        const contents = await this.requester.request(url)
+
+        // Return in appropriate class
+        const format_class = {
+            html: BibleBookHtml,
+            usx: BibleBookUsx,
+            usfm: BibleBookUsfm,
+            txt: BibleBookTxt,
+        }[format]
+        return new format_class(contents, this._manifest.translations[translation]!.copyright)
     }
 
     // Make request for extra metadata for a translation (such as book names and section headings).
@@ -716,12 +717,14 @@ export class BibleCollection {
 
         // Fetch data
         const url = `${this._endpoints[translation]!}bibles/${translation}/extra.json`
-        return this.requester.request(url).then(contents => {
-            const data = JSON.parse(contents) as DistTranslationExtra
-            // Extract local book names when done (regardless of `remember_fetches` setting)
-            this._local_book_names[translation] = data.book_names
-            return new TranslationExtra(data)
-        })
+        const contents = await this.requester.request(url)
+        const data = JSON.parse(contents) as DistTranslationExtra
+
+        // Extract local book names when done (regardless of `remember_fetches` setting)
+        this._local_book_names[translation] = data.book_names
+
+        // Return in class
+        return new TranslationExtra(data)
     }
 
     // @internal Auto-prepare args for from_string/detect_references based on translation
