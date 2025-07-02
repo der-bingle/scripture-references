@@ -28,6 +28,8 @@ export type {
 
 export type {BibleClientConfig} from './client.js'
 
+export type {FetchCollection} from './collection.js'
+
 export type {
     GetLanguagesOptions,
     GetLanguagesItem,
@@ -36,8 +38,7 @@ export type {
     GetBooksOptions,
     GetBooksItem,
     GetCompletionReturn,
-    BibleCollection,
-} from './collection.js'
+} from './resource.js'
 
 export type {
     BookCrossref,

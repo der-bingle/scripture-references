@@ -117,7 +117,7 @@ export async function update_manifest(){
         notes: {},
         languages: {},
         language2to3: {},
-        languages_most_spoken: [],
+        languages_most_spoken: languages_by_total_speakers,  // Client expects not to be filtered
         books_ordered,
         book_names_english,
         licenses: LICENSES,
@@ -140,8 +140,6 @@ export async function update_manifest(){
         .filter(([code]) => included_languages.has(code)))
     manifest.language2to3 = Object.fromEntries(Object.entries(language_data.data.language2to3)
         .filter(([, three]) => included_languages.has(three)))
-    manifest.languages_most_spoken =
-        languages_by_total_speakers.filter(l => included_languages.has(l))
 
     // Save the manifest to dist dir
     write_json(join('dist', 'manifest.json'), manifest)

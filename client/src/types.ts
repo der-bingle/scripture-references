@@ -47,6 +47,7 @@ export type RuntimeManifestItem = Omit<DistManifestItem, 'copyright'> & {
     copyright:RuntimeCopyright
     books_ot_list:string[]
     books_nt_list:string[]
+    endpoint:string
 }
 
 export type RuntimeTranslation = RuntimeManifestItem

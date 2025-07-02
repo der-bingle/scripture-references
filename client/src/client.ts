@@ -1,5 +1,5 @@
 
-import {BibleCollection} from './collection.js'
+import {FetchCollection} from './collection.js'
 import {BookCrossref} from './crossref.js'
 import {GlossesBook} from './glosses.js'
 import {NotesBook} from './notes.js'
@@ -76,7 +76,7 @@ export class BibleClient {
     }
 
     // Synchronous access to collection if it has already been fetched with `fetch_collection()`
-    collection:BibleCollection|undefined
+    collection:FetchCollection|undefined
     // Access to request handler and its caching methods
     requester:RequestHandler
 
@@ -88,10 +88,10 @@ export class BibleClient {
         this.requester = new RequestHandler(config.remember_fetches !== false)
     }
 
-    // Fetch the collection's manifest and return a BibleCollection object for interacting with it
-    async fetch_collection():Promise<BibleCollection>{
+    // Fetch the collection's manifest and return a FetchCollection object for interacting with it
+    async fetch_collection():Promise<FetchCollection>{
 
-        // Request all manifests and combine into a single BibleCollection instance
+        // Request all manifests and combine into a single FetchCollection instance
         return Promise.all(this._endpoints.map(async endpoint => {
             const manifest_str = await this.requester.request(endpoint + 'manifest.json')
             return [
@@ -100,13 +100,13 @@ export class BibleClient {
             ]
         })).then(manifests => {
             // Store instance in `this.collection` for synchronous access
-            this.collection = new BibleCollection(this._usage, this.requester,
+            this.collection = new FetchCollection(this._usage, this.requester,
                 manifests as OneOrMore<[string, DistManifest]>)
             return this.collection
         })
     }
 
-    // Manually fetch contents of book for a translation without needing to request BibleCollection
+    // Manually fetch contents of book for a translation without needing to request FetchCollection
     async fetch_book(translation:string, book:string, format?:'html'):Promise<BibleBookHtml>
     async fetch_book(translation:string, book:string, format:'usx'):Promise<BibleBookUsx>
     async fetch_book(translation:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
@@ -126,7 +126,7 @@ export class BibleClient {
         })
     }
 
-    // Manually fetch extra metadata for a translation without needing to request BibleCollection
+    // Manually fetch extra metadata for a translation without needing to request FetchCollection
     async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
         const url = `${this._data_endpoint}bibles/${translation}/extra.json`
         return this.requester.request(url).then(contents => {
@@ -135,14 +135,14 @@ export class BibleClient {
         })
     }
 
-    // Manually fetch glosses for book without needing to request BibleCollection
+    // Manually fetch glosses for book without needing to request FetchCollection
     async fetch_glosses(gloss_id:string, book:string):Promise<GlossesBook>{
         const url = this._data_endpoint + `glosses/${gloss_id}/json/${book}.json`
         const json = await this.requester.request(url)
         return new GlossesBook(json)
     }
 
-    // Manually fetch study notes for book without needing to request BibleCollection
+    // Manually fetch study notes for book without needing to request FetchCollection
     async fetch_notes(notes_id:string, book:string, format:'html'|'txt'='html'):Promise<NotesBook>{
         const url = this._data_endpoint + `notes/${notes_id}/${format}/${book}.json`
         const json = await this.requester.request(url)
