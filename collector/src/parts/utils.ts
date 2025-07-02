@@ -133,6 +133,14 @@ export function list_dirs(directory:string):string[]{
 }
 
 
+// List subdirs and return [] if dir doesn't exist
+export function list_dirs_if(directory:string):string[]{
+    if (!existsSync(directory))
+        return []
+    return list_dirs(directory)
+}
+
+
 // Get paths for all the files and subdirs in a containing dir (recursive)
 export function read_dir_deep(directory:string):{dirs: string[], files: string[]}{
     const dirs:string[] = [directory]

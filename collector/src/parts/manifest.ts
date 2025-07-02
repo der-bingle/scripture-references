@@ -6,7 +6,7 @@ import {book_names_english, books_ordered} from './bible.js'
 import {languages_by_total_speakers} from '../data/languages.js'
 import {get_language_data} from './languages.js'
 import {LICENSES} from './license.js'
-import {read_json, write_json, list_dirs, list_files} from './utils.js'
+import {read_json, write_json, list_dirs, list_files, list_dirs_if} from './utils.js'
 import type {DistManifest, DistManifestItem} from './shared_types'
 import type {TranslationSourceMeta} from './types'
 
@@ -74,10 +74,10 @@ function _add_resources(manifest:DistManifest, included_languages:Set<string>,
         category:'bibles'|'glosses'|'notes'){
 
     // Get list of service dirs (bibles don't have and are flat)
-    const service_dirs = category === 'bibles' ? [''] : list_dirs(join('sources', category))
+    const service_dirs = category === 'bibles' ? [''] : list_dirs_if(join('sources', category))
 
     for (const service_dir of service_dirs){
-        for (const id of list_dirs(join('sources', category, service_dir))){
+        for (const id of list_dirs_if(join('sources', category, service_dir))){
             if (id === '.original'){
                 continue  // Skip special dir in glosses
             }
