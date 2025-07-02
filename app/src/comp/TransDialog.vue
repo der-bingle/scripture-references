@@ -57,7 +57,7 @@ import {computed, onUnmounted, reactive, ref, watch} from 'vue'
 import {state, langs, dialog_max_width} from '@/services/state'
 import {content} from '@/services/content'
 
-import type {GetTranslationsItem} from '@gracious.tech/fetch-client'
+import type {GetResourcesItem} from '@gracious.tech/fetch-client'
 
 
 // Contants
@@ -100,7 +100,7 @@ const translations = computed(() => {
         .filter(i => !decent.find(di => di.id === i.id))
 
     // Add in separate groups
-    const items:(GetTranslationsItem|string)[] = decent
+    const items:(GetResourcesItem|string)[] = decent
     if (niche.length){
         items.push("Historical & Niche Translations")
         items.push(...niche)
