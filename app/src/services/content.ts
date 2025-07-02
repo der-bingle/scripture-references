@@ -2,7 +2,7 @@
 import {BibleClient} from '@gracious.tech/fetch-client'
 
 import type {BibleIndex} from '@gracious.tech/fetch-search'
-import type {BibleCollection, GetTranslationsItem, GetLanguagesItem,
+import type {FetchCollection, GetTranslationsItem, GetLanguagesItem,
 } from '@gracious.tech/fetch-client'
 
 
@@ -12,7 +12,7 @@ const endpoint = import.meta.env.PROD ? 'https://v1.fetch.bible/' : 'http://loca
 export const content = {
     client: new BibleClient({endpoints: [endpoint]}),
     // These will be set before app loads, so force types
-    collection: null as unknown as BibleCollection,
+    collection: null as unknown as FetchCollection,
     translations: null as unknown as Record<string, GetTranslationsItem>,
     languages: null as unknown as Record<string, GetLanguagesItem>,
     // This will be set and resolve when index has fully loaded

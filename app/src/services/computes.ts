@@ -22,7 +22,7 @@ export const current_book_abbrev = computed(() => {
 
 // List of chapters for current book
 export const chapters = computed(() => {
-    if (content.collection.has_book(state.trans[0], state.book)){
+    if (content.collection.bibles.has_book(state.trans[0], state.book)){
         return get_chapters(state.book)
     }
     return []

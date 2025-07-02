@@ -73,7 +73,7 @@ const unfiltered_total = Object.keys(collection._manifest.translations).length
 
 
 // Get list of languages for <select> filter
-const languages = collection.get_languages().map(lang => {
+const languages = collection.bibles.get_languages().map(lang => {
     return {
         value: lang.code,
         label: lang.name_bilingual,
@@ -96,7 +96,7 @@ const exclude_obsolete = ref(false)
 
 // Expose bibles list
 const bibles = computed(() => {
-    return collection.get_translations({
+    return collection.bibles.get_translations({
         language: language.value,
         sort_by_year: true,
         usage: {
@@ -107,7 +107,7 @@ const bibles = computed(() => {
         },
         exclude_obsolete: exclude_obsolete.value,
     }).map(trans => {
-        const completion = collection.get_completion(trans.id)
+        const completion = collection.bibles.get_completion(trans.id)
         let comp_str = "100%"
         if (completion.ot.missing.length || completion.nt.missing.length){
             const ot_p = Math.floor(completion.ot.available.length /

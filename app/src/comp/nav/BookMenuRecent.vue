@@ -25,7 +25,7 @@ const passage_ref = computed(() => {
 
 
 const ref_title = computed(() => {
-    return content.collection.reference_to_string(passage_ref.value, state.trans[0], true)
+    return content.collection.bibles.reference_to_string(passage_ref.value, state.trans[0], true)
 })
 
 

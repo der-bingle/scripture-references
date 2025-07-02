@@ -65,7 +65,7 @@ import {collection} from './collection'
 
 
 // Get translations
-const translations = collection.get_translations()
+const translations = collection.bibles.get_translations()
 
 
 // Util for getting count as a percentage string of total translations
@@ -133,23 +133,23 @@ owners.push({name: "* Unable to auto-detect * ", count: all_owners.length - owne
 const usages = [
     {
         name: "Can use commercially",
-        count: per(collection.get_translations({usage: {commercial: true}}).length),
+        count: per(collection.bibles.get_translations({usage: {commercial: true}}).length),
     },
     {
         name: "Attribution not required",
-        count: per(collection.get_translations({usage: {attributionless: true}}).length),
+        count: per(collection.bibles.get_translations({usage: {attributionless: true}}).length),
     },
     {
         name: "No quotation limits",
-        count: per(collection.get_translations({usage: {limitless: true}}).length),
+        count: per(collection.bibles.get_translations({usage: {limitless: true}}).length),
     },
     {
         name: "Can modify",
-        count: per(collection.get_translations({usage: {derivatives: true}}).length),
+        count: per(collection.bibles.get_translations({usage: {derivatives: true}}).length),
     },
     {
         name: "Can modify if same license",
-        count: per(collection.get_translations({usage: {derivatives: 'same-license'}}).length),
+        count: per(collection.bibles.get_translations({usage: {derivatives: 'same-license'}}).length),
     },
 ]
 
@@ -174,7 +174,7 @@ const testaments = {
     },
 }
 for (const trans of translations){
-    const completion = collection.get_completion(trans.id)
+    const completion = collection.bibles.get_completion(trans.id)
     if (completion.nt.missing.length){
         testaments.partial.count += 1
     } else if (!completion.ot.missing.length){

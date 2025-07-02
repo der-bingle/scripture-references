@@ -1,5 +1,5 @@
 
-import type {BibleCollection, PassageReference, PassageReferenceMatch}
+import type {FetchCollection, PassageReference, PassageReferenceMatch}
     from '@gracious.tech/fetch-client'
 
 
@@ -30,7 +30,7 @@ export function default_filter(element:Element):boolean{
 
 
 // Auto-discover references in provided DOM and transform into links
-export async function markup_references(collection:BibleCollection, root:HTMLElement,
+export async function markup_references(collection:FetchCollection, root:HTMLElement,
         translations:string[]=[], always_detect_english=true, filter=default_filter)
         :Promise<{element: HTMLAnchorElement, ref:PassageReference}[]>{
 
@@ -59,7 +59,7 @@ export async function markup_references(collection:BibleCollection, root:HTMLEle
     const nodes:[Text, Generator<PassageReferenceMatch, null>, PassageReferenceMatch][] = []
     while (walker.nextNode()){
         if (walker.currentNode.nodeType === Node.TEXT_NODE){
-            const detector = collection.detect_references(walker.currentNode.textContent!,
+            const detector = collection.bibles.detect_references(walker.currentNode.textContent!,
                 translations, always_detect_english)
             const match = detector.next().value
             if (match){

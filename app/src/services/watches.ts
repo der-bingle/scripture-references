@@ -12,7 +12,7 @@ import {post_message} from './post'
 export function apply_search_param(value:string){
     // If a single ref, go to it, otherwise display search results
     // May as well combine nav+search as a good way to provide fallback for malformed values
-    const match = content.collection.string_to_reference(value, state.trans)
+    const match = content.collection.bibles.string_to_reference(value, state.trans)
     if (match){
         state.book = match.book
         state.chapter = match.start_chapter
@@ -35,9 +35,9 @@ export function enable_watches(){
         // Update displayed book names
         // NOTE Don't bother with English translations since already have English names
         if (!state.trans[0].startsWith('eng_')){
-            await content.collection.fetch_translation_extras(state.trans[0])
+            await content.collection.bibles.fetch_translation_extras(state.trans[0])
         }
-        for (const book of content.collection.get_books(state.trans[0], {whole: true})){
+        for (const book of content.collection.bibles.get_books(state.trans[0], {whole: true})){
             state.book_names[book.id] = book.name
             state.book_abbrev[book.id] = book.name_abbrev
         }
@@ -45,7 +45,7 @@ export function enable_watches(){
         // Also fetch book names for any other translations as can help things like searchbar
         for (const trans of state.trans.slice(1)){
             if (!trans.startsWith('eng_')){
-                void content.collection.fetch_translation_extras(trans)
+                void content.collection.bibles.fetch_translation_extras(trans)
             }
         }
 
@@ -58,8 +58,8 @@ export function enable_watches(){
         // For secondary translations, trigger SW cache by fetching assets (and ignoring response)
         void self.caches.open('fetch-collection').then(cache => {
             for (const trans of state.trans.slice(1)){
-                for (const book of content.collection.get_books(trans)){
-                    const url = content.collection.get_book_url(trans, book.id, 'html')
+                for (const book of content.collection.bibles.get_books(trans)){
+                    const url = content.collection.bibles.get_book_url(trans, book.id, 'html')
                     void cache.match(url).then(resp => {
                         if (!resp){
                             void fetch(url, {mode: 'cors'})  // Don't actually read contents
@@ -83,18 +83,18 @@ export function enable_watches(){
         state.notes = null
 
         // If first/primary trans doesn't have current book, change to a valid book
-        if (!content.collection.has_book(state.trans[0], state.book)){
-            state.book = content.collection.get_books(state.trans[0])[0]!.id
+        if (!content.collection.bibles.has_book(state.trans[0], state.book)){
+            state.book = content.collection.bibles.get_books(state.trans[0])[0]!.id
             return  // Will have triggered re-execution of this function
         }
 
         // Fetch book for each translation
         const books = await Promise.all(state.trans.map(async trans => {
-            if (!content.collection.has_book(trans, state.book)){
+            if (!content.collection.bibles.has_book(trans, state.book)){
                 return null
             }
             try {
-                return await content.collection.fetch_book(trans, state.book)
+                return await content.collection.bibles.fetch_book(trans, state.book)
             } catch {
                 state.offline = true
                 return null

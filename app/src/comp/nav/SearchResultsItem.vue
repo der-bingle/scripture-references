@@ -24,7 +24,7 @@ const props = defineProps<{result:SearchResult}>()
 
 
 const ref_title = computed(() => {
-    return content.collection.reference_to_string(props.result.ref, state.trans[0])
+    return content.collection.bibles.reference_to_string(props.result.ref, state.trans[0])
 })
 
 

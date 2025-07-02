@@ -54,3 +54,5 @@ inspecting and manipulating references. The [fetch(bible) client](https://fetch.
  * `BibleCollection.detect_references(text, translation_id)`
  * `BibleCollection.string_to_reference(string, translation_id)`
  * `BibleCollection.reference_to_string(ref, translation_id)`
+
+Note that `BibleCollection.fetch_translation_extras(translation_id)` is required to complete beforehand.

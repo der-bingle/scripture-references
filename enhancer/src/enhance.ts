@@ -111,18 +111,18 @@ export class BibleEnhancer {
 
         // If translation hasn't been set yet, choose sensible default
         if (!this._translations.length){
-            this._translations = [collection.get_preferred_translation().id]
+            this._translations = [collection.bibles.get_preferred_translation().id]
         }
 
         let html = ''
         for (const trans of this._translations){
             // Confirm translation has book before attempting to get it
-            const trans_meta = collection.get_translation(trans)
+            const trans_meta = collection.bibles.get_translation(trans)
             if (!trans_meta){
                 continue  // Must have been given invalid trans id
             }
-            if (collection.has_book(trans, ref.book)){
-                const book = await collection.fetch_book(trans, ref.book)
+            if (collection.bibles.has_book(trans, ref.book)){
+                const book = await collection.bibles.fetch_book(trans, ref.book)
                 html += book.get_passage_from_ref(ref, {attribute: false})
             } else {
                 html += '<p>&mdash;</p>'
@@ -233,7 +233,7 @@ export class BibleEnhancer {
         // Get access to collection and ensure translation specified
         const collection = await this.client.fetch_collection()
         if (!this._translations.length){
-            this._translations = [collection.get_preferred_translation().id]
+            this._translations = [collection.bibles.get_preferred_translation().id]
         }
 
         // Ensure existing links are active (SPAs might reattach without event listeners)
@@ -255,10 +255,10 @@ export class BibleEnhancer {
         // NOTE Repeat calls ok since will cache results
         for (const trans of this._translations){
             // NOTE Skip for English to speed up execution since already have English names
-            if (!collection.has_translation(trans) || trans.startsWith('eng_')){
+            if (!collection.bibles.has_translation(trans) || trans.startsWith('eng_')){
                 continue
             }
-            await collection.fetch_translation_extras(trans)
+            await collection.bibles.fetch_translation_extras(trans)
         }
 
         // Discover and markup references as <a> elements

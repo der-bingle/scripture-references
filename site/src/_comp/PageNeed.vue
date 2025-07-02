@@ -64,11 +64,11 @@ const COVERED_BY_SHAREABLE_ALT = [...COVERED_BY_UNRESTRICTED_ALT]
 
 
 // Get translations
-const translations = collection.get_translations()
+const translations = collection.bibles.get_translations()
 
 
 // Detect modern years
-const modern_years = new Date().getFullYear() - collection._modern_year
+const modern_years = new Date().getFullYear() - collection.bibles._modern_year
 
 
 // Functionality for "show more"
@@ -79,22 +79,22 @@ const show_more = () => {
 
 
 // Get languages that do have a complete-modern-shareable translation
-const languages_with_shareable = collection.get_languages().map(item => item.code).filter(lang => {
-    return collection.get_translations({
+const languages_with_shareable = collection.bibles.get_languages().map(item => item.code).filter(lang => {
+    return collection.bibles.get_translations({
         language: lang,
         exclude_incomplete: true,
         usage: {limitless: true},
-    }).some(t => t.year >= collection._modern_year)
+    }).some(t => t.year >= collection.bibles._modern_year)
 })
 
 
 // Futher refine languages by those that have an unrestricted translation
 const languages_with_unrestricted = languages_with_shareable.filter(lang => {
-    return collection.get_translations({
+    return collection.bibles.get_translations({
         language: lang,
         exclude_incomplete: true,
         usage: {limitless: true, commercial: true, derivatives: 'same-license'},
-    }).some(t => t.year >= collection._modern_year)
+    }).some(t => t.year >= collection.bibles._modern_year)
 })
 
 

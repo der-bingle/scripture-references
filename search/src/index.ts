@@ -5,7 +5,7 @@ import {PassageReference} from '@gracious.tech/bible-references'
 
 import {strip_objects_from_txt, strip_tags_and_commentary} from './strip'
 
-import type {BibleBookHtml, BibleBookTxt, BibleCollection} from '@gracious.tech/fetch-client'
+import type {BibleBookHtml, BibleBookTxt, FetchCollection} from '@gracious.tech/fetch-client'
 
 
 export interface SearchResult {
@@ -17,17 +17,17 @@ export interface SearchResult {
 export class BibleIndex {
 
     _flexsearch:Document
-    _collection:BibleCollection
+    _collection:FetchCollection
     _translation:string
     _format:'txt'|'html'
     _available_books:string[]
 
-    constructor(collection:BibleCollection, translation:string, format:'txt'|'html'='html'){
+    constructor(collection:FetchCollection, translation:string, format:'txt'|'html'='html'){
         this._collection = collection
         this._translation = translation
         this._format = format
         this._available_books =
-            this._collection.get_books(translation).map(book_meta => book_meta.id)
+            this._collection.bibles.get_books(translation).map(book_meta => book_meta.id)
 
         // Init Document-type index that supports highlighting matches and other useful features
         this._flexsearch = new Document({
@@ -85,7 +85,7 @@ export class BibleIndex {
             // Get book
             // NOTE This assumes that caching is enabled on collection for better performance
             // NOTE Forcing format to 'txt' to keep TS happy, even though both valid
-            const book = await this._collection.fetch_book(
+            const book = await this._collection.bibles.fetch_book(
                 this._translation, book_id, this._format as 'txt')
 
             // Add items as a chain of promises to keep synchronous
@@ -121,7 +121,7 @@ export class BibleIndex {
 
         // Detect any explicit references to passages
         const passage_results:SearchResult[] = []
-        for (const match of this._collection.detect_references(query, this._translation)){
+        for (const match of this._collection.bibles.detect_references(query, this._translation)){
 
             // Can't use if translation doesn't have book
             if (!this._available_books.includes(match.ref.book)){
@@ -130,7 +130,7 @@ export class BibleIndex {
 
             // Need to get the passage (which is hopefully cached already)
             // NOTE Format may be txt|html but force type to keep TS happy
-            const book = await this._collection.fetch_book(this._translation, match.ref.book,
+            const book = await this._collection.bibles.fetch_book(this._translation, match.ref.book,
                 this._format as 'txt')
 
             // Get passage contents

@@ -78,7 +78,7 @@ const collection = await client.fetch_collection()
 
 // Method for updating the content shown
 async function update_content(){
-    const book = await collection.fetch_book(
+    const book = await collection.bibles.fetch_book(
         select_translation.value,
         select_book.value,
     )
@@ -89,7 +89,7 @@ async function update_content(){
 
 // Method for populating the language <select> element
 function update_select_language(){
-    const languages = collection.get_languages()
+    const languages = collection.bibles.get_languages()
     update_options(select_language, languages.map(language => {
         return [language.code, language.name_bilingual]
     }))
@@ -100,7 +100,7 @@ function update_select_language(){
 
 // Method for populating the translation <select> element
 function update_select_translation(){
-    const translations = collection.get_translations({
+    const translations = collection.bibles.get_translations({
         language: select_language.value,
     })
     update_options(select_translation, translations.map(translation => {
@@ -113,7 +113,7 @@ function update_select_translation(){
 
 // Method for populating the book <select> element
 function update_select_book(){
-    const books = collection.get_books(select_translation.value)
+    const books = collection.bibles.get_books(select_translation.value)
     update_options(select_book, books.map(book => {
         return [book.id, book.name]
     }))

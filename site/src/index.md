@@ -34,7 +34,7 @@ import {collection} from '@/_comp/collection'
 onMounted(async () => {
 
     // Progressively count up to total translations available
-    const total = collection.get_translations().length
+    const total = collection.bibles.get_translations().length
     let counter = 0
     while (counter < total){
         await new Promise(resolve => setTimeout(resolve, 1))

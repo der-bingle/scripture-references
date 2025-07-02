@@ -61,9 +61,10 @@ import type {GetTranslationsItem} from '@gracious.tech/fetch-client'
 
 
 // Contants
-const languages = content.collection.get_languages()
+const languages = content.collection.bibles.get_languages()
 // NOTE Just show 10 initially as scanning too many wastes time since not initially in ABC order
-const languages_by_pop = content.collection.get_languages({sort_by: 'population'}).slice(0, 10)
+const languages_by_pop = content.collection.bibles.get_languages({sort_by: 'population'})
+    .slice(0, 10)
 
 
 // State
@@ -85,7 +86,7 @@ const displayed_language_name = computed(() => {
 })
 const languages_filtered = computed(() => {
     if (languages_search.value){
-        return content.collection.get_languages({search: languages_search.value})
+        return content.collection.bibles.get_languages({search: languages_search.value})
     }
     return languages_show_all.value ? languages : languages_by_pop
 })
@@ -93,9 +94,9 @@ const languages_filtered = computed(() => {
 const translations = computed(() => {
 
     // Get translations by category
-    const decent = content.collection.get_translations({language: displayed_language.value,
+    const decent = content.collection.bibles.get_translations({language: displayed_language.value,
         exclude_obsolete: true})
-    const niche = content.collection.get_translations({language: displayed_language.value})
+    const niche = content.collection.bibles.get_translations({language: displayed_language.value})
         .filter(i => !decent.find(di => di.id === i.id))
 
     // Add in separate groups

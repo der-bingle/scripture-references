@@ -15,7 +15,7 @@ You can also use this client to access your own self-hosted collection if you ch
 
 ## Usage
 
-The standard way to use the client is to start with a `new BibleClient()` and then call `fetch_collection()`, which will return a promise for a `BibleCollection` which you can use to explore all the languages and translations available, and then call `fetch_book(translation, book)` and similar methods to get access to actual Bible content.
+The standard way to use the client is to start with a `new BibleClient()` and then call `fetch_collection()`, which will return a promise for a `FetchCollection` which you can use to explore all the languages and translations available, and then call `fetch_book(translation, book)` and similar methods to get access to actual Bible content.
 
 Methods starting with `fetch_` will make a network request and return a promise, where as methods starting with `get_` do not and are synchronous. For methods that return a list (e.g. languages, translations) you can usually pass `{object: true}` in the options argument to have them return an object keyed by `id` instead.
 
@@ -33,20 +33,20 @@ const client = new BibleClient()
 const collection = await client.fetch_collection()
 
 // Get what translations are available
-const translations = collection.get_translations()
+const translations = collection.bibles.get_translations()
 
 // Get the id of the first translation available
 const translation_id = translations[0].id
 
 // Load local book names for the translation
-await collection.fetch_translation_extras(translation_id)
+await collection.bibles.fetch_translation_extras(translation_id)
 
 // Get what books are available for the translation
 // (may be whole Bible or may only be e.g. NT)
-const books = collection.get_books(translation_id)
+const books = collection.bibles.get_books(translation_id)
 
 // Fetch the contents of the first book
-const book = await collection.fetch_book(translation_id, books[0].id)
+const book = await collection.bibles.fetch_book(translation_id, books[0].id)
 
 // Output the HTML of the first chapter of the book
 console.log(book.get_chapter(1))
@@ -61,7 +61,7 @@ console.log(book.get_chapter(1))
 If your code editor supports Typescript you'll get helpful auto-suggestions that explain all the methods and arguments possible, or alternatively you can also explore the auto-generated docs. The most important classes being:
 
  * [BibleClient](/access/client/api/classes/client.BibleClient)
-    * `fetch_collection()` -> [BibleCollection](/access/client/api/classes/collection.BibleCollection)
+    * `fetch_collection()` -> [FetchCollection](/access/client/api/classes/collection.FetchCollection)
         * `fetch_book(...)` -> [BibleBookHtml](/access/client/api/classes/book.BibleBookHtml)
 
 [All modules](/access/client/api/)

@@ -53,11 +53,11 @@ import {collection} from './collection'
 
 
 // Generate list of languages
-const languages = collection.get_languages().map(lang => {
+const languages = collection.bibles.get_languages().map(lang => {
     const mil = Math.round((lang.population ?? 0) / 1000000)
     return {
         ...lang,
-        count: collection.get_translations({language: lang.code}).length,
+        count: collection.bibles.get_translations({language: lang.code}).length,
         pop: lang.population === null ? "None" : (mil ? `${mil.toLocaleString()} million` : '< 1 million'),
         mil,
     }
