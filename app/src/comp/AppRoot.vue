@@ -3,7 +3,7 @@
 
 v-app(:style='{"max-width": max_width}' @mousemove='resize_study_move' @mouseup='resize_study_end'
         @mouseleave='resize_study_end'
-        @touchmove.passive='resize_study_move_touch' @touchend.passive='resize_study_end')
+        @touchmove='resize_study_move' @touchend='resize_study_end')
 
     //- Show book menu in drawer for narrow screens
     //- NOTE touchless disables swiping right from screen edge to open (conflicts with prev ch)
@@ -60,13 +60,17 @@ const resize_study_start = () => {
 const resize_study_end = () => {
     resize_study_active = false
 }
-const resize_study_move_touch = (event:TouchEvent) => {
-    resize_study_move({pageY: event.touches[0]!.pageY})
-}
-const resize_study_move = (event:{pageY:number}) => {
+const resize_study_move = (event:MouseEvent|TouchEvent) => {
     if (resize_study_active && study_div.value){
+
+        // Prevent main page from scrolling while moving (laggy and annoying)
+        event.preventDefault()
+
+        // pageY will be within `touches` for touch events
+        const pageY = 'touches' in event ? event.touches[0]!.pageY : event.pageY
+
         const resize_bar_height = 16 / 2
-        let new_height = self.innerHeight - event.pageY - resize_bar_height
+        let new_height = self.innerHeight - pageY - resize_bar_height
         const smallest = 100
         const largest = self.innerHeight - 200
         new_height = Math.max(smallest, Math.min(largest, new_height))
