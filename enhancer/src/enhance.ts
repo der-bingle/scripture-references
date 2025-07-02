@@ -117,7 +117,7 @@ export class BibleEnhancer {
         let html = ''
         for (const trans of this._translations){
             // Confirm translation has book before attempting to get it
-            const trans_meta = collection.bibles.get_translation(trans)
+            const trans_meta = collection.bibles.get_resource(trans)
             if (!trans_meta){
                 continue  // Must have been given invalid trans id
             }
