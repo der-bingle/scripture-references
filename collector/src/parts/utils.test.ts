@@ -20,27 +20,28 @@ describe('read_dir', () => {
 })
 
 describe('get_dir_entries', () => {
-    const contents = get_dir_entries(path.join('dist', 'bibles'))
+    const bsb_path = path.join('dist', 'bibles', 'eng_bsb')
+    const contents = get_dir_entries(bsb_path)
 
     it('should return a correct directory entry', ({expect}) => {
         expect(contents.length).not.toEqual(0)
-        const bsb = contents.find((item: DirectoryEntry) => item.name === 'eng_bsb')
-        expect(bsb).not.toEqual(undefined)
-        expect(bsb!.name).toEqual('eng_bsb')
-        expect(bsb!.isDirectory).toBe(true)
-        expect(bsb!.fileSize).toEqual(undefined)
-        expect(bsb!.dirSize).toEqual(5)
+        const html = contents.find((item: DirectoryEntry) => item.name === 'html')
+        expect(html).not.toEqual(undefined)
+        expect(html!.name).toEqual('html')
+        expect(html!.isDirectory).toBe(true)
+        expect(html!.fileSize).toEqual(undefined)
+        expect(html!.dirSize).toEqual(66)
     })
 
     it('should return a correct file entry', ({expect}) => {
-        const expected_size = statSync(path.join('dist', 'manifest.json')).size
+        const expected_size = statSync(path.join(bsb_path, 'extra.json')).size
         expect(contents.length).not.toEqual(0)
-        const manifest = contents.find((item: DirectoryEntry) => item.name === 'manifest.json')
-        expect(manifest).not.toEqual(undefined)
-        expect(manifest!.name).toEqual('manifest.json')
-        expect(manifest!.isDirectory).toBe(false)
-        expect(manifest!.fileSize).toEqual(expected_size)
-        expect(manifest!.dirSize).toEqual(undefined)
+        const extra = contents.find((item: DirectoryEntry) => item.name === 'extra.json')
+        expect(extra).not.toEqual(undefined)
+        expect(extra!.name).toEqual('extra.json')
+        expect(extra!.isDirectory).toBe(false)
+        expect(extra!.fileSize).toEqual(expected_size)
+        expect(extra!.dirSize).toEqual(undefined)
     })
 
 })
