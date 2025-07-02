@@ -6,6 +6,7 @@ import {convert as html_to_text} from 'html-to-text'
 
 import * as tyndale from '../integrations/tyndale.js'
 import {clean_dir, list_dirs, mkdir_exist, write_json} from '../parts/utils.js'
+import {update_manifest} from '../parts/manifest.js'
 
 import type {NotesData} from '../parts/shared_types'
 
@@ -15,12 +16,15 @@ export async function update_notes(redownload:boolean){
     if (!existsSync(tyndale.tyndale_source_dir) || redownload){
         await tyndale.download_notes()
     }
-    notes_process()
+    await notes_process()
+
+    // Update manifest whenever dist files change
+    await update_manifest()
 }
 
 
 // Process available notes in sources dir and convert to publishable formats
-export function notes_process(){
+export async function notes_process(){
 
     // Clean existing notes dir in dist
     // NOTE Would find a way to append instead if many notes available

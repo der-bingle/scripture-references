@@ -18,5 +18,7 @@ mkdir collection
 .bin/collector download eng_bsb
 .bin/collector download vie_bib
 .bin/collector process
-.bin/collector notes-process
-.bin/collector data-crossref
+.bin/collector glosses
+.bin/collector notes
+.bin/collector crossref
+.bin/collector manifest

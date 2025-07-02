@@ -5,6 +5,7 @@ import {join} from 'node:path'
 import {concurrent, read_json, type_from_path, read_dir_deep} from '../parts/utils.js'
 import {PublisherAWS} from '../integrations/aws.js'
 import {generate_index_content} from '../parts/indexes.js'
+import {update_manifest} from '../parts/manifest.js'
 
 import type {DistManifest} from '../parts/shared_types'
 
@@ -53,7 +54,8 @@ export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:strin
         invalidations.push(...await _publish_data(publisher, ids))
     }
 
-    // Always upload manifest in case any changes, and do last so assets are ready before it is used
+    // Always upload fresh manifest in case any changes, and do last so assets ready before used
+    await update_manifest()
     const manifest_path = join('dist', 'manifest.json')
     await publisher.upload_file(manifest_path)
     invalidations.push('/manifest.json')

@@ -27,8 +27,9 @@ import './parts/console_colors.js'
 await yargs(process.argv.slice(2))
     .scriptName('fetch-collector')
 
+    // Setup
     .command('setup', "Setup new collection", {},
-        async argv => {await Promise.all([init_config(), gen_language_data(), update_bmc()])})
+        argv => Promise.all([init_config(), gen_language_data(), update_bmc()]).then(x => {}))
     .command('setup-data', "Update data on world's languages", {},
         argv => gen_language_data())
     .command('setup-bmc [version]', "Update Bible Multi Converter", {},
@@ -36,21 +37,28 @@ await yargs(process.argv.slice(2))
 
     // Bibles
     .command('discover [service] [id]', "Discover what translations are available", {},
-        argv => discover_translations(
-            argv['service'] as TransServiceId, argv['id'] as string))
-
+        argv => discover_translations(argv['service'] as TransServiceId, argv['id'] as string))
     .command('download [id]', "Download source files (--recheck for updating existing)",
         {recheck: {type: 'boolean'}, force: {type: 'boolean'}},
         argv => download_source(!!argv['recheck'], !!argv['force'], argv['id'] as string))
-
     .command('process [id]', "Convert source files to distributable formats", {},
         argv => update_dist(argv['id'] as string))
-    .command('process-manifest', "Update manifest (without updating actual translations)", {},
+
+    // Other
+    .command('notes', "Download and update study notes", {redownload: {type: 'boolean'}},
+        argv => update_notes(!!argv['redownload']))
+    .command('glosses', "Download and update glosses", {redownload: {type: 'boolean'}},
+        argv => update_glosses(!!argv['redownload']))
+    .command('crossref', "Generate cross-references data", {},
+        argv => crossref_process())
+    .command('manifest', "Update manifest (without updating actual translations)", {},
         argv => update_manifest())
 
+    // Serve
     .command('serve [port]', "Serve the collection for testing", {},
         argv => serve(argv['port'] ? parseInt(argv['port'] as string) : undefined))
 
+    // Publish
     .command('publish', "Publish all changes to server", {},
         argv => publish())
     .command('publish-bible [ids]', "Publish translations to server", {},
@@ -62,9 +70,11 @@ await yargs(process.argv.slice(2))
     .command('publish-data [id]', "Publish other data to server", {},
         argv => publish('data', argv['id'] as string))
 
+    // Maintenance
     .command('clean', "Remove any unnecessary files from the collection", {},
         argv => clean_collection())
 
+    // Report
     .command('report', "Report the status of included translations", {},
         argv => report_items())
     .command('report-invalid-meta', "Report translations with invalid metadata", {},
@@ -77,15 +87,6 @@ await yargs(process.argv.slice(2))
         argv => report_incomplete())
     .command('report-unprocessed [type]', "Report translations yet to be processed", {},
         argv => report_unprocessed(argv['type'] as 'usfmx'|'other'|undefined))
-
-    // Language-based resources
-    .command('notes-update', "Download and update study notes", {redownload: {type: 'boolean'}},
-        argv => update_notes(!!argv['redownload']))
-    .command('gloss-update', "Download and update glosses", {redownload: {type: 'boolean'}},
-        argv => update_glosses(!!argv['redownload']))
-
-    // Data
-    .command('data-crossref', "Generate cross-references data", {}, argv => crossref_process())
 
     // Show help when no command
     .demandCommand()
