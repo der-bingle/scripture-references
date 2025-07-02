@@ -20,6 +20,7 @@ export {FetchNetworkError} from './assets/request.js'
 // TYPES
 // Only expose those relevant to the user and willing to support going forward)
 
+export type * from './assets/types.js'
 export type {FetchClientConfig} from './client.js'
 export type {RequestHandler} from './assets/request.js'
 
@@ -43,22 +44,12 @@ export type {BibleCollection} from './collection/bibles.js'
 export type {
     GetLanguagesOptions,
     GetLanguagesItem,
-    GetTranslationsOptions,
-    GetTranslationsItem,
+    GetResourcesOptions,
+    GetResourcesItem,
     GetBooksOptions,
     GetBooksItem,
     GetCompletionReturn,
 } from './collection/generic.js'
-
-
-export type {
-    UsageConfig,
-    UsageOptions,
-    RuntimeLicense,
-    RuntimeCopyright,
-    RuntimeTranslation,
-    RuntimeManifest,
-} from './assets/types.js'
 
 
 export type {

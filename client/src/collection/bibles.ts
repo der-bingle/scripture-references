@@ -12,26 +12,26 @@ import type {DistTranslationExtra} from '../assets/shared_types'
 export class BibleCollection extends GenericCollection {
 
     // Get the URL for a book's content (useful for caching and manual retrieval)
-    get_book_url(translation:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'){
-        this._ensure_book_exists(translation, book)
-        const endpoint = this._items[translation]!.endpoint
+    get_book_url(resource:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'){
+        this._ensure_book_exists(resource, book)
+        const endpoint = this._items[resource]!.endpoint
         const ext = ['html', 'txt'].includes(format) ? 'json' : format
-        return `${endpoint}bibles/${translation}/${format}/${book}.${ext}`
+        return `${endpoint}bibles/${resource}/${format}/${book}.${ext}`
     }
 
     // Make request for the text for a book of a translation (returns object for accessing it)
-    async fetch_book(translation:string, book:string, format?:'html'):Promise<BibleBookHtml>
-    async fetch_book(translation:string, book:string, format:'usx'):Promise<BibleBookUsx>
-    async fetch_book(translation:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
-    async fetch_book(translation:string, book:string, format:'txt'):Promise<BibleBookTxt>
-    async fetch_book(translation:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'):
+    async fetch_book(resource:string, book:string, format?:'html'):Promise<BibleBookHtml>
+    async fetch_book(resource:string, book:string, format:'usx'):Promise<BibleBookUsx>
+    async fetch_book(resource:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
+    async fetch_book(resource:string, book:string, format:'txt'):Promise<BibleBookTxt>
+    async fetch_book(resource:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'):
             Promise<BibleBook>{
 
         // Check args valid
-        this._ensure_book_exists(translation, book)
+        this._ensure_book_exists(resource, book)
 
         // Fetch book in desired format
-        const url = this.get_book_url(translation, book, format)
+        const url = this.get_book_url(resource, book, format)
         const contents = await this.requester.request(url)
 
         // Return in appropriate class
@@ -41,37 +41,37 @@ export class BibleCollection extends GenericCollection {
             usfm: BibleBookUsfm,
             txt: BibleBookTxt,
         }[format]
-        return new format_class(contents, this._items[translation]!.copyright)
+        return new format_class(contents, this._items[resource]!.copyright)
     }
 
     // Make request for extra metadata for a translation (such as book names and section headings).
     // This will also auto-provide local book names for future calls of `get_books()`.
-    async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
+    async fetch_translation_extras(resource:string):Promise<TranslationExtra>{
 
         // Check args valid
-        this._ensure_trans_exists(translation)
+        this._ensure_resource_exists(resource)
 
         // Fetch data
-        const endpoint = this._items[translation]!.endpoint
-        const url = `${endpoint}bibles/${translation}/extra.json`
+        const endpoint = this._items[resource]!.endpoint
+        const url = `${endpoint}bibles/${resource}/extra.json`
         const contents = await this.requester.request(url)
         const data = JSON.parse(contents) as DistTranslationExtra
 
         // Extract local book names when done (regardless of `remember_fetches` setting)
-        this._local_book_names[translation] = data.book_names
+        this._local_book_names[resource] = data.book_names
 
         // Return in class
         return new TranslationExtra(data)
     }
 
     // @internal Auto-prepare args for from_string/detect_references based on translation
-    _from_string_args(translation:string|string[]=[], always_detect_english=true){
+    _from_string_args(resource:string|string[]=[], always_detect_english=true){
 
         // Get book names and abbreviations for translations (if available)
         const book_names:[string, string][] = []
-        const translations = typeof translation === 'string' ? [translation] : translation
-        for (const trans of translations){
-            for (const [code, name_types] of Object.entries(this._local_book_names[trans] ?? {})){
+        const resources = typeof resource === 'string' ? [resource] : resource
+        for (const re of resources){
+            for (const [code, name_types] of Object.entries(this._local_book_names[re] ?? {})){
                 if (name_types.normal){
                     book_names.push([code, name_types.normal])
                 }
@@ -101,7 +101,7 @@ export class BibleCollection extends GenericCollection {
         ]
 
         // Detect language as whatever first translation given has
-        const lang = translations[0]?.split('_')[0] ?? 'eng'
+        const lang = resources[0]?.split('_')[0] ?? 'eng'
 
         // Set args based on whether a Chinese script or not
         const exclude_book_names:string[]|undefined =
@@ -117,32 +117,32 @@ export class BibleCollection extends GenericCollection {
     // A generator is returned and can be passed updated text each time it yields a result.
     // You must have first awaited a call to `fetch_translation_extras()` to be able to parse
     //     non-English references.
-    detect_references(text:string, translation:string|string[]=[], always_detect_english=true){
+    detect_references(text:string, resource:string|string[]=[], always_detect_english=true){
         return detect_references(text,
-            ...this._from_string_args(translation, always_detect_english))
+            ...this._from_string_args(resource, always_detect_english))
     }
 
     // Parse a single bible reference string into a PassageReference object (validating it).
     // Supports only single passages (for e.g. Matt 10:6,8 use `detect_references`).
     // You must have first awaited a call to `fetch_translation_extras()` to be able to parse
     //     non-English references.
-    string_to_reference(text:string, translation:string|string[]=[], always_detect_english=true){
+    string_to_reference(text:string, resource:string|string[]=[], always_detect_english=true){
         return PassageReference.from_string(text,
-            ...this._from_string_args(translation, always_detect_english))
+            ...this._from_string_args(resource, always_detect_english))
     }
 
     // Render a PassageReference object as a string using the given translation's book names.
     // You must have first awaited a call to `fetch_translation_extras()` for the translation,
     // or English will be used by default.
-    reference_to_string(reference:PassageReference, translation?:string, abbreviate?:boolean){
+    reference_to_string(reference:PassageReference, resource?:string, abbreviate?:boolean){
 
         // Start with English names as `toString()` default will not account for `abbreviate` option
         const book_names = {... abbreviate ? book_abbrev_english : book_names_english}
 
         // Overwrite English defaults with translation's names if they are available
-        if (translation){
+        if (resource){
             const name_prop = abbreviate ? 'abbrev' : 'normal'
-            for (const [book, props] of Object.entries(this._local_book_names[translation] ?? {})){
+            for (const [book, props] of Object.entries(this._local_book_names[resource] ?? {})){
                 if (props[name_prop]){
                     book_names[book] = props[name_prop]
                 }

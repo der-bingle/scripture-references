@@ -38,7 +38,7 @@ export interface GetLanguagesItem {
     population:number|null
 }
 
-export interface GetTranslationsOptions {
+export interface GetResourcesOptions {
     language?:string
     object?:boolean
     sort_by_year?:boolean
@@ -48,7 +48,7 @@ export interface GetTranslationsOptions {
     exclude_incomplete?:boolean
 }
 
-export interface GetTranslationsItem {
+export interface GetResourcesItem {
     // NOTE Keeps flat structure for better dev experience
     id:string
     language:string
@@ -58,21 +58,21 @@ export interface GetTranslationsItem {
     attribution_url:string
     licenses:RuntimeLicense[]
     tags:MetaTag[]
-    // Local name of translation (falls back to English)
+    // Local name of resource (falls back to English)
     name:string
-    // Local abbreviation of translation (falls back to English)
+    // Local abbreviation of resource (falls back to English)
     name_abbrev:string
-    // English name of translation (may not exist)
+    // English name of resource (may not exist)
     name_english:string
-    // English abbreviation of translation (may not exist)
+    // English abbreviation of resource (may not exist)
     name_english_abbrev:string
-    // Local name of translation (may not exist)
+    // Local name of resource (may not exist)
     name_local:string
-    // Local abbreviation of translation (may not exist)
+    // Local abbreviation of resource (may not exist)
     name_local_abbrev:string
-    // Local name of translation with the English name in brackets when it differs
+    // Local name of resource with the English name in brackets when it differs
     name_bilingual:string
-    // Local abbreviation of translation with the English abbreviation in brackets when it differs
+    // Local abbreviation of resource with the English abbreviation in brackets when it differs
     name_bilingual_abbrev:string
 }
 
@@ -158,22 +158,22 @@ export class GenericCollection {
     }
 
     // @internal
-    _ensure_trans_exists(translation:string){
-        // Util that throws if translation doesn't exist
-        if (! this.has_translation(translation)){
-            throw new Error(`Translation with id "${translation}" does not exist in collection(s)`)
+    _ensure_resource_exists(resource:string){
+        // Util that throws if resource doesn't exist
+        if (! this.has_resource(resource)){
+            throw new Error(`Resource with id "${resource}" does not exist in collection`)
         }
     }
 
     // @internal
-    _ensure_book_exists(translation:string, book:string){
+    _ensure_book_exists(resource:string, book:string){
         // Util that throws if book doesn't exist
-        this._ensure_trans_exists(translation)
+        this._ensure_resource_exists(resource)
         if (!books_ordered.includes(book)){
             throw new Error(`Book id "${book}" is not valid (should be 3 letters lowercase)`)
         }
-        if (! this.has_book(translation, book)){
-            throw new Error(`Translation "${translation}" does not have book "${book}"`)
+        if (! this.has_book(resource, book)){
+            throw new Error(`Resource "${resource}" does not have book "${book}"`)
         }
     }
 
@@ -182,16 +182,17 @@ export class GenericCollection {
         return language in this._languages
     }
 
-    // Check if a translation exists
-    has_translation(translation:string):boolean{
-        return translation in this._items
+    // Check if a resource exists
+    has_resource(resource:string):boolean{
+        return resource in this._items
     }
 
-    // Check if a book exists within a translation
-    has_book(translation:string, book:string):boolean{
-        this._ensure_trans_exists(translation)
-        const trans_meta = this._items[translation]!
-        return trans_meta.books_ot_list.includes(book) || trans_meta.books_nt_list.includes(book)
+    // Check if a book exists within a resource
+    has_book(resource:string, book:string):boolean{
+        this._ensure_resource_exists(resource)
+        const resource_meta = this._items[resource]!
+        return resource_meta.books_ot_list.includes(book)
+            || resource_meta.books_nt_list.includes(book)
     }
 
     // Get a language's metadata
@@ -298,76 +299,76 @@ export class GenericCollection {
         return 'eng' in this._languages ? 'eng' : Object.keys(this._languages)[0]!
     }
 
-    // Get a translation's metadata
-    get_translation(id:string):GetTranslationsItem|undefined{
-        return this._get_translation(id)
+    // Get a resource's metadata
+    get_resource(id:string):GetResourcesItem|undefined{
+        return this._get_resource(id)
     }
 
-    // @internal Version that takes a `usage` arg which is only useful for `get_translations()`
-    _get_translation(id:string, usage?:UsageOptions):GetTranslationsItem|undefined{
-        const trans = this._items[id]
-        if (!trans){
+    // @internal Version that takes a `usage` arg which is only useful for `get_resources()`
+    _get_resource(id:string, usage?:UsageOptions):GetResourcesItem|undefined{
+        const resource = this._items[id]
+        if (!resource){
             return undefined
         }
 
         // Work out bilingual names
-        let bilingual = trans.name.local || trans.name.english
-        if (trans.name.local && trans.name.english &&
-                trans.name.local.toLowerCase() !== trans.name.english.toLowerCase()){
-            bilingual = `${trans.name.local} (${trans.name.english})`
+        let bilingual = resource.name.local || resource.name.english
+        if (resource.name.local && resource.name.english &&
+                resource.name.local.toLowerCase() !== resource.name.english.toLowerCase()){
+            bilingual = `${resource.name.local} (${resource.name.english})`
         }
-        let bilingual_abbrev = trans.name.local_abbrev || trans.name.english_abbrev
-        if (trans.name.local_abbrev && trans.name.english_abbrev &&
-                trans.name.local_abbrev !== trans.name.english_abbrev){
-            bilingual_abbrev = `${trans.name.local_abbrev} (${trans.name.english_abbrev})`
+        let bilingual_abbrev = resource.name.local_abbrev || resource.name.english_abbrev
+        if (resource.name.local_abbrev && resource.name.english_abbrev &&
+                resource.name.local_abbrev !== resource.name.english_abbrev){
+            bilingual_abbrev = `${resource.name.local_abbrev} (${resource.name.english_abbrev})`
         }
 
         return {
             id,
             language: id.slice(0, 3),
-            direction: trans.direction,
-            year: trans.year,
+            direction: resource.direction,
+            year: resource.year,
 
-            name: trans.name.local || trans.name.english,
-            name_abbrev: trans.name.local_abbrev || trans.name.english_abbrev,
-            name_english: trans.name.english,
-            name_english_abbrev: trans.name.english_abbrev,
-            name_local: trans.name.local,
-            name_local_abbrev: trans.name.local_abbrev,
+            name: resource.name.local || resource.name.english,
+            name_abbrev: resource.name.local_abbrev || resource.name.english_abbrev,
+            name_english: resource.name.english,
+            name_english_abbrev: resource.name.english_abbrev,
+            name_local: resource.name.local,
+            name_local_abbrev: resource.name.local_abbrev,
             name_bilingual: bilingual,
             name_bilingual_abbrev: bilingual_abbrev,
 
-            attribution: trans.copyright.attribution,
-            attribution_url: trans.copyright.attribution_url,
+            attribution: resource.copyright.attribution,
+            attribution_url: resource.copyright.attribution_url,
             licenses: deep_copy(
-                filter_licenses(trans.copyright.licenses, {...this._usage, ...usage})),
-            tags: [...trans.tags],
-        } as GetTranslationsItem
+                filter_licenses(resource.copyright.licenses, {...this._usage, ...usage})),
+            tags: [...resource.tags],
+        } as GetResourcesItem
     }
 
-    // Get available translations as either a list or an object
-    get_translations(options:ObjT<GetTranslationsOptions>):Record<string, GetTranslationsItem>
-    get_translations(options?:ObjF<GetTranslationsOptions>):GetTranslationsItem[]
-    get_translations({language, object, sort_by_year, usage, exclude_obsolete, exclude_incomplete}:
-            GetTranslationsOptions={}):GetTranslationsItem[]|Record<string, GetTranslationsItem>{
+    // Get available resources as either a list or an object
+    get_resources(options:ObjT<GetResourcesOptions>):Record<string, GetResourcesItem>
+    get_resources(options?:ObjF<GetResourcesOptions>):GetResourcesItem[]
+    get_resources({language, object, sort_by_year, usage, exclude_obsolete, exclude_incomplete}:
+            GetResourcesOptions={}):GetResourcesItem[]|Record<string, GetResourcesItem>{
 
-        // Start with list of translations, extracting properties that don't need extra processing
-        // NOTE Filters out translations not compatible with usage config
+        // Start with list of resources, extracting properties that don't need extra processing
+        // NOTE Filters out resources not compatible with usage config
         // WARN Careful to unpack all objects so originals can't be modified
         let list = Object.keys(this._items).map(id => {
-            return this._get_translation(id, usage)!
-        }).filter(trans => trans.licenses.length)
+            return this._get_resource(id, usage)!
+        }).filter(resource => resource.licenses.length)
 
         // Optionally limit to single language
         if (language){
             list = list.filter(item => item.language === language)
         }
 
-        // Optionally exclude obsolete translations (as long as better alternative exists)
-        // For each test, only apply if 1 translation remains (else try other tests)
+        // Optionally exclude obsolete resources (as long as better alternative exists)
+        // For each test, only apply if 1 resource remains (else try other tests)
         if (exclude_obsolete){
 
-            // First filter out very old translations
+            // First filter out very old resources
             const modern = list.filter(item => item.year >= this._modern_year)
             if (modern.length){
                 list = modern
@@ -382,11 +383,11 @@ export class GenericCollection {
             }
         }
 
-        // Optionally exclude incomplete translations
+        // Optionally exclude incomplete resources
         if (exclude_incomplete){
             list = list.filter(item => {
-                const trans_meta = this._items[item.id]!
-                return trans_meta.books_ot === true && trans_meta.books_nt === true
+                const resource_meta = this._items[item.id]!
+                return resource_meta.books_ot === true && resource_meta.books_nt === true
             })
         }
 
@@ -402,18 +403,18 @@ export class GenericCollection {
         return list
     }
 
-    // Get user's preferred available translation (provide language preferences if not in browser)
-    get_preferred_translation(languages:string[]=[]):GetTranslationsItem{
-        return this.get_translation(this._get_preferred_translation_id(languages))!
+    // Get user's preferred available resource (provide language preferences if not in browser)
+    get_preferred_resource(languages:string[]=[]):GetResourcesItem{
+        return this.get_resource(this._get_preferred_resource_id(languages))!
     }
 
-    // @internal Get preferred translation id
-    _get_preferred_translation_id(languages:string[]=[]):string{
+    // @internal Get preferred resource id
+    _get_preferred_resource_id(languages:string[]=[]):string{
 
         // First get preferred language
         const language = this._get_preferred_language_code(languages)
 
-        // Return recommended translation, or otherwise the most modern full translation
+        // Return recommended resource, or otherwise the most modern full resource
         let candidate:string|null = null
         let candidate_full = false
         let candidate_year = -9999
@@ -432,7 +433,7 @@ export class GenericCollection {
                 const full = data.books_ot === true && data.books_nt === true
                 if (
                     !candidate  // Something better than nothing
-                    || (!candidate_full && full)  // Full translation better than partial
+                    || (!candidate_full && full)  // Full resource better than partial
                     // Otherwise only consider if more modern
                     || (full && data.year > candidate_year)
                 ){
@@ -443,32 +444,32 @@ export class GenericCollection {
             }
         }
 
-        // If no candidate for this language, just return the first translation whatever that is
+        // If no candidate for this language, just return the first resource whatever that is
         return candidate ?? Object.keys(this._items)[0]!
     }
 
-    // Get which books are available for a translation.
-    // If no translation is given, all books will be listed but marked as unavailable.
-    // If `fetch_translation_extras()` has already been called for the translation then local name
+    // Get which books are available for a resource.
+    // If no resource is given, all books will be listed but marked as unavailable.
+    // If `fetch_translation_extras()` has already been called for a translation then local name
     // data will also be available (otherwise only English book names will be available).
-    get_books(translation:string|undefined,
+    get_books(resource:string|undefined,
         options:ObjT<GetBooksOptions>):Record<string, GetBooksItem>
-    get_books(translation?:string, options?:ObjF<GetBooksOptions>):GetBooksItem[]
-    get_books(translation?:string, {object, sort_by_name, testament, whole}:GetBooksOptions={}):
+    get_books(resource?:string, options?:ObjF<GetBooksOptions>):GetBooksItem[]
+    get_books(resource?:string, {object, sort_by_name, testament, whole}:GetBooksOptions={}):
             GetBooksItem[]|Record<string, GetBooksItem>{
 
-        // Determine what books are available if given a translation (otherwise list all)
+        // Determine what books are available if given a resource (otherwise list all)
         let available = books_ordered
-        if (translation){
-            this._ensure_trans_exists(translation)
-            const trans_meta = this._items[translation]!
-            available = [...trans_meta.books_ot_list, ...trans_meta.books_nt_list]
+        if (resource){
+            this._ensure_resource_exists(resource)
+            const resource_meta = this._items[resource]!
+            available = [...resource_meta.books_ot_list, ...resource_meta.books_nt_list]
         }
 
         // Get local book names if available
         let local:Record<string, BookNames> = {}
-        if (translation && translation in this._local_book_names){
-            local = this._local_book_names[translation]!
+        if (resource && resource in this._local_book_names){
+            local = this._local_book_names[resource]!
         }
 
         // Create a list of the available books in traditional order
@@ -503,7 +504,7 @@ export class GenericCollection {
                     name_bilingual_abbrev: bilingual_abbrev,
                     ot,
                     nt: !ot,
-                    available: !!translation && available.includes(id),
+                    available: !!resource && available.includes(id),
                 }
             })
 
@@ -520,10 +521,10 @@ export class GenericCollection {
         return list
     }
 
-    // Get book ids that are available/missing for a translation for each testament
-    get_completion(translation:string):GetCompletionReturn{
+    // Get book ids that are available/missing for a resource for each testament
+    get_completion(resource:string):GetCompletionReturn{
 
-        this._ensure_trans_exists(translation)
+        this._ensure_resource_exists(resource)
 
         // Form object that will be returned
         const data:GetCompletionReturn = {
@@ -532,14 +533,14 @@ export class GenericCollection {
         }
 
         // Look through books adding to either `available` or `missing`
-        const trans_meta = this._items[translation]!
-        const trans_books = [...trans_meta.books_ot_list, ...trans_meta.books_nt_list]
+        const resource_meta = this._items[resource]!
+        const resource_books = [...resource_meta.books_ot_list, ...resource_meta.books_nt_list]
         let testament:'ot'|'nt' = 'ot'
         for (const book of books_ordered){
             if (book === 'mat'){
                 testament = 'nt'  // Switch testament when reach Matthew (books ordered)
             }
-            const status = trans_books.includes(book) ? 'available' : 'missing'
+            const status = resource_books.includes(book) ? 'available' : 'missing'
             data[testament][status].push(book)
         }
 

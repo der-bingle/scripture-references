@@ -10,7 +10,7 @@ import type {UsageConfig, RuntimeManifest, RuntimeLicense} from '../assets/types
 import type {RequestHandler} from '../assets/request.js'
 
 
-// Access to a collection's meta data, including languages and translations available
+// Access to a collection's meta data, including languages and resources available
 export class FetchCollection {
 
     // @internal
@@ -53,21 +53,21 @@ export class FetchCollection {
             // Loop through endpoint's resources
             const resource_types = ['bibles', 'glosses', 'notes'] as const
             for (const type of resource_types){
-                for (const [trans, trans_data] of Object.entries(manifest[type])){
+                for (const [resource, resource_data] of Object.entries(manifest[type])){
 
                     // Get data for licenses compatible with _usage
                     const licenses = resolve_license_data(manifest.licenses, this._usage,
-                        trans_data.copyright)
+                        resource_data.copyright)
                     if (!licenses.length){
-                        continue  // No compatible licenses so exclude translation
+                        continue  // No compatible licenses so exclude resource
                     }
 
-                    // Add the translation to the combined collection
-                    this._manifest[type][trans] = {
-                        ...trans_data,
-                        ...resolve_books(trans_data.books_ot, trans_data.books_nt),
+                    // Add the resource to the combined collection
+                    this._manifest[type][resource] = {
+                        ...resource_data,
+                        ...resolve_books(resource_data.books_ot, resource_data.books_nt),
                         copyright: {
-                            ...trans_data.copyright,
+                            ...resource_data.copyright,
                             licenses,
                         },
                         endpoint,

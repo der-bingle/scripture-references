@@ -26,19 +26,19 @@ export interface FetchClientConfig {
     /* The endpoint desired for generic data like crossrefs, defaulting to the first endpoint. */
     data_endpoint?:string
 
-    /* Configure how you'll be using Bible translations to automatically filter out those
-        which have incompatible licenses. You can alternatively do this per translation when
-        fetching actual passages.
+    /* Configure how you'll be using resources to automatically filter out those
+        which have incompatible licenses. You can alternatively do this per resource when
+        fetching actual data.
 
-        All options default to `false` which results in having access to the most translations,
-        except for `limitless` which defaults to `true` to ensure full use of bibles is allowed.
+        All options default to `false` which results in having access to the most resources,
+        except for `limitless` which defaults to `true` to ensure full use is allowed.
 
-         * `commercial`: `true` if you will use translations in a commercial manner
-         * `attributionless`: `true` if you will be using Bible translations without including
+         * `commercial`: `true` if you will use resources in a commercial manner
+         * `attributionless`: `true` if you will be using resources without including
                 attribution to the owners
-         * `limitless`: `true` if you will be using translations in full without any limitations
+         * `limitless`: `true` if you will be using resources in full without any limitations
                 to the number of verses that can be quoted
-         * `derivatives`: `true` if you'll be modifying the translations, or `same-license` if
+         * `derivatives`: `true` if you'll be modifying the resources, or `same-license` if
                 you'll be sharing modifications under the same license as the original
      */
     usage?:UsageOptions
@@ -108,14 +108,14 @@ export class FetchClient {
     }
 
     // Manually fetch contents of book for a translation without needing to request FetchCollection
-    async fetch_book(translation:string, book:string, format?:'html'):Promise<BibleBookHtml>
-    async fetch_book(translation:string, book:string, format:'usx'):Promise<BibleBookUsx>
-    async fetch_book(translation:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
-    async fetch_book(translation:string, book:string, format:'txt'):Promise<BibleBookTxt>
-    async fetch_book(translation:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'):
+    async fetch_book(resource:string, book:string, format?:'html'):Promise<BibleBookHtml>
+    async fetch_book(resource:string, book:string, format:'usx'):Promise<BibleBookUsx>
+    async fetch_book(resource:string, book:string, format:'usfm'):Promise<BibleBookUsfm>
+    async fetch_book(resource:string, book:string, format:'txt'):Promise<BibleBookTxt>
+    async fetch_book(resource:string, book:string, format:'html'|'usx'|'usfm'|'txt'='html'):
             Promise<BibleBook>{
         const ext = ['html', 'txt'].includes(format) ? 'json' : format
-        const url = `${this._data_endpoint}bibles/${translation}/${format}/${book}.${ext}`
+        const url = `${this._data_endpoint}bibles/${resource}/${format}/${book}.${ext}`
         return this.requester.request(url).then(contents => {
             const format_class = {
                 html: BibleBookHtml,
@@ -128,8 +128,8 @@ export class FetchClient {
     }
 
     // Manually fetch extra metadata for a translation without needing to request FetchCollection
-    async fetch_translation_extras(translation:string):Promise<TranslationExtra>{
-        const url = `${this._data_endpoint}bibles/${translation}/extra.json`
+    async fetch_translation_extras(resource:string):Promise<TranslationExtra>{
+        const url = `${this._data_endpoint}bibles/${resource}/extra.json`
         return this.requester.request(url).then(contents => {
             const data = JSON.parse(contents) as DistTranslationExtra
             return new TranslationExtra(data)
@@ -137,15 +137,15 @@ export class FetchClient {
     }
 
     // Manually fetch glosses for book without needing to request FetchCollection
-    async fetch_glosses(gloss_id:string, book:string):Promise<GlossesBook>{
-        const url = this._data_endpoint + `glosses/${gloss_id}/json/${book}.json`
+    async fetch_glosses(resource:string, book:string):Promise<GlossesBook>{
+        const url = this._data_endpoint + `glosses/${resource}/json/${book}.json`
         const json = await this.requester.request(url)
         return new GlossesBook(json)
     }
 
     // Manually fetch study notes for book without needing to request FetchCollection
-    async fetch_notes(notes_id:string, book:string, format:'html'|'txt'='html'):Promise<NotesBook>{
-        const url = this._data_endpoint + `notes/${notes_id}/${format}/${book}.json`
+    async fetch_notes(resource:string, book:string, format:'html'|'txt'='html'):Promise<NotesBook>{
+        const url = this._data_endpoint + `notes/${resource}/${format}/${book}.json`
         const json = await this.requester.request(url)
         return new NotesBook(json)
     }
