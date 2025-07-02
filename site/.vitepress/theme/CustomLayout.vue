@@ -12,17 +12,19 @@ import {onMounted} from 'vue'
 import {useRouter} from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 
+import {FetchClient} from '@gracious.tech/fetch-client'
 import {BibleEnhancer} from '@gracious.tech/fetch-enhancer'
 
 
 const {Layout} = DefaultTheme
 
+const endpoint = import.meta.env.PROD ? 'https://v1.fetch.bible/' : 'http://localhost:8430/'
 const app_origin = import.meta.env.PROD ? 'https://app.fetch.bible' : 'http://localhost:8431'
 
 
 onMounted(() => {
-
     const enhancer = new BibleEnhancer({
+        client: new FetchClient({endpoints: [endpoint]}),
         app_origin,
         translations: ['eng_bsb', 'grc_sr'],
         before_history_push: () => {
