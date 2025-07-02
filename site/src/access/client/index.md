@@ -147,3 +147,4 @@ This client has zero external dependencies, no differences between the browser a
  * `BibleClient` renamed to `FetchClient`
  * `BibleCollection` renamed to `FetchCollection`
  * Methods of old `BibleCollection` now accessible at `FetchCollection.bibles`
+ * The word "resource" is now used in place of "translation" for all methods and arguments
