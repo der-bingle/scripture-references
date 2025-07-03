@@ -182,16 +182,13 @@ export type CrossrefSingle = [string, number, number]
 export type CrossrefRange = [...CrossrefSingle, number, number]
 export type CrossrefData = Record<string, Record<string, (CrossrefSingle|CrossrefRange)[]>>
 
-export interface GlossesDataWord {
-    word:string
-    gloss:string
-    strong:string
-}
-
 export interface GlossesData {
     trans_id:string
     book:string
-    contents:GlossesDataWord[][][]
+    // NOTE Compact format used not just for transport but to reduce memory use in clients
+    //      As glosses with original words are basically 2x a whole bible
+    // NOTE word should include diacritics and punctuation if any (can strip in client)
+    contents:[string, string][][][]  // chapters > verses > words > [word, gloss]
 }
 
 export interface MultiVerseNote {

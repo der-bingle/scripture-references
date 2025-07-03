@@ -2,11 +2,13 @@
 import {rm_diacritics} from '../assets/utils.js'
 
 import type {PassageReference} from '@gracious.tech/bible-references'
-import type {GlossesData, GlossesDataWord} from '../assets/shared_types'
+import type {GlossesData} from '../assets/shared_types'
 
 
-export interface GlossesWord extends GlossesDataWord {
+export interface GlossesWord {
+    word:string
     original:string
+    gloss:string
 }
 
 
@@ -30,10 +32,11 @@ export class GlossesBook {
         }
         // NOTE Clones objects before returning
         return (this._data.contents[ch_or_ref]?.[verse] ?? [])
-            .map(w => ({
-                ...w,
+            .map(([word, gloss]) => ({
+                word,
+                gloss,
                 // NOTE Hebrew is unicase, but harmless...
-                original: strip_unoriginal_chars(w.word),
+                original: strip_unoriginal_chars(word),
             }))
     }
 }

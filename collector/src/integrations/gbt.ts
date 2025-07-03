@@ -11,7 +11,7 @@ import {list_dirs, list_files, mkdir_exist, read_json, request, write_json} from
 import {books_ordered} from '../parts/bible.js'
 import {get_language_data} from '../parts/languages.js'
 
-import type {GlossesData, GlossesDataWord, MetaLanguage} from '../parts/shared_types.js'
+import type {GlossesData, MetaLanguage} from '../parts/shared_types.js'
 import type {CommonSourceMeta} from '../parts/types.js'
 
 
@@ -222,10 +222,10 @@ export async function sources_to_dist(){
                 contents: [[]],  // Start with chapter 0
             }
             for (let chapter_i = 0; chapter_i < last_verse[book]!.length; chapter_i++){
-                const current_chapter:GlossesDataWord[][] = [[]]  // Start with verse 0
+                const current_chapter:[string, string][][] = [[]]  // Start with verse 0
                 processed_data.contents.push(current_chapter)
                 for (let verse_i = 0; verse_i < last_verse[book]![chapter_i]!; verse_i++){
-                    const current_verse:GlossesDataWord[] = []
+                    const current_verse:[string, string][] = []
                     current_chapter.push(current_verse)
 
                     // Get data for verse
@@ -243,13 +243,12 @@ export async function sources_to_dist(){
                         // May be missing gloss but should never miss word or lemma
                         const word = verse_words[word_i]!.text.trim()
                         const gloss = (verse_glosses[word_i]!.gloss ?? '').trim()
-                        const strong = verse_words[word_i]!.lemma.trim()
-                        if (!word || !strong){
+                        if (!word){
                             throw new Error(`Missing word data`)
                         }
 
                         // Add word
-                        current_verse.push({word, gloss, strong})
+                        current_verse.push([word, gloss])
                         word_total += 1
                         if (gloss){
                             gloss_total += 1
