@@ -130,6 +130,8 @@ export class BibleIndex {
 
             // Need to get the passage (which is hopefully cached already)
             // NOTE Format may be txt|html but force type to keep TS happy
+            // NOTE While inefficient to parse whole book for single passage,
+            //      in most cases this will be a single match only and not several search results
             const book = await this._collection.bibles.fetch_book(this._bible, match.ref.book,
                 this._format as 'txt')
 
