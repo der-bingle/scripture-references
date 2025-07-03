@@ -94,7 +94,7 @@ await yargs(process.argv.slice(2))
     .help()
     .fail((msg, error) => {
         // Output whole stack, not just message
-        console.error(error.stack ?? msg)
+        console.error(error?.stack ?? msg)
     })
 
     // Trigger processing
