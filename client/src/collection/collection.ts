@@ -3,6 +3,7 @@ import {books_ordered} from '@gracious.tech/bible-references'
 
 import {filter_licenses} from '../assets/licenses.js'
 import {BibleCollection} from './bibles.js'
+import {GlossesCollection} from './glosses.js'
 import {NotesCollection} from './notes.js'
 
 import type {DistManifest, MetaCopyright, MetaStandardLicense, OneOrMore}
@@ -21,6 +22,7 @@ export class FetchCollection {
 
     requester:RequestHandler
     bibles:BibleCollection
+    glosses:GlossesCollection
     notes:NotesCollection
 
     // @internal
@@ -81,6 +83,14 @@ export class FetchCollection {
         // Init resource subcollections
         this.bibles = new BibleCollection(
             this._manifest.bibles,
+            this.requester,
+            this._manifest.languages,
+            this._manifest.language2to3,
+            this._manifest.languages_most_spoken,
+            this._usage,
+        )
+        this.glosses = new GlossesCollection(
+            this._manifest.glosses,
             this.requester,
             this._manifest.languages,
             this._manifest.language2to3,
