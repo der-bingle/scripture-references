@@ -10,7 +10,7 @@ v-toolbar(:density='density')
         template(#prepend-inner)
             app-icon.placeholder(v-if='!state.search' name='search')
         template(v-if='orig_mode' #chip='chip_props')
-            v-chip(@click='remove(chip_props.index)') {{ chip_props.item.value }}
+            v-chip(@click='remove(chip_props.index)' rounded) {{ chip_props.item.value }}
         template(#append-inner)
             v-btn(v-if='state.search || state.search_orig' @click='clear_search' icon size='small')
                 app-icon(name='close' small)
