@@ -53,6 +53,9 @@ export type {
 } from './collection/generic.js'
 
 
+export type {SearchWords, SearchWordsResults} from './other/search.js'
+
+
 export type {
     BookNames,
     BibleJsonHtml,
