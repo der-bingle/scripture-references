@@ -91,6 +91,7 @@ export function enable_watches(){
         }
 
         // Fetch book for each translation
+        // NOTE This uses `await` so book contents is not delayed by any other network requests
         const books = await Promise.all(state.trans.map(async trans => {
             if (!content.collection.bibles.has_book(trans, state.book)){
                 return null
