@@ -2,7 +2,8 @@
 <template lang='pug'>
 
 div.column
-    div.word(@click='search_original' :class='{ot: state.study?.ot}') {{ displayed }}
+    div.word(@click='search_original' :class='{ot: state.study?.ot}' v-tooltip:top="can_search")
+        | {{ displayed }}
     a.gloss(:href='research_url' target='research') {{ gloss }}
 
 </template>
@@ -51,6 +52,13 @@ const research_url = computed(() => {
     return `https://biblehub.com/${lang_path}/${strong_num}.htm`
 })
 
+
+const can_search = computed(() => {
+    // A symbol for whether can search or not
+    return props.strongs ? "🔍" : "❌"  // A unicode red X
+})
+
+
 const search_original = () => {
 
     // Can't search if no strongs code and in strongs mode
@@ -58,6 +66,9 @@ const search_original = () => {
     if (mode === 'strongs' && !props.strongs){
         return
     }
+
+    // Open nav on narrow screens
+    state.show_nav = true
 
     // Prepare to add word to search
     const to_add:OrigSearchWord = {
