@@ -57,6 +57,7 @@ const overrides:LanguageDataPartial = {
         */
         cmn: {local: '中文', english: "Chinese"},  // TODO Change to "Mandarin" when aliasing done
         awk: {local: 'Awabakal'},  // Population data uses region name by mistake, no CLDR data
+        hbo: {direction: 'rtl'},  // No CLDR direction data
     },
     language2to3: {
         // TODO Modify to support including country codes and routing to correct spoken language
