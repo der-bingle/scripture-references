@@ -25,6 +25,9 @@ import {state} from '@/services/state'
 
 .panel
     background-color: rgb(var(--v-theme-surface))
+    display: flex
+    flex-direction: column
+    height: 100%
 
 .scrollable
     overflow-y: auto
