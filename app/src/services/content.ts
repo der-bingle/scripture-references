@@ -69,7 +69,7 @@ export async function search_orig(){
         // Add to list
         results.push({
             ref: result.verse,
-            contents: `<div>${orig_html}</div><div>${verse_html}</div>`,
+            contents: `<div class='orig'>${orig_html}</div><div>${verse_html}</div>`,
         })
     }
 }

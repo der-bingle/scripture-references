@@ -5,7 +5,7 @@ v-card(class='mb-4' density='compact' @click='go_to_ref')
     v-card-item
         v-card-title(class='text-subtitle-2 font-weight-bold') {{ ref_title }}
     v-card-text
-        div.scripture(v-html='result.contents')
+        div.scripture(v-html='result.contents' :class='direction')
 
 </template>
 
@@ -25,6 +25,14 @@ const props = defineProps<{result:SearchResult}>()
 
 const ref_title = computed(() => {
     return content.collection.bibles.reference_to_string(props.result.ref, state.trans[0])
+})
+
+
+const direction = computed(() => {
+    if (props.result.ref.nt || state.hebrew_ltr){
+        return 'orig-ltr'
+    }
+    return 'orig-rtl'
 })
 
 
@@ -50,6 +58,11 @@ const go_to_ref = () => {
     @media (min-width: 800px)
         font-size: 15px
 
+    &.orig-ltr :deep(.orig)
+        direction: ltr
+    &.orig-rtl :deep(.orig)
+        direction: rtl
+
     // Fade out when exceed height by adding gradient to bottom edge
     &::after
         content: ""
@@ -63,6 +76,9 @@ const go_to_ref = () => {
     :deep(mark)
         color: inherit
         background-color: rgb(var(--v-theme-primary), 0.5)
+
+    :deep(.orig)
+        margin-bottom: 4px
 
 
 </style>
