@@ -28,9 +28,9 @@ export class SearchWords {
         this.source = data.source
         this.source_url = data.url
 
-        // Verses are encoded as space-separated string, so separate words
+        // Verses are encoded as comma-separated string, so separate words
         this._books = Object.fromEntries(Object.entries(data.books).map(([book, chapters]) => {
-            return [book, chapters.map(c => c.map(v => v ? v.split(' ') : []))]
+            return [book, chapters.map(c => c.map(v => v ? v.split(',') : []))]
         }))
     }
 

@@ -272,7 +272,9 @@ export async function sources_to_dist(){
     }
 
     // Generate search data
-    _gen_search_data(original_books, 'strongs', w => w.lemma.trim())
+    // WARN When strongs code unknown, 'H????' is used, so make empty string instead
+    _gen_search_data(original_books, 'strongs',
+        w => w.lemma.includes('?') ? '' : w.lemma.trim())
     _gen_search_data(original_books, 'original', w => word_to_original(w.text))
 }
 
@@ -293,7 +295,8 @@ function _gen_search_data(original_books:Record<string, GbtDataOriginal>, type:'
             const current_chapter:string[] = ['']  // Start with verse 0
             testament[book].push(current_chapter)
             for (const verse of chapter.verses){
-                current_chapter.push(verse.words.map(extractor).join(' '))
+                // WARN Do not space-separate as some may be empty strings and appear need trimming
+                current_chapter.push(verse.words.map(extractor).join(','))
             }
         }
     }
