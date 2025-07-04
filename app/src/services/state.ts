@@ -111,6 +111,7 @@ export const state = reactive({
     study: null as null|PassageReference,
     crossref: null as BookCrossref|null,
     glosses: null as GlossesBook|null,
+    glosses_id: 'eng_gbt',  // Auto-set on first load
     notes: null as NotesBook|null,
     search_filter: null as null|'ot'|'nt'|'book',
     search_results: null as SearchResult[]|null,  // null = loading

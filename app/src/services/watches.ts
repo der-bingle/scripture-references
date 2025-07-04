@@ -3,7 +3,7 @@
 import {watch} from 'vue'
 import {BibleIndex} from '@gracious.tech/fetch-search'
 
-import {state} from './state'
+import {langs, state} from './state'
 import {content, search_translation, search_orig, update_trans} from './content'
 import {post_message} from './post'
 
@@ -82,6 +82,7 @@ export function enable_watches(){
         state.content_verses = []
         state.crossref = null
         state.glosses = null
+        state.glosses_id = content.collection.glosses.get_preferred_resource(langs.value).id
         state.notes = null
 
         // If first/primary trans doesn't have current book, change to a valid book
@@ -118,7 +119,7 @@ export function enable_watches(){
         })
 
         // Get glosses for book
-        void content.client.fetch_glosses('eng_gbt', state.book).then(async glosses => {
+        void content.client.fetch_glosses(state.glosses_id, state.book).then(async glosses => {
             state.glosses = glosses
         })
 

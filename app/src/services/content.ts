@@ -6,7 +6,7 @@ import {state} from './state'
 
 import type {BibleIndex} from '@gracious.tech/fetch-search'
 import type {FetchCollection, GetResourcesItem, GetLanguagesItem, SearchWords,
-    BibleBookHtml} from '@gracious.tech/fetch-client'
+    BibleBookHtml, GlossesBook} from '@gracious.tech/fetch-client'
 
 
 const endpoint = import.meta.env.PROD ? 'https://v1.fetch.bible/' : 'http://localhost:8430/'
@@ -41,6 +41,7 @@ export async function search_orig(){
 
     // Collect books as they load to avoid refetching
     const books:Record<string, BibleBookHtml> = {}
+    const glosses:Record<string, GlossesBook> = {}
 
     // Work out which index to look through
     const testament =
@@ -55,16 +56,20 @@ export async function search_orig(){
         const book = result.verse.book
         if (! (book in books)){
             books[book] = await content.collection.bibles.fetch_book(state.trans[0], book)
+            glosses[book] = await content.collection.glosses.fetch_glosses(state.glosses_id, book)
         }
 
         // Get text from book
-        const verse_html = books[book]!.get_verse(result.verse.start_chapter,
-            result.verse.start_verse, {attribute: false})
+        const orig_html = glosses[book]!.get_words(result.verse).map((word, i) => {
+            return result.word_indexes.includes(i) ? `<mark>${word.original}</mark>` : word.original
+        }).join(' ')
+        const verse_html = strip_tags_and_commentary(
+                books[book]!.get_passage_from_ref(result.verse, {attribute: false}))
 
         // Add to list
         results.push({
             ref: result.verse,
-            contents: strip_tags_and_commentary(verse_html),
+            contents: `<div>${orig_html}</div><div>${verse_html}</div>`,
         })
     }
 }
