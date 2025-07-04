@@ -1,5 +1,6 @@
 
 import {FetchClient} from '@gracious.tech/fetch-client'
+import {strip_tags_and_commentary} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
 
@@ -63,7 +64,7 @@ export async function search_orig(){
         // Add to list
         results.push({
             ref: result.verse,
-            contents: verse_html,
+            contents: strip_tags_and_commentary(verse_html),
         })
     }
 }
