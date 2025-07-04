@@ -22,7 +22,7 @@ export function _missing_meta(meta:TranslationSourceMeta){
 
 
 // Get the meta data for a resource that is to be added to the manifest
-function _process_resource_meta(sources_path:string, dist_path:string){
+function _process_resource_meta(sources_path:string, dist_path:string):DistManifestItem|undefined{
 
     // Load the meta data for the translation
     const meta = read_json<TranslationSourceMeta>(join(sources_path, 'meta.json'))
@@ -34,25 +34,24 @@ function _process_resource_meta(sources_path:string, dist_path:string){
     }
 
     // Detect what books are available (must be in all formats)
-    let available_books:string[]|null = null
+    const available_books = new Set(books_ordered)
     for (const format of list_dirs(dist_path)){
         const format_dir = join(dist_path, format)
-        const format_books = list_files(format_dir).map(name => name.slice(0, 3))
-        if (available_books === null){
-            available_books = format_books  // First format checked
-        } else if (available_books.length !== format_books.length){
-            console.error(`IGNORING ${sources_path} (not all formats available)`)
-            return
+        const format_books = new Set(list_files(format_dir).map(name => name.slice(0, 3)))
+        for (const possible of available_books){
+            if (!format_books.has(possible)){
+                available_books.delete(possible)
+            }
         }
     }
-    if (!available_books || !available_books.length){
+    if (!available_books.size){
         console.error(`IGNORING ${sources_path} (no books)`)
         return
     }
 
     // Determine what books are included
-    const books_ot = books_ordered.slice(0, 39).filter(b => available_books.includes(b))
-    const books_nt = books_ordered.slice(39).filter(b => available_books.includes(b))
+    const books_ot = books_ordered.slice(0, 39).filter(b => available_books.has(b))
+    const books_nt = books_ordered.slice(39).filter(b => available_books.has(b))
 
     // Put it all together
     // NOTE Not including meta data that client doesn't need (users can still check git repo)
@@ -65,7 +64,7 @@ function _process_resource_meta(sources_path:string, dist_path:string){
         // Record as `true` if whole testament to reduce data size
         books_ot: books_ot.length === 39 ? true : books_ot,
         books_nt: books_nt.length === 27 ? true : books_nt,
-    } as DistManifestItem
+    }
 }
 
 
