@@ -1,8 +1,8 @@
 
-import {existsSync, rmSync, unlinkSync} from 'fs'
+import {existsSync, rmSync, unlinkSync, renameSync} from 'fs'
 import {join} from 'path'
 
-import {list_dirs, list_files} from '../parts/utils.js'
+import {list_dirs, list_files, read_json, write_json} from '../parts/utils.js'
 
 
 export async function clean_collection(){
@@ -29,4 +29,20 @@ export async function clean_collection(){
             }
         }
     }
+}
+
+
+// Create indented copy of manifest in root dir for easier comparison
+export function inspect_manifest(){
+
+    // If a copy already exists, rename it to old
+    if (existsSync('manifest-new.json')){
+        renameSync('manifest-new.json', 'manifest-old.json')
+    }
+
+    // Create indented copy of current manifest
+    const manifest = read_json(join('dist', 'manifest.json'))
+    write_json('manifest-new.json', manifest, true)
+
+    console.info("Inspect with: git diff --no-index manifest-old.json manifest-new.json | less")
 }
