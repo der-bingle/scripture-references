@@ -1,124 +1,16 @@
 
-import fs from 'node:fs'
-import {join} from 'node:path'
-
-import {concurrent, read_json, type_from_path, read_dir_deep} from '../parts/utils.js'
 import {PublisherAWS} from '../integrations/aws.js'
-import {generate_index_content} from '../parts/indexes.js'
 import {update_manifest} from '../parts/manifest.js'
 
-import type {DistManifest} from '../parts/shared_types'
 
+export async function publish(type?:'bibles'|'glosses'|'notes'|'data', ids?:string){
 
-export class Publisher extends PublisherAWS {
-    // Interface for publishing collection to server
+    // ids can be comma separated
+    const ids_array = ids ? ids.split(',') : undefined
 
-    async upload_file(path:string){
-        // Upload a single file
-        const server_path = path.slice('dist/'.length)
-        await this.upload(server_path, fs.readFileSync(path), type_from_path(path))
-    }
-
-    async upload_dir(dir:string){
-        // Upload all files in dir and also upload generated indexes for the dir and subdirs
-        const dir_contents = read_dir_deep(dir)
-
-        // Upload files
-        await concurrent(dir_contents.files.map(path => async () => {
-            await this.upload_file(path)
-        }))
-
-        // Upload dir indexes
-        await concurrent(dir_contents.dirs.map(path => async () => {
-            const server_path = join(path.slice('dist/'.length), 'index.html')
-            await this.upload(server_path, generate_index_content(path), 'text/html')
-        }))
-    }
-}
-
-
-export async function publish(type?:'bible'|'notes'|'glosses'|'data', ids?:string){
-    // Publish files to server
-    const publisher = new Publisher()
-    const invalidations = []
-    if (!type || type === 'bible'){
-        invalidations.push(...await _publish_bibles(publisher, ids))
-    }
-    if (!type || type === 'notes'){
-        invalidations.push(...await _publish_notes(publisher, ids))
-    }
-    if (!type || type === 'glosses'){
-        invalidations.push(...await _publish_glosses(publisher, ids))
-    }
-    if (!type || type === 'data'){
-        invalidations.push(...await _publish_data(publisher, ids))
-    }
-
-    // Always upload fresh manifest in case any changes, and do last so assets ready before used
+    // Update manifest in case forgot to
     await update_manifest()
-    const manifest_path = join('dist', 'manifest.json')
-    await publisher.upload_file(manifest_path)
-    invalidations.push('/manifest.json')
 
-    // Also upload manifest to old location for clients < 1.1.0 with old prop name for bibles
-    // This won't be listed in index.html
-    const manifest = fs.readFileSync(manifest_path, {encoding: 'utf8'})
-        .replace('"bibles":{', '"translations":{')
-    await publisher.upload('bibles/manifest.json', manifest, 'application/json')
-    invalidations.push('/bibles/manifest.json')
-
-    // Always update root index file, just in case
-    await publisher.upload('index.html', generate_index_content('dist'), 'text/html')
-    invalidations.push('/')
-
-    await publisher.invalidate(invalidations)
-}
-
-
-async function _publish_bibles(publisher:Publisher, translations?:string):Promise<string[]>{
-    // Publish bibles and return paths needing invalidation
-
-    // Detect translations from manifest so know they passed review
-    const manifest = read_json<DistManifest>(join('dist', 'manifest.json'))
-
-    // Add translations if not published yet
-    const trans_ids = translations ? translations.split(',') : null
-    const invalidations:string[] = []
-    for (const id in manifest.bibles){
-        if (trans_ids && !trans_ids.includes(id)){
-            continue  // Only publishing certain translations
-        }
-
-        // Upload bible's files and dir indexes
-        console.info(`Publishing bible: ${id}`)
-        await publisher.upload_dir(join('dist', 'bibles', id))
-        invalidations.push(`/bibles/${id}/*`)
-    }
-
-    // Also always republish bibles dir index in case any changes
-    await publisher.upload('bibles/index.html', generate_index_content('dist/bibles'), 'text/html')
-    invalidations.push('/bibles/')
-
-    return invalidations
-}
-
-
-async function _publish_notes(publisher:Publisher, id?:string):Promise<string[]>{
-    // Publish study notes and return paths for invalidation
-    // TODO Currently uploading everything as no manifest yet
-    await publisher.upload_dir(join('dist', 'notes'))
-    return ['/notes/*']
-}
-
-async function _publish_glosses(publisher:Publisher, id?:string):Promise<string[]>{
-    // Publish glosses and return paths for invalidation
-    // TODO Currently uploading everything as no manifest yet
-    await publisher.upload_dir(join('dist', 'glosses'))
-    return ['/glosses/*']
-}
-
-async function _publish_data(publisher:Publisher, id?:string):Promise<string[]>{
-    // Publish data and return paths for invalidation
-    await publisher.upload_dir(join('dist', 'crossref'))
-    return ['/crossref/*']
+    const publisher = new PublisherAWS()
+    await publisher.publish(type, ids_array)
 }

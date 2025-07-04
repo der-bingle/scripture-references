@@ -7,9 +7,10 @@ import {S3} from '@aws-sdk/client-s3'
 import {CloudFront} from '@aws-sdk/client-cloudfront'
 
 import {CollectionConfig} from '../parts/types'
+import {Publisher} from '../parts/publisher'
 
 
-export class PublisherAWS {
+export class PublisherAWS extends Publisher {
 
     _s3:S3
     _bucket:string
@@ -17,6 +18,7 @@ export class PublisherAWS {
     _cf_id:string
 
     constructor(){
+        super()
         // Load config and init clients
         const config =
             (parse_yaml(readFileSync('config.yaml', 'utf-8')) as CollectionConfig).integrations.aws
@@ -26,7 +28,7 @@ export class PublisherAWS {
         this._cf_id = config.cloudfront
     }
 
-    async upload(key:string, body:Buffer|string, type:string){
+    override async upload(key:string, body:Buffer|string, type:string){
         // Upload a file to the bucket
         await this._s3.putObject({
             Bucket: this._bucket,
@@ -36,7 +38,7 @@ export class PublisherAWS {
         })
     }
 
-    async invalidate(paths:string[]){
+    override async invalidate(paths:string[]){
         // Request invalidation of given paths in CloudFront
 
         // If invalidating too many paths, better to just use single wildcard
