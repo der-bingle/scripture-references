@@ -194,3 +194,28 @@ export function type_from_path(path:string){
     }
     return 'application/octet-stream'
 }
+
+
+// Remove diacritics from a string
+export function rm_diacritics(string:string):string{
+    // See https://stackoverflow.com/a/37511463/10262211
+    return string.normalize('NFKD').replace(/\p{Diacritic}/gu, '')
+}
+
+
+// Convert modern rendering of a greek/hebrew word to original, without diacritics/punctuation/etc
+export function word_to_original(word:string){
+
+    // Remove diacritics
+    word = rm_diacritics(word)
+
+    // Make uppercase (for Greek)
+    word = word.toUpperCase()
+
+    // Remove all punctuation and non-orig chars
+    // Greek \u0391-\u03A9 = Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω
+    // Hebrew \u05D0-\u05EA = א ב ג ד ה ו ז ח ט י כ ל מ נ ס ע פ צ ק ר ש ת
+    word = word.replace(/[^\u0391-\u03A9\u05D0-\u05EA]+/g, '')
+
+    return word
+}
