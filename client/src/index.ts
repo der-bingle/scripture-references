@@ -61,5 +61,6 @@ export type {
     TxtContent,
     BibleJsonTxt,
     GlossesData,
-    GlossesDataWord,
+    NotesData,
+    SearchData,
 } from './assets/shared_types.js'
