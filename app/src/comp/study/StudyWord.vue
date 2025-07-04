@@ -2,7 +2,7 @@
 <template lang='pug'>
 
 div.column
-    div.word(@click='search_original' :class='{ot: state.study?.ot}' v-tooltip:top="can_search")
+    div.word(@click='search_original' :class='{ot: state.study?.ot}')
         | {{ displayed }}
     a.gloss(:href='research_url' target='research') {{ gloss }}
 
