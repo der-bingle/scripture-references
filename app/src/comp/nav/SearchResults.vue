@@ -51,5 +51,6 @@ const filtered_results = computed(() => {
 
 .results
     overflow-y: auto
+    background-color: rgb(var(--v-theme-background))
 
 </style>

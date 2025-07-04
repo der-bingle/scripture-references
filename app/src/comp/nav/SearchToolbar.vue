@@ -45,7 +45,8 @@ const orig_mode = computed(() => !!state.search_orig)
 const search_value = computed({
     get(){
         // Return string if normal search, otherwise array of strings
-        return state.search_orig ? state.search_orig.words.map(w => w.original) : state.search
+        const prop = state.original_chars ? 'original' : 'word'
+        return state.search_orig ? state.search_orig.words.map(w => w[prop]) : state.search
     },
     set(value:string){
         // NOTE Cannot edit search_orig, can only clear words or whole search

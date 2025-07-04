@@ -2,7 +2,7 @@
 <template lang='pug'>
 
 div.column
-    div.word(@click='search_original' :class='{ot: state.study?.ot}') {{ word.original }}
+    div.word(@click='search_original' :class='{ot: state.study?.ot}') {{ displayed }}
     a.gloss(:href='research_url' target='research') {{ gloss }}
 
 </template>
@@ -19,6 +19,12 @@ import type {OrigSearchWord} from '@/services/types'
 
 
 const props = defineProps<{word:GlossesWord, strongs:string|undefined}>()
+
+
+const displayed = computed(() => {
+    return state.original_chars ? props.word.original : props.word.word
+})
+
 
 const gloss = computed(() => {
     // If blank or hyphen, replace with mdash so easier to click
@@ -89,11 +95,18 @@ const search_original = () => {
     text-align: center
 
 .word
+    margin-bottom: 4px
     &.ot
         direction: rtl
 
 .gloss
     max-width: 100px
     font-size: 14px
+
+.word, .gloss
+    cursor: pointer
+
+    &:hover
+        color: rgb(var(--v-theme-primary-lighten-1))
 
 </style>

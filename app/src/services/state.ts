@@ -88,6 +88,7 @@ export const state = reactive({
     show_redletter: local_storage.getItem('show_redletter') !== 'false',
     font_size: local_storage.getItem('font_size') ?? 'regular',
     hebrew_ltr: local_storage.getItem('hebrew_ltr') !== 'false',
+    original_chars: local_storage.getItem('original_chars') !== 'false',
 
     // Preserved state
     search_history: (local_storage.getItem('search_history') ?? '').split('\n').filter(i => i),
@@ -225,6 +226,9 @@ watch(() => state.font_size, () => {
 })
 watch(() => state.hebrew_ltr, () => {
     local_storage.setItem('hebrew_ltr', String(state.hebrew_ltr))
+})
+watch(() => state.original_chars, () => {
+    local_storage.setItem('original_chars', String(state.original_chars))
 })
 watch(() => state.search_history, () => {
     local_storage.setItem('search_history', state.search_history.join('\n'))

@@ -61,7 +61,8 @@ export async function search_orig(){
 
         // Get text from book
         const orig_html = glosses[book]!.get_words(result.verse).map((word, i) => {
-            return result.word_indexes.includes(i) ? `<mark>${word.original}</mark>` : word.original
+            const prop = state.original_chars ? 'original' : 'word'
+            return result.word_indexes.includes(i) ? `<mark>${word[prop]}</mark>` : word[prop]
         }).join(' ')
         const verse_html = strip_tags_and_commentary(
                 books[book]!.get_passage_from_ref(result.verse, {attribute: false}))

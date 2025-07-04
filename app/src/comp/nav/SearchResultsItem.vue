@@ -53,7 +53,7 @@ const go_to_ref = () => {
 
 .scripture
     line-height: 1.2
-    max-height: 200px  // Limit height of results
+    max-height: 250px  // Limit height of results
     font-size: 14px
     @media (min-width: 800px)
         font-size: 15px
@@ -79,6 +79,7 @@ const go_to_ref = () => {
 
     :deep(.orig)
         margin-bottom: 4px
+        font-size: 13px
 
 
 </style>
