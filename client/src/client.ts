@@ -4,6 +4,7 @@ import {BookCrossref} from './book/crossref.js'
 import {GlossesBook} from './book/glosses.js'
 import {NotesBook} from './book/notes.js'
 import {TranslationExtra} from './collection/bibles_extra.js'
+import {SearchWords} from './other/search.js'
 import {BibleBook, BibleBookHtml, BibleBookTxt, BibleBookUsfm, BibleBookUsx} from './book/bible.js'
 import {RequestHandler} from './assets/request.js'
 
@@ -155,6 +156,14 @@ export class FetchClient {
         const url = this._data_endpoint + `crossref/${size}/${book}.json`
         return this.requester.request(url).then(data => {
             return new BookCrossref(JSON.parse(data) as CrossrefData)
+        })
+    }
+
+    // Fetch search data for a testament
+    async fetch_search(id:string, format:'strongs'|'original'):Promise<SearchWords>{
+        const url = this._data_endpoint + `search/${id}/${format}.json`
+        return this.requester.request(url).then(data => {
+            return new SearchWords(data)
         })
     }
 }
