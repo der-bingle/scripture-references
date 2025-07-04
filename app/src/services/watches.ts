@@ -4,7 +4,7 @@ import {watch} from 'vue'
 import {BibleIndex} from '@gracious.tech/fetch-search'
 
 import {state} from './state'
-import {content, search, update_trans} from './content'
+import {content, search_translation, search_orig, update_trans} from './content'
 import {post_message} from './post'
 
 
@@ -203,11 +203,14 @@ export function enable_watches(){
 
 
     // Get search results when search changes
-    watch(() => state.search, async () => {
+    watch([() => state.search, () => state.search_orig?.words], async () => {
         state.search_results = null
-        if (!state.search){
-            return
+        // NOTE These update state.search_results themselves so can stream results as they load
+        //      Though only actually necessary for search_orig since other uses text in index
+        if (state.search_orig){
+            await search_orig()
+        } else if (state.search){
+            await search_translation()
         }
-        state.search_results = await search(state.search)
-    })
+    }, {deep: true})
 }

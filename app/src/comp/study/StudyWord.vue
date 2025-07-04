@@ -60,7 +60,7 @@ const search_original = () => {
         strongs: props.strongs ?? '',  // ?? '' to keep TS happy, checked already above
     }
 
-    // Add to existing or reset if different testament
+    // Reset if none or different testament
     if (!state.search_orig || state.search_orig.ot !== state.study!.ot){
         state.search_orig = {ot: state.study!.ot, words: [to_add]}
         return

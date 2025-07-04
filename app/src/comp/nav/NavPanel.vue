@@ -4,7 +4,7 @@
 div.panel
     SearchToolbar
     div.scrollable
-        SearchResults(v-if='state.search')
+        SearchResults(v-if='state.search_results')
         BookMenu(v-else)
 
 </template>

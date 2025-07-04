@@ -4,15 +4,18 @@
 v-toolbar(:density='density')
 
     //- autocomplete=off tells browser not to show its own suggestions which would overlap own
-    v-combobox.input(ref='combobox' v-model='state.search' hide-details autocomplete='off'
-            density='compact' variant='outlined' autofocus :items='state.search_history')
+    v-combobox.input(ref='combobox' v-model='search_value' hide-details autocomplete='off'
+            density='compact' variant='outlined' autofocus :items='state.search_history'
+            :multiple='orig_mode' :chips='orig_mode' :readonly='orig_mode')
         template(#prepend-inner)
             app-icon.placeholder(v-if='!state.search' name='search')
+        template(v-if='orig_mode' #chip='chip_props')
+            v-chip(@click='remove(chip_props.index)') {{ chip_props.item.value }}
         template(#append-inner)
-            v-btn(v-if='state.search' @click='clear_search' icon size='small')
+            v-btn(v-if='state.search || state.search_orig' @click='clear_search' icon size='small')
                 app-icon(name='close' small)
 
-    v-btn-toggle(v-model='search_filter' color='primary' density='compact'
+    v-btn-toggle.filter(v-model='search_filter' color='primary' density='compact'
             :class='{"mr-2": state.wide}')
         v-btn(size='x-small' value='ot') Old
         v-btn(size='x-small' value='nt') New
@@ -36,6 +39,23 @@ import type {VCombobox} from 'vuetify/lib/components'
 const comboxbox = useTemplateRef<VCombobox>('combobox')
 
 
+const orig_mode = computed(() => !!state.search_orig)
+
+
+const search_value = computed({
+    get(){
+        // Return string if normal search, otherwise array of strings
+        return state.search_orig ? state.search_orig.words.map(w => w.original) : state.search
+    },
+    set(value:string){
+        // NOTE Cannot edit search_orig, can only clear words or whole search
+        if (!state.search_orig){
+            state.search = value
+        }
+    },
+})
+
+
 // Proxy so save null rather than undefined
 const search_filter = computed({
     get(){
@@ -49,8 +69,19 @@ const search_filter = computed({
 
 const clear_search = () => {
     state.search = ""
+    state.search_orig = null
     // Ensure don't start showing search suggestions if box still has focus
     comboxbox.value?.blur()
+}
+
+const remove = (i:number) => {
+    // Only used for search_orig
+    if (state.search_orig){
+        state.search_orig.words.splice(i, 1)
+        if (!state.search_orig.words.length){
+            state.search_orig = null
+        }
+    }
 }
 
 </script>
@@ -76,5 +107,7 @@ const clear_search = () => {
 .v-toolbar__content > .v-btn:last-child
     margin-inline-end: 0  // Override Vuetify
 
+.filter
+    flex-shrink: 0
 
 </style>
