@@ -27,7 +27,7 @@ export function apply_search_param(value:string){
 export function enable_watches(){
 
     // Translation-related
-    watch(() => state.trans, async () => {
+    watch(() => state.trans, () => {  // WARN Don't make async so content.index sets before app load
 
         // Clear search results which were based on previous translation
         state.search = ''
