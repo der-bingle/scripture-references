@@ -6,8 +6,9 @@ import {parse as parse_yaml} from 'yaml'
 import {S3} from '@aws-sdk/client-s3'
 import {CloudFront} from '@aws-sdk/client-cloudfront'
 
-import {CollectionConfig} from '../parts/types'
-import {Publisher} from '../parts/publisher'
+import {Publisher} from '../parts/publisher.js'
+
+import type {CollectionConfig} from '../parts/types'
 
 
 export class PublisherAWS extends Publisher {
