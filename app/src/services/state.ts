@@ -6,6 +6,7 @@ import {IndividualVerse, BookCrossref, PassageReference,
 
 import {parse_int} from './utils.js'
 
+import type {OrigSearchState} from './types.js'
 import type {SearchResult} from '@gracious.tech/fetch-search'
 
 
@@ -113,6 +114,8 @@ export const state = reactive({
     notes: null as NotesBook|null,
     search_filter: null as null|'ot'|'nt'|'book',
     search_results: null as SearchResult[]|null,  // null = loading
+    search_orig: null as null|OrigSearchState,
+    search_orig_mode: 'strongs' as 'original'|'strongs',  // TODO Original supported but no UI yet
 })
 
 

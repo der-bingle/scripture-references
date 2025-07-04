@@ -15,6 +15,7 @@ import {computed} from 'vue'
 import {state} from '@/services/state'
 
 import type {GlossesWord} from '@gracious.tech/fetch-client'
+import type {OrigSearchWord} from '@/services/types'
 
 
 const props = defineProps<{word:GlossesWord, strongs:string|undefined}>()
@@ -45,6 +46,35 @@ const research_url = computed(() => {
 })
 
 const search_original = () => {
+
+    // Can't search if no strongs code and in strongs mode
+    const mode = state.search_orig_mode
+    if (mode === 'strongs' && !props.strongs){
+        return
+    }
+
+    // Prepare to add word to search
+    const to_add:OrigSearchWord = {
+        word: props.word.word,
+        original: props.word.original,
+        strongs: props.strongs ?? '',  // ?? '' to keep TS happy, checked already above
+    }
+
+    // Add to existing or reset if different testament
+    if (!state.search_orig || state.search_orig.ot !== state.study!.ot){
+        state.search_orig = {ot: state.study!.ot, words: [to_add]}
+        return
+    }
+
+    // Adding word to existing words being searched for
+    // But don't add if already there
+    // NOTE Comparing strongs===strongs or original===original
+    if (state.search_orig.words.find(w => w[mode] === to_add[mode])){
+        return
+    }
+
+    // Add to the list!
+    state.search_orig.words.push(to_add)
 }
 
 </script>
