@@ -17,7 +17,7 @@ import {state} from '@/services/state'
 import type {GlossesWord} from '@gracious.tech/fetch-client'
 
 
-const props = defineProps<{word:GlossesWord}>()
+const props = defineProps<{word:GlossesWord, strongs:string|undefined}>()
 
 const gloss = computed(() => {
     // If blank or hyphen, replace with mdash so easier to click
@@ -28,10 +28,19 @@ const gloss = computed(() => {
 })
 
 const research_url = computed(() => {
-    const lang_path = props.word.strong.startsWith('H') ? 'hebrew' : 'greek'
+
+    // Strong code may not be available for word
+    if (!props.strongs){
+        const q = encodeURIComponent(props.word.word)
+        if (state.study?.ot){
+            return 'https://biblehub.com/searchhebrew.php?q=' + q
+        }
+        return 'https://biblehub.com/searchgreek.php?q=' + q
+    }
+    const lang_path = state.study?.ot ? 'hebrew' : 'greek'
     // NOTE Sometimes has letter at end (e.g. 1254a)
     //   Bible Hub seems to support these but with less info, so removing
-    const strong_num = parseInt(props.word.strong.slice(1).replace(/\D/, ''))
+    const strong_num = parseInt(props.strongs.slice(1).replace(/\D/, ''))
     return `https://biblehub.com/${lang_path}/${strong_num}.htm`
 })
 

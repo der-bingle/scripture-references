@@ -17,7 +17,7 @@ template(v-if='glosses.length')
                 @click='state.hebrew_ltr = !state.hebrew_ltr')
             | {{ state.hebrew_ltr ? '⟼' : '⟻' }}
     div.orig(:class='{flex_ltr: state.hebrew_ltr}')
-        StudyWord(v-for='(word, i) of glosses' :key='i' :word='word')
+        StudyWord(v-for='(word, i) of glosses' :key='i' :word='word' :strongs='strongs[i]')
 div(v-if='variants_url')
     v-btn(:href='variants_url' target='variants' color='' size='small' variant='tonal' rounded)
         | Variants &amp; Manuscripts
@@ -40,6 +40,7 @@ import {books_ordered, PassageReference} from '@gracious.tech/fetch-client'
 import StudyWord from './StudyWord.vue'
 import StudyCrossref from './StudyCrossref.vue'
 import {change_to_ref, state, add_to_read_history} from '@/services/state'
+import {content} from '@/services/content'
 
 import type {GlossesWord, RelevantNotes} from '@gracious.tech/fetch-client'
 
@@ -80,6 +81,18 @@ watch(() => state.study, () => {
         return
     }
     glosses.value = state.glosses.get_words(state.study)
+}, {immediate: true})
+
+
+// Just using watch since content.search_orig_ is async, not because it changes like others do
+const strongs = ref<string[]>([])
+watch(() => state.study, async () => {
+    if (!state.study){
+        strongs.value = []
+        return
+    }
+    const testament = await (state.study.ot ? content.search_orig_ot : content.search_orig_nt)
+    strongs.value = testament.get_words_for_ref(state.study)
 }, {immediate: true})
 
 

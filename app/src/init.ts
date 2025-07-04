@@ -66,6 +66,8 @@ void content.client.fetch_collection().then(collection => {
     content.collection = collection
     content.translations = collection.bibles.get_resources({object: true})
     content.languages = collection.bibles.get_languages({object: true})
+    content.search_orig_ot = content.client.fetch_search('ot_gbt', 'strongs')
+    content.search_orig_nt = content.client.fetch_search('nt_gbt', 'strongs')
 
     // Ensure all trans codes are valid before trying to load for first time
     update_trans(state.trans)

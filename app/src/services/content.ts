@@ -17,8 +17,11 @@ export const content = {
     collection: null as unknown as FetchCollection,
     translations: null as unknown as Record<string, GetResourcesItem>,
     languages: null as unknown as Record<string, GetLanguagesItem>,
-    // This will be set and resolve when index has fully loaded
+    // These will be set before app loads, but resolve when complete
+    // TODO Should `index` be in state since it changes and the rest here don't?
     index: null as unknown as Promise<BibleIndex>,
+    search_orig_ot: null as unknown as Promise<SearchWords>,
+    search_orig_nt: null as unknown as Promise<SearchWords>,
 }
 
 
