@@ -54,7 +54,7 @@ function get_files(dir:string):string[]{
 
 
 // Load config
-let domain = argv[1]
+let domain = argv[2]
 if (!domain){
     const domains = readdirSync('.deployments')
     if (domains.length === 1){
@@ -63,6 +63,7 @@ if (!domain){
         throw new Error("Pass domain name as first arg")
     }
 }
+console.info(`Publishing to: ${domain}`)
 const config = yaml.parse(readFileSync(join('.deployments', `${domain}.yaml`), 'utf-8')) as
     {bucket:string, dist:string, region?:string}
 config.region = config.region || 'us-west-2'
@@ -101,7 +102,7 @@ await concurrent(get_files('dist').map(file => async () => {
 
 // Delete old
 const existing = await s3.listObjectsV2({Bucket: config.bucket})
-const delete_objects = existing.Contents!.map(item => ({Key: item.Key!}))
+const delete_objects = (existing.Contents ?? []).map(item => ({Key: item.Key!}))
     .filter(item => !new_keys.includes(item.Key))
 if (delete_objects.length){
     await s3.deleteObjects({Bucket: config.bucket, Delete: {Objects: delete_objects}})

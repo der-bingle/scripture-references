@@ -1,5 +1,5 @@
 #!/bin/bash
-# Publish app
+# Publish quiet app
 set -e
 cd "$(realpath -m "$0/../..")/app"
 
@@ -11,7 +11,4 @@ cd "$(realpath -m "$0/../..")/app"
 ../.bin/build_app
 
 # Publish to server
-npx esbuild --platform=node ../.bin/publish.ts | node --input-type=module - app.fetch.bible
-
-# Publish to npm
-npm publish --access=public
+npx esbuild --platform=node ../.bin/publish.ts | node --input-type=module - quiet.fetch.bible
