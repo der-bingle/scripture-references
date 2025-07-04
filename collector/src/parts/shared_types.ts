@@ -206,3 +206,10 @@ export interface NotesData {
     // NOTE No separate prop for chapters as more logical to break down by section than chapter
     ranges:MultiVerseNote[]  // Notes that span multiple verses and/or chapters
 }
+
+export interface SearchData {
+    id:string
+    source:string
+    url:string
+    books:Record<string, string[][]>  // book -> chapter -> verse (string of space-separated codes)
+}

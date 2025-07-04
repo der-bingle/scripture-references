@@ -7,11 +7,12 @@ import {existsSync, writeFileSync} from 'node:fs'
 import StreamZip from 'node-stream-zip'
 import {last_verse} from '@gracious.tech/bible-references'
 
-import {list_dirs, list_files, mkdir_exist, read_json, request, write_json} from '../parts/utils.js'
+import {list_dirs, list_files, mkdir_exist, read_json, request, word_to_original, write_json}
+    from '../parts/utils.js'
 import {books_ordered} from '../parts/bible.js'
 import {get_language_data} from '../parts/languages.js'
 
-import type {GlossesData, MetaLanguage} from '../parts/shared_types.js'
+import type {GlossesData, MetaLanguage, SearchData} from '../parts/shared_types.js'
 import type {CommonSourceMeta} from '../parts/types.js'
 
 
@@ -269,4 +270,56 @@ export async function sources_to_dist(){
             }
         }
     }
+
+    // Generate search data
+    _gen_search_data(original_books, 'strongs', w => w.lemma.trim())
+    _gen_search_data(original_books, 'original', w => word_to_original(w.text))
+}
+
+
+// Generate search data from GBT data
+function _gen_search_data(original_books:Record<string, GbtDataOriginal>, type:'strongs'|'original',
+        extractor:(w:GbtWordOriginal)=>string){
+
+    // Compile search data by testament
+    // NOTE It's assumed chapter/verse numbers are all correct and verified above already
+    const ot_data:Record<string, string[][]> = {}
+    const nt_data:Record<string, string[][]> = {}
+    for (const book in original_books){
+        const is_ot = books_ordered.indexOf(book) < 39
+        const testament = is_ot ? ot_data : nt_data
+        testament[book] = [[]]  // Start with chapter 0
+        for (const chapter of original_books[book]!.chapters){
+            const current_chapter:string[] = ['']  // Start with verse 0
+            testament[book].push(current_chapter)
+            for (const verse of chapter.verses){
+                current_chapter.push(verse.words.map(extractor).join(' '))
+            }
+        }
+    }
+
+    // Define dirs
+    const ot_dir = join('dist', 'search', 'ot_gbt')
+    const nt_dir = join('dist', 'search', 'nt_gbt')
+    mkdir_exist(ot_dir)
+    mkdir_exist(nt_dir)
+
+    // Meta data
+    const url = 'https://github.com/globalbibletools/data'
+
+    // Write OT data
+    write_json(join(ot_dir, `${type}.json`), {
+        id: 'ot_gbt',
+        source: "Global Bible Tools Old Testament",
+        url,
+        books: ot_data,
+    } as SearchData)
+
+    // Write NT data
+    write_json(join(nt_dir, `${type}.json`), {
+        id: 'nt_gbt',
+        source: "Global Bible Tools New Testament",
+        url,
+        books: nt_data,
+    } as SearchData)
 }
