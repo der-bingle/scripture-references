@@ -1,8 +1,0 @@
-#!/bin/bash
-# Run tests
-# NOTE CWD is set to collection for sake of collector tests
-# Changing CWD is complicated due to threading, and didn't work even without threading in OSX
-set -e
-cd "$(realpath -m "$0/../..")/collection"
-
-npx vitest --root ../ "$@"

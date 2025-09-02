@@ -1,39 +1,58 @@
-# fetch(bible)
+# Bible References
 
-All the source code for everything [fetch(bible)](https://fetch.bible).
+Bible reference detection, parsing, and rendering that supports any human language.
 
-You should read all of the docs on the website before reading this, as they explain how the platform works. This is not a typical platform, as the hosted portion is simply static files and the "API" is really a client-side module that does things an API would usually do.
-
-
-## Components
-
- * __collector:__ A node CLI for managing a private collection of Bible translations
- * __collection:__ A test collection that `.bin/collector` will generate during development
- * __client:__ A browser/Node module that can interact with a collection in an API-like way
- * __app:__ A simple generic Bible reading app that can be embedded in another website/app
- * __site:__ Website for fetch.bible that includes the documentation
+It's designed for use with [fetch(bible)](https://fetch.bible) but can be used independently of it. See it in action via the [fetch(bible) enhancer](https://fetch.bible/access/enhancer/).
 
 
-## Development setup
+```js
 
-If you want to use the platform for an app, check out the documentation on [how to use it](https://fetch.bible/access/). The following setup is only for developers who wish to improve the platform itself:
+import {PassageReference, detect_references, book_abbrev_english}
+    from '@gracious.tech/bible-references'
 
-```bash
+// Simple args
+const ref1 = new PassageReference('jhn', 3, 16)
 
-# Install modules
-.bin/setup
+// Complex args that can specify a range of verses
+const ref2 = new PassageReference({
+    book: 'jhn',
+    start_chapter: 3,
+    start_verse: 16,
+    end_chapter: 3,
+    end_verse: 17,
+})
 
-# Setup a test collection with a few translations
-# This will take 5-10 mins to discover and convert translations to required formats
-.bin/test_collector
+// Parse a string (defaults to detecting English only)
+const ref3 = PassageReference.from_string("John 3:16-17")
 
-# Build the client which other components rely on
-.bin/build_client
+// Provide book names arg to detect any language
+const ref4 = PassageReference.from_string("Giăng 3.16-17", {jhn: "Giăng"})
 
-# Serve the collection (so app and site can use it)
-.bin/serve_collection
+// Convert to string
+console.log(`See ${ref1}`)  // Defaults to English ("See John 3:16")
+console.log(ref4.toString({jhn: "Giăng"}, '.'))  // Provide i18n args ("Giăng 3.16-17")
+console.log(new PassageReference('ezk').toString(book_abbrev_english))  // Abbrev. names ("Ezek")
 
-# Serve the app and/or site (while collection is still being served)
-.bin/serve_app
-.bin/serve_site
+// Detecting references in a block of text
+for (const match of detect_references("Multiple refs like Gen 2:3 or John 3:16 and Matt 10:8")){
+    console.log(match.text)  // "Gen 2:3", "John 3:16", "Matt 10:8"
+}
+
+// Detection can be configured to suit different languages
+const exclude_book_names = []  // E.g. To prevent "so 1 is" matching as "Song of Songs 1" add "so"
+const min_chars = 1  // Default is 2 but Chinese can abbreviate books down to a single character
+const match_from_start = false  // Default is true but Chinese can abbreviate using a middle char
+detect_references("伯5：14", {job: "約伯記"}, exclude_book_names, min_chars, match_from_start)
+
 ```
+
+Bible book codes are the [same as USX](https://ubsicap.github.io/usx/vocabularies.html#usx-vocab-bookcode) but lowercase.
+
+See your editor's auto-suggestions or the source code for the variety of methods available for
+inspecting and manipulating references. The [fetch(bible) client](https://fetch.bible/access/client/) will automatically supply the names of books from existing translations so that you don't have to. See methods:
+
+ * `BibleCollection.detect_references(text, translation_id)`
+ * `BibleCollection.string_to_reference(string, translation_id)`
+ * `BibleCollection.reference_to_string(ref, translation_id)`
+
+Note that `fetch_translation_extras(translation_id)` is required to be called and complete beforehand.

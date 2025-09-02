@@ -1,1 +1,0 @@
-../../../collector/src/parts/shared_types.ts

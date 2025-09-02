@@ -1,6 +1,0 @@
-#!/bin/bash
-# Build app
-set -e
-cd "$(realpath -m "$0/../..")/app"
-
-npx vite build

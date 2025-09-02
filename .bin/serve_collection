@@ -1,6 +1,0 @@
-#!/bin/bash
-# Serve test collection
-set -e
-cd "$(realpath -m "$0/../..")"
-
-.bin/collector serve

@@ -1,7 +1,0 @@
-#!/bin/bash
-# Publish references module
-set -e
-cd "$(realpath -m "$0/../..")/references"
-
-../.bin/build_references
-npm publish --access=public

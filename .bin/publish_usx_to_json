@@ -1,7 +1,0 @@
-#!/bin/bash
-# Publish usx-to-json
-set -e
-cd "$(realpath -m "$0/../..")/converters/usx-to-json"
-
-../../.bin/build_converters
-npm publish --access=public

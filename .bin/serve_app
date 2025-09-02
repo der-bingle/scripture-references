@@ -1,6 +1,0 @@
-#!/bin/bash
-# Serve app
-set -e
-cd "$(realpath -m "$0/../..")/app"
-
-npx vite --port 8431 --strictPort

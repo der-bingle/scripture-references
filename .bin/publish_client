@@ -1,7 +1,0 @@
-#!/bin/bash
-# Publish client
-set -e
-cd "$(realpath -m "$0/../..")/client"
-
-../.bin/build_client
-npm publish --access=public

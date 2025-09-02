@@ -1,6 +1,0 @@
-#!/bin/bash
-# Build site
-set -e
-cd "$(realpath -m "$0/../..")/site"
-
-npx vitepress build

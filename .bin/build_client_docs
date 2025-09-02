@@ -1,6 +1,0 @@
-#!/bin/bash
-# Auto-generate api docs for client and place within site
-set -e
-cd "$(realpath -m "$0/../..")/site"
-
-npx typedoc --out src/access/client/api --tsconfig ../client/tsconfig.json "$@" ../client/src

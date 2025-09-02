@@ -1,1 +1,0 @@
-../../../client/dist/bundled.mjs

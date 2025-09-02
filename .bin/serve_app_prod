@@ -1,7 +1,0 @@
-#!/bin/bash
-# Serve app prod mode
-set -e
-cd "$(realpath -m "$0/../..")/app"
-
-npx vite build --watch &
-npx vite preview --port 8431
