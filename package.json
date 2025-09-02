@@ -1,30 +1,24 @@
 {
-  "name": "@gracious.tech/bible-references",
+  "name": "@der-bingle/scripture-references",
   "version": "1.1.0",
   "description": "Bible reference detection, parsing, and rendering that supports any language.",
   "type": "module",
-  "exports": {
-    "import": "./dist/esm/index.js",
-    "require": "./dist/bundled.cjs"
-  },
-  "types": "./dist/esm/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "exports": "./src/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gracious-tech/fetch.git"
+    "url": "git+https://github.com/der-bingle/scripture-references.git"
   },
   "keywords": [
     "bible",
-    "reference"
+    "reference",
+    "scripture"
   ],
-  "author": "Gracious Tech",
+  "author": "Luke Wilson <luke.m.wilson@gmail.com>",
   "license": "MIT-0",
   "bugs": {
-    "url": "https://github.com/gracious-tech/fetch/issues"
+    "url": "https://github.com/der-bingle/scripture-references/issues"
   },
-  "homepage": "https://github.com/gracious-tech/fetch/tree/master/references",
+  "homepage": "https://github.com/der-bingle/scripture-references",
   "dependencies": {
     "ramda": "^0.31.3"
   }
