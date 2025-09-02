@@ -1,13 +1,13 @@
-import { pipe, reverse, reduce } from 'ramda'
+import { pipe, reverse, reduce, curry } from 'ramda'
 import { detectReferences } from './detect.js'
 
 /**
  * Transform all detected references in text using a transformation function
- * @param {string} text - Text containing references to transform
  * @param {function} transformFn - Function that takes a match object and returns transformed string
+ * @param {string} text - Text containing references to transform
  * @returns {string} Text with all references transformed
  */
-export const transformReferences = (text, transformFn) => pipe(
+export const transformReferences = curry((transformFn, text) => pipe(
   detectReferences,           // Get all matches
   reverse,                   // Process from end to beginning to preserve indices
   reduce((acc, match) => {   // Transform text with each match
@@ -16,7 +16,7 @@ export const transformReferences = (text, transformFn) => pipe(
     const transformed = transformFn(match)
     return before + transformed + after
   }, text)
-)(text)
+)(text))
 
 /**
  * Transform reference match to Obsidian wikilink format
