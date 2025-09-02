@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { transformReferences, toObsidianWikilink } from './transform.js'
+import { transformReferences, toObsidianWikilink } from '../src/transform.js'
 
 describe('transformReferences', () => {
   it('transforms single reference', () => {

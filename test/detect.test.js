@@ -1,8 +1,8 @@
 
 import {describe, it} from 'vitest'
 
-import {detectReferences} from './detect.js'
-import {english_abbrev_exclude} from './data.js'
+import {detectReferences} from '../src/detect.js'
+import {english_abbrev_exclude} from '../src/data.js'
 
 
 describe('detectReferences', () => {

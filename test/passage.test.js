@@ -1,8 +1,8 @@
 
 import {describe, it} from 'vitest'
 
-import {PassageReference, detectBookCode, parseVerseReference} from './passage.js'
-import {book_names_english, book_abbrev_english, english_abbrev_include} from './data.js'
+import {PassageReference, detectBookCode, parseVerseReference} from '../src/passage.js'
+import {book_names_english, book_abbrev_english, english_abbrev_include} from '../src/data.js'
 
 
 function simple(start_chapter:number, start_verse:number, end_chapter?:number, end_verse?:number){
