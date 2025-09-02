@@ -6,8 +6,7 @@ It's designed for use with [fetch(bible)](https://fetch.bible) but can be used i
 
 
 ```js
-
-import {PassageReference, detectReferences, book_abbrev_english}
+import { PassageReference, detectReferences, book_abbrev_english, transformReferences, toObsidianWikilink }
     from '@gracious.tech/bible-references'
 
 // Simple args
@@ -25,7 +24,6 @@ const ref2 = new PassageReference({
 // Parse a string
 const ref3 = PassageReference.fromString("John 3:16-17")
 
-
 // Convert to string
 console.log(`See ${ref1}`)  // Defaults to English ("See John 3:16")
 console.log(new PassageReference('ezk').toString())  // Full names ("Ezekiel")
@@ -35,7 +33,18 @@ for (const match of detectReferences("Multiple refs like Gen 2:3 or John 3:16 an
     console.log(match.text)  // "Gen 2:3", "John 3:16", "Matt 10:8"
 }
 
+// Transform references in text (function is curried for functional composition)
+const text = "Read John 3:16 and Romans 8:28 today."
+const transformed = transformReferences(toObsidianWikilink, text)
+console.log(transformed)  // "Read [[Bible/CSB/John 3#16|John 3:16]] and [[Bible/CSB/Romans 8#28|Romans 8:28]] today."
 
+// Functional composition with curried transformReferences
+import { pipe } from 'ramda'
+const toLinks = transformReferences(toObsidianWikilink)
+const processText = pipe(
+    // other text transformations...
+    toLinks
+)
 ```
 
 Bible book codes are the [same as USX](https://ubsicap.github.io/usx/vocabularies.html#usx-vocab-bookcode) but lowercase.
