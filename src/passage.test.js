@@ -1,7 +1,7 @@
 
 import {describe, it} from 'vitest'
 
-import {PassageReference, _detect_book, _verses_str_to_obj} from './passage.js'
+import {PassageReference, detectBookCode, parseVerseReference} from './passage.js'
 import {book_names_english, book_abbrev_english, english_abbrev_include} from './data.js'
 
 
@@ -15,10 +15,10 @@ function simple(start_chapter:number, start_verse:number, end_chapter?:number, e
 }
 
 
-describe('_verses_str_to_obj', () => {
+describe('parseVerseReference', () => {
 
     it("Parses a single chapter", ({expect}) => {
-        expect(_verses_str_to_obj('1')).toEqual({
+        expect(parseVerseReference('1')).toEqual({
             start_chapter: 1,
             start_verse: undefined,
             end_chapter: undefined,
@@ -27,7 +27,7 @@ describe('_verses_str_to_obj', () => {
     })
 
     it("Parses multiple chapters", ({expect}) => {
-        expect(_verses_str_to_obj('1-2')).toEqual({
+        expect(parseVerseReference('1-2')).toEqual({
             start_chapter: 1,
             start_verse: undefined,
             end_chapter: 2,
@@ -36,7 +36,7 @@ describe('_verses_str_to_obj', () => {
     })
 
     it("Parses a single verse", ({expect}) => {
-        expect(_verses_str_to_obj('1:1')).toEqual({
+        expect(parseVerseReference('1:1')).toEqual({
             start_chapter: 1,
             start_verse: 1,
             end_chapter: undefined,
@@ -45,7 +45,7 @@ describe('_verses_str_to_obj', () => {
     })
 
     it("Parses multiple verses", ({expect}) => {
-        expect(_verses_str_to_obj('1:1-2')).toEqual({
+        expect(parseVerseReference('1:1-2')).toEqual({
             start_chapter: 1,
             start_verse: 1,
             end_chapter: undefined,
@@ -54,7 +54,7 @@ describe('_verses_str_to_obj', () => {
     })
 
     it("Parses verses across chapters", ({expect}) => {
-        expect(_verses_str_to_obj('1:1-2:2')).toEqual({
+        expect(parseVerseReference('1:1-2:2')).toEqual({
             start_chapter: 1,
             start_verse: 1,
             end_chapter: 2,
@@ -63,31 +63,31 @@ describe('_verses_str_to_obj', () => {
     })
 
     it("Salvages what it can from invalid references", ({expect}) => {
-        expect(_verses_str_to_obj('x')).toEqual({
+        expect(parseVerseReference('x')).toEqual({
             start_chapter: undefined,
             start_verse: undefined,
             end_chapter: undefined,
             end_verse: undefined,
         })
-        expect(_verses_str_to_obj('1:x')).toEqual({
+        expect(parseVerseReference('1:x')).toEqual({
             start_chapter: 1,
             start_verse: undefined,
             end_chapter: undefined,
             end_verse: undefined,
         })
-        expect(_verses_str_to_obj('1:1-x')).toEqual({
+        expect(parseVerseReference('1:1-x')).toEqual({
             start_chapter: 1,
             start_verse: 1,
             end_chapter: undefined,
             end_verse: undefined,
         })
-        expect(_verses_str_to_obj('1:1-1:x')).toEqual({
+        expect(parseVerseReference('1:1-1:x')).toEqual({
             start_chapter: 1,
             start_verse: 1,
             end_chapter: 1,
             end_verse: undefined,
         })
-        expect(_verses_str_to_obj('1-2:1')).toEqual({
+        expect(parseVerseReference('1-2:1')).toEqual({
             start_chapter: 1,
             start_verse: undefined,
             end_chapter: 2,
@@ -98,45 +98,42 @@ describe('_verses_str_to_obj', () => {
 })
 
 
-describe('_detect_book', () => {
+describe('detectBookCode', () => {
 
     const book_names = [...Object.entries(book_names_english), ...english_abbrev_include]
 
     for (const [code, name] of book_names){
         it(`Identifies "${name}" as '${code}'`, ({expect}) => {
-            expect(_detect_book(name, book_names)).toEqual(code)
+            expect(detectBookCode(name)).toEqual(code)
         })
     }
 
     for (const [code, abbrevs] of Object.entries(book_name_abbreviations)){
         for (const abbrev of abbrevs){
             it(`Identifies "${abbrev}" as '${code}'`, ({expect}) => {
-                expect(_detect_book(abbrev, book_names)).toEqual(code)
+                expect(detectBookCode(abbrev)).toEqual(code)
             })
         }
     }
 
     it("Returns null if can't match", ({expect}) => {
-        expect(_detect_book('nothing', book_names)).toEqual(null)
+        expect(detectBookCode('nothing')).toEqual(null)
     })
 
     it("Returns null if multiple matches", ({expect}) => {
-        expect(_detect_book('j', book_names)).toEqual(null)
+        expect(detectBookCode('j')).toEqual(null)
     })
 
     it("Requires second char at start if first char is number", ({expect}) => {
-        expect(_detect_book('1am', book_names)).toEqual(null)
-        expect(_detect_book('1sam', book_names)).toEqual('1sa')
+        expect(detectBookCode('1am')).toEqual(null)
+        expect(detectBookCode('1sam')).toEqual('1sa')
     })
 
     it("Still parses some kinds of ambiguous references", ({expect}) => {
         // Phil could be Philemon or Philippians but is generally understood to be the later
-        expect(_detect_book("Phil", book_names)).toEqual('php')
+        expect(detectBookCode("Phil")).toEqual('php')
     })
 
-    it("Detects abbreviations within words for languages that require it", ({expect}) => {
-        expect(_detect_book("伯", [['job', "約伯記"]], undefined, false)).toBe('job')
-    })
 })
 
 
@@ -286,7 +283,7 @@ describe('ranges', () => {
         ]
 
         for (const [string, type, start_chapter, start_verse, end_chapter, end_verse, new_string] of tests){
-            const ref_obj = PassageReference.from_string(string)!
+            const ref_obj = PassageReference.fromString(string)!
             expect(ref_obj).toMatchObject(
                 {type, start_chapter, start_verse, end_chapter, end_verse})
             expect(ref_obj.toString()).toBe(new_string ?? string)
@@ -295,39 +292,39 @@ describe('ranges', () => {
 })
 
 
-describe('from_string', () => {
+describe('fromString', () => {
 
     it("Interprets single digits as verses for single chapter books", ({expect}) => {
 
         // To confirm multi-chapter books are interpreted as chapter
-        expect(PassageReference.from_string("1 John 1")!.type).toBe('chapter')
-        expect(PassageReference.from_string("1 John 2-3"))
+        expect(PassageReference.fromString("1 John 1")!.type).toBe('chapter')
+        expect(PassageReference.fromString("1 John 2-3"))
             .toMatchObject({start_chapter: 2, start_verse: 1, end_chapter: 3, end_verse: 24})
 
         // Single chapter books
         // NOTE It's still expected to re-render these with toString() as 1:1 for clarity
-        expect(PassageReference.from_string("Obadiah 1")!.type).toBe('verse')
-        expect(PassageReference.from_string("Philemon 1")!.type).toBe('verse')
-        expect(PassageReference.from_string("2 John 1")!.type).toBe('verse')
-        expect(PassageReference.from_string("3 John 1")!.type).toBe('verse')
-        expect(PassageReference.from_string("Jude 1")!.type).toBe('verse')
+        expect(PassageReference.fromString("Obadiah 1")!.type).toBe('verse')
+        expect(PassageReference.fromString("Philemon 1")!.type).toBe('verse')
+        expect(PassageReference.fromString("2 John 1")!.type).toBe('verse')
+        expect(PassageReference.fromString("3 John 1")!.type).toBe('verse')
+        expect(PassageReference.fromString("Jude 1")!.type).toBe('verse')
 
-        expect(PassageReference.from_string("Obadiah 2-3"))
+        expect(PassageReference.fromString("Obadiah 2-3"))
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
-        expect(PassageReference.from_string("Philemon 2-3"))
+        expect(PassageReference.fromString("Philemon 2-3"))
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
-        expect(PassageReference.from_string("2 John 2-3"))
+        expect(PassageReference.fromString("2 John 2-3"))
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
-        expect(PassageReference.from_string("3 John 2-3"))
+        expect(PassageReference.fromString("3 John 2-3"))
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
-        expect(PassageReference.from_string("Jude 2-3"))
+        expect(PassageReference.fromString("Jude 2-3"))
             .toMatchObject({start_chapter: 1, start_verse: 2, end_chapter: 1, end_verse: 3})
     })
 
     it("Does not detect single letter English names", ({expect}) => {
         // NOTE O for Obadiah seems to be the only unique one
-        expect(PassageReference.from_string("O 1")).toBe(null)
-        expect(PassageReference.from_string("O. 1")?.book).toBe('oba')
+        expect(PassageReference.fromString("O 1")).toBe(null)
+        expect(PassageReference.fromString("O. 1")?.book).toBe('oba')
     })
 
 })
@@ -355,14 +352,14 @@ describe('toString', () => {
     })
 
     it("Restores original valid string", ({expect}) => {
-        expect(PassageReference.from_string('Titus')!.toString()).toBe('Titus')
-        expect(PassageReference.from_string('Titus 1')!.toString()).toBe('Titus 1')
-        expect(PassageReference.from_string('Titus 1:1')!.toString()).toBe('Titus 1:1')
-        expect(PassageReference.from_string('Titus 1:1-2')!.toString()).toBe('Titus 1:1-2')
-        expect(PassageReference.from_string('Titus 1:1-2:2')!.toString()).toBe('Titus 1:1-2:2')
-        expect(PassageReference.from_string('Titus 1-2')!.toString()).toBe('Titus 1-2')
+        expect(PassageReference.fromString('Titus')!.toString()).toBe('Titus')
+        expect(PassageReference.fromString('Titus 1')!.toString()).toBe('Titus 1')
+        expect(PassageReference.fromString('Titus 1:1')!.toString()).toBe('Titus 1:1')
+        expect(PassageReference.fromString('Titus 1:1-2')!.toString()).toBe('Titus 1:1-2')
+        expect(PassageReference.fromString('Titus 1:1-2:2')!.toString()).toBe('Titus 1:1-2:2')
+        expect(PassageReference.fromString('Titus 1-2')!.toString()).toBe('Titus 1-2')
         // Also test Jude since had bug with single chapter books earlier
-        expect(PassageReference.from_string('Jude')!.toString()).toBe('Jude')
+        expect(PassageReference.fromString('Jude')!.toString()).toBe('Jude')
     })
 
 })
@@ -405,9 +402,9 @@ describe('serialized', () => {
 
         for (const test_props of [props_tit, props_jud]){
             for (const [code, props] of test_props){
-                const ref_produced = PassageReference.from_serialized(code)
+                const ref_produced = PassageReference.fromSerialized(code)
                 expect(ref_produced).toMatchObject(props)
-                const code_produced = ref_produced.to_serialized()
+                const code_produced = ref_produced.toSerialized()
                 expect(code_produced).toBe(code)
             }
         }
@@ -419,14 +416,14 @@ describe('serialized', () => {
 describe('total_verses', () => {
 
     it("Sums for each verse type", ({expect}) => {
-        expect(PassageReference.from_string('2 Tim')!.total_verses()).toBe(18 + 26 + 17 + 22)
-        expect(PassageReference.from_string('2 Tim 2')!.total_verses()).toBe(26)
-        expect(PassageReference.from_string('2 Tim 2:4')!.total_verses()).toBe(1)
-        expect(PassageReference.from_string('2 Tim 2:4-5')!.total_verses()).toBe(2)
-        expect(PassageReference.from_string('2 Tim 2-3')!.total_verses()).toBe(26 + 17)
-        expect(PassageReference.from_string('2 Tim 2:2-3:3')!.total_verses()).toBe(25 + 3)
+        expect(PassageReference.fromString('2 Tim')!.total_verses()).toBe(18 + 26 + 17 + 22)
+        expect(PassageReference.fromString('2 Tim 2')!.total_verses()).toBe(26)
+        expect(PassageReference.fromString('2 Tim 2:4')!.total_verses()).toBe(1)
+        expect(PassageReference.fromString('2 Tim 2:4-5')!.total_verses()).toBe(2)
+        expect(PassageReference.fromString('2 Tim 2-3')!.total_verses()).toBe(26 + 17)
+        expect(PassageReference.fromString('2 Tim 2:2-3:3')!.total_verses()).toBe(25 + 3)
         // Also test with multiple middle chapters
-        expect(PassageReference.from_string('2 Tim 1:2-4:3')!.total_verses()).toBe(17 + 26 + 17 + 3)
+        expect(PassageReference.fromString('2 Tim 1:2-4:3')!.total_verses()).toBe(17 + 26 + 17 + 3)
     })
 
 })

@@ -2,7 +2,7 @@
 // The number of the last verse for every chapter of the Bible
 // NOTE Since some verses may be missing contents, it's not the number of verses in that sense
 // WARN Chapters are zero-indexed (i.e chapter 1 is at index 0)
-export const last_verse:Readonly<Record<string, number[]>> = Object.freeze({
+export const last_verse = Object.freeze({
     '1ch': [
         54,
         55,

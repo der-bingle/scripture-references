@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/gracious-tech/fetch/issues"
   },
-  "homepage": "https://github.com/gracious-tech/fetch/tree/master/references"
+  "homepage": "https://github.com/gracious-tech/fetch/tree/master/references",
+  "dependencies": {
+    "ramda": "^0.31.3"
+  }
 }

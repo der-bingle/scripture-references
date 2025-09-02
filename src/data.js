@@ -1,6 +1,5 @@
-
 // Bible book ids in traditional order
-export const books_ordered:readonly string[] = Object.freeze([
+export const books_ordered = Object.freeze([
     'gen', 'exo', 'lev', 'num', 'deu', 'jos', 'jdg', 'rut', '1sa', '2sa', '1ki', '2ki', '1ch',
     '2ch', 'ezr', 'neh', 'est', 'job', 'psa', 'pro', 'ecc', 'sng', 'isa', 'jer', 'lam', 'ezk',
     'dan', 'hos', 'jol', 'amo', 'oba', 'jon', 'mic', 'nam', 'hab', 'zep', 'hag', 'zec', 'mal',
@@ -11,7 +10,7 @@ export const books_ordered:readonly string[] = Object.freeze([
 
 
 // Usual English names of Bible books
-export const book_names_english:Readonly<Record<string, string>> = Object.freeze({
+export const book_names_english = Object.freeze({
     'gen': "Genesis",
     'exo': "Exodus",
     'lev': "Leviticus",
@@ -83,7 +82,7 @@ export const book_names_english:Readonly<Record<string, string>> = Object.freeze
 
 // Usual English abbreviations of Bible books
 // NOTE Aiming for short but also easily recognisable
-export const book_abbrev_english:Readonly<Record<string, string>> = Object.freeze({
+export const book_abbrev_english = Object.freeze({
     'gen': "Gen",
     'exo': "Exo",
     'lev': "Lev",
@@ -157,7 +156,7 @@ export const book_abbrev_english:Readonly<Record<string, string>> = Object.freez
 // These could in theory abbreviate multiple books, and are only specified because of convention
 // See https://www.logos.com/bible-book-abbreviations
 // These are hard-coded so that they will result in a correct match if English default is kept
-export const english_abbrev_include:readonly [string, string][] = Object.freeze([
+export const english_abbrev_include = Object.freeze([
     // [code, abbrev]
     ['num', "nm"],
     ['ezr', "ez"],
@@ -175,5 +174,5 @@ export const english_abbrev_include:readonly [string, string][] = Object.freeze(
 // Abbreviations that should be ignored for being too vague
 // Words are only added if (1) common and (2) could actually match a book
 // E.g. "So. 1" is ok but not "So 1 cat"
-export const english_abbrev_exclude:readonly string[] =
+export const english_abbrev_exclude = 
     Object.freeze(["is", "so", "at", "am", "me", "he", "hi"])

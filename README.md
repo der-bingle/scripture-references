@@ -1,13 +1,13 @@
 # Bible References
 
-Bible reference detection, parsing, and rendering that supports any human language.
+Bible reference detection, parsing, and rendering for English.
 
 It's designed for use with [fetch(bible)](https://fetch.bible) but can be used independently of it. See it in action via the [fetch(bible) enhancer](https://fetch.bible/access/enhancer/).
 
 
 ```js
 
-import {PassageReference, detect_references, book_abbrev_english}
+import {PassageReference, detectReferences, book_abbrev_english}
     from '@gracious.tech/bible-references'
 
 // Simple args
@@ -22,37 +22,22 @@ const ref2 = new PassageReference({
     end_verse: 17,
 })
 
-// Parse a string (defaults to detecting English only)
-const ref3 = PassageReference.from_string("John 3:16-17")
+// Parse a string
+const ref3 = PassageReference.fromString("John 3:16-17")
 
-// Provide book names arg to detect any language
-const ref4 = PassageReference.from_string("Giăng 3.16-17", {jhn: "Giăng"})
 
 // Convert to string
 console.log(`See ${ref1}`)  // Defaults to English ("See John 3:16")
-console.log(ref4.toString({jhn: "Giăng"}, '.'))  // Provide i18n args ("Giăng 3.16-17")
-console.log(new PassageReference('ezk').toString(book_abbrev_english))  // Abbrev. names ("Ezek")
+console.log(new PassageReference('ezk').toString())  // Full names ("Ezekiel")
 
 // Detecting references in a block of text
-for (const match of detect_references("Multiple refs like Gen 2:3 or John 3:16 and Matt 10:8")){
+for (const match of detectReferences("Multiple refs like Gen 2:3 or John 3:16 and Matt 10:8")){
     console.log(match.text)  // "Gen 2:3", "John 3:16", "Matt 10:8"
 }
 
-// Detection can be configured to suit different languages
-const exclude_book_names = []  // E.g. To prevent "so 1 is" matching as "Song of Songs 1" add "so"
-const min_chars = 1  // Default is 2 but Chinese can abbreviate books down to a single character
-const match_from_start = false  // Default is true but Chinese can abbreviate using a middle char
-detect_references("伯5：14", {job: "約伯記"}, exclude_book_names, min_chars, match_from_start)
 
 ```
 
 Bible book codes are the [same as USX](https://ubsicap.github.io/usx/vocabularies.html#usx-vocab-bookcode) but lowercase.
 
-See your editor's auto-suggestions or the source code for the variety of methods available for
-inspecting and manipulating references. The [fetch(bible) client](https://fetch.bible/access/client/) will automatically supply the names of books from existing translations so that you don't have to. See methods:
-
- * `BibleCollection.detect_references(text, translation_id)`
- * `BibleCollection.string_to_reference(string, translation_id)`
- * `BibleCollection.reference_to_string(ref, translation_id)`
-
-Note that `fetch_translation_extras(translation_id)` is required to be called and complete beforehand.
+See your editor's auto-suggestions or the source code for the variety of methods available for inspecting and manipulating references.
