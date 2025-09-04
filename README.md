@@ -5,7 +5,7 @@ Functional Bible reference detection & parsing,
 
 ```js
 import { PassageReference, detectReferences, book_abbrev_english, transformReferences, toObsidianWikilink }
-    from '@gracious.tech/bible-references'
+    from 'scripture-references'
 
 // Simple args
 const ref1 = new PassageReference('jhn', 3, 16)
