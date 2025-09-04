@@ -1,5 +1,5 @@
 {
-  "name": "@der-bingle/scripture-references",
+  "name": "scripture-references",
   "version": "1.1.0",
   "description": "Bible reference detection, parsing, and rendering that supports any language.",
   "type": "module",
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/der-bingle/scripture-references",
   "dependencies": {
+    "@der-bingle/scripture-references": "github:der-bingle/scripture-references",
     "ramda": "^0.31.3"
   }
 }
