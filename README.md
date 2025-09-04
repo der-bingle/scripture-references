@@ -1,13 +1,11 @@
 # Bible References
 
-Bible reference detection, parsing, and rendering for English.
-
-It's designed for use with [fetch(bible)](https://fetch.bible) but can be used independently of it. See it in action via the [fetch(bible) enhancer](https://fetch.bible/access/enhancer/).
+Functional Bible reference detection & parsing,
 
 
 ```js
 import { PassageReference, detectReferences, book_abbrev_english, transformReferences, toObsidianWikilink }
-    from '@gracious.tech/bible-references'
+    from 'scripture-references'
 
 // Simple args
 const ref1 = new PassageReference('jhn', 3, 16)
