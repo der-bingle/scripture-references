@@ -8,26 +8,15 @@ importers:
 
   .:
     dependencies:
-      '@der-bingle/scripture-references':
-        specifier: github:der-bingle/scripture-references
-        version: https://codeload.github.com/der-bingle/scripture-references/tar.gz/e66a7cc60b46a2e8d6c727bcbf83c15515edb6b9
       ramda:
         specifier: ^0.31.3
         version: 0.31.3
 
 packages:
 
-  '@der-bingle/scripture-references@https://codeload.github.com/der-bingle/scripture-references/tar.gz/e66a7cc60b46a2e8d6c727bcbf83c15515edb6b9':
-    resolution: {tarball: https://codeload.github.com/der-bingle/scripture-references/tar.gz/e66a7cc60b46a2e8d6c727bcbf83c15515edb6b9}
-    version: 1.1.0
-
   ramda@0.31.3:
     resolution: {integrity: sha512-xKADKRNnqmDdX59PPKLm3gGmk1ZgNnj3k7DryqWwkamp4TJ6B36DdpyKEQ0EoEYmH2R62bV4Q+S0ym2z8N2f3Q==}
 
 snapshots:
-
-  '@der-bingle/scripture-references@https://codeload.github.com/der-bingle/scripture-references/tar.gz/e66a7cc60b46a2e8d6c727bcbf83c15515edb6b9':
-    dependencies:
-      ramda: 0.31.3
 
   ramda@0.31.3: {}
