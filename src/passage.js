@@ -12,7 +12,7 @@
 */
 
 
-import { pipe, replace, split, map, includes, filter, find } from 'ramda'
+import { pipe, replace, split, map, includes, filter, find, trim, toLower } from 'ramda'
 import { safeParseInt } from './utils.js'
 import {books_ordered, book_names_english, english_abbrev_include,
     english_abbrev_exclude} from './data.js'
@@ -94,7 +94,8 @@ export const parseVerseReference = (ref) => {
 
 // Clean and normalize book name strings using functional composition
 const cleanBookName = pipe(
-    (s) => s.trim().toLowerCase(),
+    trim,
+    toLower,
     replace(/^i /, '1'),
     replace(/1st /, '1'),
     replace(/first /, '1'),
