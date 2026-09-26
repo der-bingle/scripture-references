@@ -158,6 +158,8 @@ export const book_abbrev_english = Object.freeze({
 // These are hard-coded so that they will result in a correct match if English default is kept
 export const english_abbrev_include = Object.freeze([
     // [code, abbrev]
+    ['sng', "Song of Solomon"],
+    ['sng', "Song of Sol."],
     ['num', "nm"],
     ['ezr', "ez"],
     ['mic', "mc"],

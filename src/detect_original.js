@@ -15,7 +15,7 @@ const regex_verse_sep = '[:：\\.]'
 const regex_book_num_prefix = '(?:(?:[123]|I{1,3}) ? ?)?'
 const regex_book_name_tmpl = '\\p{Letter}[\\p{Letter}\\p{Dash} ]{MIN_MID,16}END_LETTER\\.? ? ?'
 const regex_integer_with_opt_sep =
-    '\\d{1,3}[abc]?(?: ? ?' + regex_verse_sep + ' ? ?\\d{1,3}[abc]?)?'
+    '\\d{1,3}[abc]?(?: ? ?' + regex_verse_sep + ' ? ?\\d{1,3}[abc]?[fF]{0,2})?'
 const regex_verse_range = regex_integer_with_opt_sep + '(?: ? ?\\p{Dash} ? ?'
     + regex_integer_with_opt_sep + ')?'
 const regex_trailing = '(?![\\d\\p{Letter}@#$%])'  // Doesn't make sense to be followed by these
