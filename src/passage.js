@@ -12,7 +12,7 @@
 */
 
 
-import { pipe, replace, split, map, includes, filter, find, trim, toLower } from 'ramda'
+import { pipe, replace, split, map, includes, filter, find, trim, toLower, uniq, head } from 'ramda'
 import { safeParseInt } from './utils.js'
 import {books_ordered, book_names_english, english_abbrev_include,
     english_abbrev_exclude} from './data.js'
@@ -157,8 +157,10 @@ export const detectBookCode = (input) => {
     // Check for exact and partial matches
     const { exact, partial } = findBookMatches(cleanedInput, normalizedNames)
     if (exact) return exact
-    if (partial.length === 1) return partial[0][0]
-    if (partial.length > 1) return null // Too ambiguous
+    // Several names of one book ("Song" starts Song of Songs, Song of Solomon, Song of Sol.) are no ambiguity
+    const partialCodes = uniq(map(head, partial))
+    if (partialCodes.length === 1) return partialCodes[0]
+    if (partialCodes.length > 1) return null // Too ambiguous
     
     // Try fuzzy matching (always from start for English)
     const fuzzyRegex = createFuzzyRegex(cleanedInput, true)
