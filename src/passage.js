@@ -17,6 +17,7 @@ import { safeParseInt } from './utils.js'
 import {books_ordered, book_names_english, english_abbrev_include,
     english_abbrev_exclude} from './data.js'
 import {last_verse} from './last_verse.js'
+import { normalizeRomanChapters } from './roman.js'
 
 /**
  * @typedef {Object} PassageArgs
@@ -315,7 +316,8 @@ export class PassageReference {
     static fromString(reference) {
         
         
-        const trimmedRef = reference.trim()
+        // "John vi. 37" is read as "John 6:37" (src/roman.js)
+        const trimmedRef = normalizeRomanChapters(reference).text.trim()
         
         // Find where verses start (after first digit that's not at the beginning)
         const versesStartIndex = pipe(
