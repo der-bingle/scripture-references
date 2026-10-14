@@ -12,16 +12,24 @@ import { PassageReference } from './passage.js'
 // Regex strings used for identifying passage references in blocks of text
 // NOTE Allow two spaces but no more, to be forgiving but not match weird text
 const regex_verse_sep = '[:：\\.]'
-const regex_book_num_prefix = '(?:(?:[123]|I{1,3}) ? ?)?'
-const regex_book_name_tmpl = '\\p{Letter}[\\p{Letter}\\p{Dash} ]{MIN_MID,16}END_LETTER\\.? ? ?'
+const regex_whitespace_char = '[\\s\\u00a0\\u202f]'
+const regex_optional_whitespace = `${regex_whitespace_char}?${regex_whitespace_char}?`
+const regex_book_num_prefix = `(?:(?:[123]|I{1,3})${regex_optional_whitespace})?`
+const regex_book_name_mid = `(?:[\\p{Letter}\\p{Dash}]|${regex_whitespace_char})`
+const regex_book_name_tmpl = `\\p{Letter}${regex_book_name_mid}{MIN_MID,16}END_LETTER\\.?${regex_optional_whitespace}`
 const regex_integer_with_opt_sep =
-    '\\d{1,3}[abc]?(?: ? ?' + regex_verse_sep + ' ? ?\\d{1,3}[abc]?[fF]{0,2})?'
-const regex_verse_range = regex_integer_with_opt_sep + '(?: ? ?\\p{Dash} ? ?'
+    `\\d{1,3}[abc]?(?:${regex_optional_whitespace}` + regex_verse_sep
+    + `${regex_optional_whitespace}\\d{1,3}[abc]?[fF]{0,2})?`
+const regex_verse_range = regex_integer_with_opt_sep + `(?:${regex_optional_whitespace}\\p{Dash}${regex_optional_whitespace}`
     + regex_integer_with_opt_sep + ')?'
 const regex_trailing = '(?![\\d\\p{Letter}@#$%])'  // Doesn't make sense to be followed by these
 
-const regex_between_ranges = ' ? ?[,;] ? ?'
+const regex_between_ranges = `${regex_optional_whitespace}[,;]${regex_optional_whitespace}`
 const regex_additional_range = regex_between_ranges + '(' + regex_verse_range + ')' + regex_trailing
+const findNextWhitespaceIndex = (value) => {
+    const index = value.slice(1).search(new RegExp(regex_whitespace_char, 'u'))
+    return index === -1 ? -1 : index + 1
+}
 
 
 /**
@@ -157,7 +165,7 @@ export function* detectReferencesGenerator(text) {
             }
         } else {
             // Backtrack to try next word if invalid match
-            const charsToNextWord = match[0].indexOf(' ', 1)
+            const charsToNextWord = findNextWhitespaceIndex(match[0])
             if (charsToNextWord >= 1) {
                 regex.lastIndex -= (match[0].length - charsToNextWord - 1)
             }
@@ -171,4 +179,3 @@ export function* detectReferencesGenerator(text) {
  * @returns {PassageReferenceMatch[]} Found references
  */
 export const detectReferences = (text) => [...detectReferencesGenerator(text)]
-

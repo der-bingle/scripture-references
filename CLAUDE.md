@@ -84,13 +84,13 @@ const processUsers = compose(
 ```javascript
 // ✅ Point-free (no explicit data parameter)
 const getActiveUserNames = pipe(
-  filter(propEq('status', 'active')),
+  filter(propEq('active', 'status')),
   pluck('name')
 );
 
 // ⚠️ Avoid unnecessary lambda wrapping
 const getActiveUserNames = (users) => pipe(
-  filter(propEq('status', 'active')),
+  filter(propEq('active', 'status')),
   pluck('name')
 )(users);
 ```
@@ -121,7 +121,7 @@ const processUsers = pipe(
 import { propEq, propSatisfies, allPass, anyPass } from 'ramda';
 
 // Simple predicates
-const isActive = propEq('status', 'active');
+const isActive = propEq('active', 'status');
 const isAdult = propSatisfies(gte(18), 'age');
 
 // Composite predicates
