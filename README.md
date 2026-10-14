@@ -48,3 +48,35 @@ const processText = pipe(
 Bible book codes are the [same as USX](https://ubsicap.github.io/usx/vocabularies.html#usx-vocab-bookcode) but lowercase.
 
 See your editor's auto-suggestions or the source code for the variety of methods available for inspecting and manipulating references.
+
+## Spoken references
+
+`detectSpokenReferences(text)` recognizes English references written as they might be said aloud. It is a pure detector: it leaves the input alone and does not create links or depend on a transcription service.
+
+```js
+import { detectSpokenReferences } from 'scripture-references'
+
+const text = 'Read Jude three, then First Corinthians fifteen verses 56 and 57.'
+const matches = detectSpokenReferences(text)
+
+for (const match of matches) {
+    console.log(match.text, match.ref?.toString(), match.interpretation)
+    // "Jude three" "Jude 1:3" "explicit"
+    // "First Corinthians fifteen verses 56 and 57" "1 Corinthians 15:56-57" "explicit"
+}
+```
+
+Results are ordered and non-overlapping. Each result has:
+
+- `text`, `index`, `end`: the exact input slice, its UTF-16 start offset, and exclusive end offset. `text === input.slice(index, end)`.
+- `ref`: one canonical `PassageReference`, or `null` when the phrase cannot be represented safely as one passage.
+- `references`: the individual `PassageReference` members. A range has one member; a spoken list has one member per listed reference. Adjacent listed verses also yield a contiguous `ref`, while nonadjacent verses leave `ref` null.
+- `interpretation`: `explicit`, `inferred`, `ambiguous`, or `invalid`. This describes the words' parse, not the reliability of the speaker or any speech recognizer.
+- `reasons`: stable reason codes for inference, ambiguity, or invalid input. Current codes include `uncued_chapter_verse`, `uncued_repeated_tens`, `uncertain_spoken_number`, `missing_chapter`, `missing_chapter_number`, `missing_verse_number`, `chapter_out_of_bounds`, `verse_out_of_bounds`, `descending_range`, and `invalid_reference`.
+- `evidence`: plain data containing `bookForm`, `numberForms` (`digits` or `spoken`), and observed `cues`.
+
+“Jude three” means Jude 1:3 because Jude has one chapter. The same rule applies to Obadiah, Philemon, 2 John, and 3 John. An explicit impossible chapter such as “Jude chapter three” is returned as `invalid`; it is not reinterpreted as a verse. “John three sixteen” is returned as `inferred`, while “John chapter three verse sixteen” is `explicit`. “Verses 56 and 58” returns two members and no invented range.
+
+`ambiguous` and `invalid` candidates have `ref: null` and an empty `references` array, so no uncertain interpretation appears as a resolved member.
+
+The first version recognizes complete English book names, numbered-book word forms, `Psalm`, and `Song of Solomon`; compositional spoken numbers, chapter/verse cues, and common range/list wording. It does not correct misheard or misspelled book names, infer a book from distant context, or interpret document markup. Callers working with Markdown, HTML, subtitles, or timed transcripts should select the text they want scanned and map the returned offsets to their own source structure. When combining this with `detectReferences()`, compare source spans and keep one result for each overlapping written phrase.

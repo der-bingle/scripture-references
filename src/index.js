@@ -1,6 +1,7 @@
 // Modern exports with clear function names
 export { PassageReference } from './passage.js'
 export { detectReferences } from './detect.js'
+export { detectSpokenReferences } from './detect_spoken.js'
 export { transformReferences, toObsidianWikilink } from './transform.js'
 export { getChapterNumbers, getVerseNumbers } from './stats.js'
 export { safeParseInt, parseIntWithBounds } from './utils.js'
