@@ -48,3 +48,11 @@ test('short names that prefix several different books stay as they were', () => 
     for (const [name, code] of Object.entries(codes)) assert.equal(detectBookCode(name), code, name)
     for (const name of ['Sam', 'Kings', 'Cor', 'Tim', 'Pet']) assert.equal(detectBookCode(name), null, name)
 })
+
+test('"number 10" is the word, not the book of Numbers; "Numbers 10" and "Num 10" still are', () => {
+    assert.deepEqual([...detectReferences('point number 10, then Number 11')], [])
+    assert.equal(detectBookCode('number'), null)
+    for (const source of ['Numbers 10', 'numbers 10', 'Num 10']) {
+        assert.equal([...detectReferences(source)][0]?.ref.toString(), 'Numbers 10', source)
+    }
+})

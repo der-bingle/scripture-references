@@ -176,5 +176,6 @@ export const english_abbrev_include = Object.freeze([
 // Abbreviations that should be ignored for being too vague
 // Words are only added if (1) common and (2) could actually match a book
 // E.g. "So. 1" is ok but not "So 1 cat"
+// "number" is the common word ("point number 10"), not the singular of Numbers
 export const english_abbrev_exclude = 
-    Object.freeze(["is", "so", "at", "am", "me", "he", "hi"])
+    Object.freeze(["is", "so", "at", "am", "me", "he", "hi", "number"])
