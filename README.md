@@ -80,3 +80,15 @@ Results are ordered and non-overlapping. Each result has:
 `ambiguous` and `invalid` candidates have `ref: null` and an empty `references` array, so no uncertain interpretation appears as a resolved member.
 
 The first version recognizes complete English book names, numbered-book word forms, `Psalm`, and `Song of Solomon`; compositional spoken numbers, chapter/verse cues, and common range/list wording. It does not correct misheard or misspelled book names, infer a book from distant context, or interpret document markup. Callers working with Markdown, HTML, subtitles, or timed transcripts should select the text they want scanned and map the returned offsets to their own source structure. When combining this with `detectReferences()`, compare source spans and keep one result for each overlapping written phrase.
+
+Single-reference parsing accepts one numeric reference and returns `null` for
+lists or malformed numeric tails. Use `detectReferences` for lists, including
+comma, semicolon and `and` continuations. Each continuation inherits the most
+recent chapter. A dash after a complete range can introduce another
+chapter-and-verse reference (`John 14:1-5– 20:30-31`). Match text and offsets
+always refer to the original input.
+
+An oversized verse range end is clamped to its chapter's last verse
+(`1 Peter 5:1–40` becomes `1 Peter 5:1-14`). Invalid starts or chapters still
+fail `args_valid`. `f` and `ff` suffixes anchor to the starting verse and remain
+in the match's display text; they do not imply a known range endpoint.

@@ -50,7 +50,9 @@ const cleanVerseRef = pipe(
  * @returns {PassageArgs} Parsed reference object
  */
 export const parseVerseReference = (ref) => {
-    const cleanedRef = cleanVerseRef(ref)
+    const cleanedRef = cleanVerseRef(ref).replace(/f{1,2}$/i, '').replace(/[abc](?=[:\-]|$)/gi, '')
+    // One parser call accepts one reference, never a truncated list or prose.
+    if (cleanedRef && !/^\d+(?::\d+)?(?:-\d+(?::\d+)?)?$/.test(cleanedRef)) return null
     
     const parseChapterOnlyRef = (cleanRef) => {
         const parts = split('-', cleanRef)
@@ -338,6 +340,8 @@ export class PassageReference {
         const versesStr = trimmedRef.slice(versesStartIndex)
         let verses = parseVerseReference(versesStr)
         
+        if (!verses) return null
+
         // Special handling for single chapter books
         if (includes(bookCode, single_chapter_books) && 
             verses.start_chapter && 
@@ -346,7 +350,13 @@ export class PassageReference {
             verses = parseVerseReference('1:' + versesStr)
         }
         
-        return new PassageReference({ book: bookCode, ...verses })
+        // Clamp only an oversized range end; an invalid start still fails validation.
+        const endChapter = verses.end_chapter ?? verses.start_chapter
+        const lastVerse = last_verse[bookCode][endChapter - 1]
+        const bounded = verses.end_verse > lastVerse
+            ? { ...verses, end_verse: lastVerse }
+            : verses
+        return new PassageReference({ book: bookCode, ...bounded })
     }
 
 

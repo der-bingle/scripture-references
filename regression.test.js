@@ -56,3 +56,41 @@ test('"number 10" is the word, not the book of Numbers; "Numbers 10" and "Num 10
         assert.equal([...detectReferences(source)][0]?.ref.toString(), 'Numbers 10', source)
     }
 })
+
+test('lists inherit the most recent chapter and keep source spans', () => {
+    const cases = [
+        ['Proverbs 16:9 and 33', ['Proverbs 16:9', 'Proverbs 16:33']],
+        ['Matthew 7:15-23; 24:10-11,24', ['Matthew 7:15-23', 'Matthew 24:10-11', 'Matthew 24:24']],
+        ['Rev. 11:1-2; 12:6,14-17', ['Revelation 11:1-2', 'Revelation 12:6', 'Revelation 12:14-17']],
+        ['John 14:1-5– 20:30-31', ['John 14:1-5', 'John 20:30-31']],
+        ['John 3:16-4:2', ['John 3:16-4:2']],
+        ['John 3:16 and Romans 8:28', ['John 3:16', 'Romans 8:28']],
+    ]
+    for (const [source, expected] of cases) {
+        const matches = detectReferences(source)
+        assert.deepEqual(matches.map(({ ref }) => ref.toString()), expected, source)
+        matches.forEach((match, index) => {
+            assert.equal(source.slice(match.index, match.index + match.text.length), match.text)
+            const previousEnd = index ? matches[index - 1].index + matches[index - 1].text.length : 0
+            assert.equal(match.index_from_prev_match, match.index - previousEnd)
+        })
+    }
+})
+
+test('single-reference parsing rejects lists and malformed numeric tails', async () => {
+    const { PassageReference } = await import('./src/index.js')
+    for (const source of ['John 1:1-5; 20:30-31', 'John 14:1-5– 20:30-31', 'John 3:16,18', 'Proverbs 16:9 and 33', 'John 3:16 garbage', 'John 3:16-17-18']) {
+        assert.equal(PassageReference.fromString(source), null, source)
+    }
+})
+
+test('oversized range ends clamp, but invalid starts and chapters remain invalid', async () => {
+    const { PassageReference } = await import('./src/index.js')
+    const [match] = detectReferences('1 Peter 5:1–40')
+    assert.equal(match.text, '1 Peter 5:1–40')
+    assert.equal(match.ref.toString(), '1 Peter 5:1-14')
+    assert.equal(match.ref.args_valid, true)
+    for (const source of ['1 Peter 5:40', '1 Peter 5:40-50', '1 Peter 6:1-40', 'John 3:16-99:40']) {
+        assert.equal(PassageReference.fromString(source)?.args_valid, false, source)
+    }
+})

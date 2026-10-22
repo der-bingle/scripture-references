@@ -24,7 +24,7 @@ const regex_verse_range = regex_integer_with_opt_sep + `(?:${regex_optional_whit
     + regex_integer_with_opt_sep + ')?'
 const regex_trailing = '(?![\\d\\p{Letter}@#$%])'  // Doesn't make sense to be followed by these
 
-const regex_between_ranges = `${regex_optional_whitespace}[,;]${regex_optional_whitespace}`
+const regex_between_ranges = `(?:${regex_optional_whitespace}[,;]${regex_optional_whitespace}|\\s+and\\s+|${regex_optional_whitespace}\\p{Dash}${regex_optional_whitespace}(?=\\d{1,3}${regex_verse_sep}\\d))`
 const regex_additional_range = regex_between_ranges + '(' + regex_verse_range + ')' + regex_trailing
 const findNextWhitespaceIndex = (value) => {
     const index = value.slice(1).search(new RegExp(regex_whitespace_char, 'u'))
@@ -79,6 +79,7 @@ const processAdditionalRanges = function*(
 ) {
     const addRegex = new RegExp(patterns.additional, 'uiy')
     addRegex.lastIndex = regex.lastIndex
+    let previousRef = mainRef
     
     while (true) {
         // Check for book look-ahead
@@ -96,10 +97,10 @@ const processAdditionalRanges = function*(
         const addMatchRealIndex = addMatch.index + addMatch[0].indexOf(addMatch[1])
         
         // Build prefix for additional reference
-        let prefix = mainRef.book
+        let prefix = previousRef.book
         const hasVerseSep = new RegExp(regex_verse_sep).test(addMatch[1])
-        if (!hasVerseSep && ['verse', 'range_verses', 'range_multi'].includes(mainRef.type)) {
-            prefix += `${mainRef.end_chapter}:`
+        if (!hasVerseSep && ['verse', 'range_verses', 'range_multi'].includes(previousRef.type)) {
+            prefix += `${previousRef.end_chapter}:`
         }
         
         const addRef = parseReference(prefix + addMatch[1])
@@ -118,6 +119,9 @@ const processAdditionalRanges = function*(
             newEndIndex
         }
         
+        previousRef = addRef
+        endOfPrevMatch = newEndIndex
+
         // Update main regex position if needed
         if (addRegex.lastIndex > regex.lastIndex) {
             regex.lastIndex = addRegex.lastIndex
